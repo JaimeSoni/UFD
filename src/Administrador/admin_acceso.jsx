@@ -1,5 +1,5 @@
 import React from 'react'
-import './Styles/admin_acceso.css'
+import '../StylesAdmin/admin_acceso.css'
 
 {/* Iconos */}
 import { FaHome } from "react-icons/fa";

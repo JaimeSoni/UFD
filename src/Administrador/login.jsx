@@ -1,5 +1,5 @@
 import React from 'react';
-import './Styles/login.css';
+import '../StylesAdmin/login.css';
 import { useNavigate } from 'react-router-dom';
 
 // Iconos
@@ -10,8 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
-    event.preventDefault(); // Previene el envío del formulario
-    // Aquí puedes agregar la lógica de autenticación
+    event.preventDefault();
     navigate("/admin_inicio");
   };
 

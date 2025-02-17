@@ -1,5 +1,5 @@
 import React from 'react'
-import './Styles/admin_areas.css'
+import '../StylesAdmin/admin_areas.css'
 import { useState } from "react";
 
 {/* Iconos */}
