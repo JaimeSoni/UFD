@@ -8,6 +8,8 @@ import { TfiWorld } from "react-icons/tfi";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { Link } from 'react-router-dom';
 import { RxLapTimer } from "react-icons/rx";
+import { IoIosCloseCircleOutline } from "react-icons/io";
+import { FaUsers } from "react-icons/fa";
 
 const AdminAreas = () => {
 
@@ -15,6 +17,10 @@ const AdminAreas = () => {
   const [isOpen, setIsOpen] = useState(false);
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const openModalEdit = () => setIsEditOpen(true);
+  const closeModalEdit = () => setIsEditOpen(false);
 
   
   return (
@@ -35,7 +41,12 @@ const AdminAreas = () => {
             
             <Link to={'/admin_acceso'} className="action" type="button">
               <RxLapTimer className="action-icon" color="#353866" />
-              <span className="action-content" data-content="Accesos" />
+              <span className="action-content" data-content="Mis Accesos" />
+            </Link>
+
+            <Link to={'/admin_registros'} className="action" type="button">
+              <FaUsers className="action-icon" color="#353866" />
+              <span className="action-content" data-content="Registro de Accesos" />
             </Link>
             
             <Link to={'/'} className="action" type="button">
@@ -51,7 +62,7 @@ const AdminAreas = () => {
         {/* Titulo */}
         <div className='w-[94%] h-screen'>
           <div className='w-[100%] h-[15%] flex'>
-            <h1 id='titulo'>Áreas Registradas</h1>
+            <h1 id='titulo-areas'>Áreas Registradas</h1>
 
             <button onClick={openModal}>
               <span className="box">
@@ -62,7 +73,7 @@ const AdminAreas = () => {
 
           {/* Buscador */}
           <div className='w-[100%] h-[10%] flex items-center justify-center'>
-            <div className="search-panels">
+            <div className="search-panels-filtro">
               <div className="search-group">
                 <input required type="text" name="text" autoComplete="on" className="input" />
                 <label className="enter-label">Filtrar Área</label>
@@ -100,7 +111,7 @@ const AdminAreas = () => {
               <td className='border-2 border-basenaranja w-[100%]'>
                 {/* Boton editar */}
                 <div className='flex'>
-                <button className="Btn w-[50%]">Editar
+                <button className="Btn w-[50%]" onClick={openModalEdit}>Editar
                   <svg className="svg" viewBox="0 0 512 512">
                   <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z" /></svg>
                 </button>
@@ -122,17 +133,81 @@ const AdminAreas = () => {
           </div>
         </div>
 
-        {/* Modal */}
+        {/* Modal Registrar */}
           {isOpen && (
             <div id="modal" className="fixed inset-0 flex justify-center items-center">
-              <div className="p-6 rounded w-96">
-                <h2 className="text-xl font-bold mb-4">Este es un Modal</h2>
-                <p className="mb-4">Puedes cerrar el modal usando el botón abajo.</p>
-              
-                <button onClick={closeModal} className="px-4 py-2 bg-red-500 text-white rounded"> 
-                  Cerrar Modal
-                </button>
+              <div className="">
+
+                <div className='x flex items-center justify-end pr-3 pt-2'>
+                  <button className="BotonCerrar" onClick={closeModal}>
+                  <IoIosCloseCircleOutline className='text-2xl' />
+                  </button>
+                </div>
+
+                <div className='Registrar'>
+                  <h1>Registrar Nueva Área</h1>
+                </div>
+
+                <div className='Inputs'>
+                  <input required type="text" name="idarea" autoComplete="off" className="InputRegistro1" />
+                  <label className="LabelRegistro1">ID Área</label>
+
+                  <input required type="text" name="area" autoComplete="off" className="InputRegistro2" />
+                  <label className="LabelRegistro2">Área</label>
+
+                  <input required type="text" name="usuario" autoComplete="off" className="InputRegistro3" />
+                  <label className="LabelRegistro3">Usuario</label>
+
+                  <input required type="password" name="constraseña" autoComplete="off" className="InputRegistro4" />
+                  <label className="LabelRegistro4">Contraseña</label>
+                </div>
+
+                <div className='BotonRegistro flex items-center justify-center'>
+                  <button>
+                    <a href="#"><span>Registrar</span></a> 
+                  </button>
+                </div>
+
               </div>
+            </div>
+          )}
+
+          {/* Modal editar */}
+          {isEditOpen && (
+            <div id="modal" className="fixed inset-0 flex justify-center items-center">
+              <div className="">
+
+                <div className='x flex items-center justify-end pr-3 pt-2'>
+                  <button className="BotonCerrar" onClick={closeModalEdit}>
+                  <IoIosCloseCircleOutline className='text-2xl' />
+                  </button>
+                </div>
+
+                <div className='Registrar'>
+                  <h1>Editar Área</h1>
+                </div>
+
+                <div className='Inputs'>
+                  <input required type="text" name="idarea" autoComplete="off" className="InputRegistro1" />
+                  <label className="LabelRegistro1">ID Área</label>
+
+                  <input required type="text" name="area" autoComplete="off" className="InputRegistro2" />
+                  <label className="LabelRegistro2">Área</label>
+
+                  <input required type="text" name="usuario" autoComplete="off" className="InputRegistro3" />
+                  <label className="LabelRegistro3">Usuario</label>
+
+                  <input required type="password" name="constraseña" autoComplete="off" className="InputRegistro4" />
+                  <label className="LabelRegistro4">Contraseña</label>
+                </div>
+
+                <div className='BotonRegistro flex items-center justify-center'>
+                  <button>
+                    <a href="#"><span>Guardar</span></a> 
+                  </button>
+                </div>
+
+              </div>  
             </div>
           )}
 

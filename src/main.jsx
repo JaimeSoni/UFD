@@ -6,6 +6,7 @@ import Login from "./login.jsx";
 import AdminInicio from "./admin_inicio.jsx";
 import AdminAreas from "./admin_areas.jsx";
 import AdminAcceso from "./admin_acceso.jsx";
+import AdminRegistros from "./admin_registros.jsx";
 
 createRoot(document.getElementById("root")).render(
   <Router>
@@ -14,6 +15,7 @@ createRoot(document.getElementById("root")).render(
       <Route path="/admin_inicio" element={<AdminInicio />} />
       <Route path="/admin_areas" element={<AdminAreas />} />
       <Route path="/admin_acceso" element={<AdminAcceso />} />
+      <Route path="/admin_registros" element={<AdminRegistros />}/>
     </Routes>
   </Router>
 );

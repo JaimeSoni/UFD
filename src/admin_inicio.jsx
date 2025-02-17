@@ -7,6 +7,7 @@ import { TfiWorld } from "react-icons/tfi";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { Link } from 'react-router-dom';
 import { RxLapTimer } from "react-icons/rx";
+import { FaUsers } from "react-icons/fa";
 
 const AdminInicio = () => {
   return (
@@ -30,7 +31,12 @@ const AdminInicio = () => {
 
         <Link to={'/admin_acceso'} className="action" type="button">
           <RxLapTimer className="action-icon" color="#353866" />
-          <span className="action-content" data-content="Accesos" />
+          <span className="action-content" data-content="Mis Accesos" />
+        </Link>
+
+        <Link to={'/admin_registros'} className="action" type="button">
+          <FaUsers className="action-icon" color="#353866" />
+          <span className="action-content" data-content="Registro de Accesos" />
         </Link>
 
         <Link to={'/'} className="action" type="button">
