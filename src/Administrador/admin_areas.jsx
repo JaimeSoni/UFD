@@ -22,6 +22,15 @@ const AdminAreas = () => {
   const openModalEdit = () => setIsEditOpen(true);
   const closeModalEdit = () => setIsEditOpen(false);
 
+  // Funcion de la X en los filtros
+  const [filtroArea, setfiltroArea] = useState ('');
+  const handleInputChange = (e) => {
+    setfiltroArea(e.target.value);
+  };
+
+  const clearInput = () => {
+    setfiltroArea('');
+  };
   
   return (
     <div>
@@ -75,7 +84,7 @@ const AdminAreas = () => {
           <div className='w-[100%] h-[10%] flex items-center justify-center'>
             <div className="search-panels-filtro">
               <div className="search-group">
-                <input required type="text" name="text" autoComplete="on" className="input" />
+                <input required type="text" name="text" autoComplete="on" className="input" value={filtroArea} onChange={handleInputChange} />
                 <label className="enter-label">Filtrar Área</label>
                 <div className="btn-box">
                   <button className="btn-search">
@@ -83,7 +92,7 @@ const AdminAreas = () => {
                   </button>
                 </div>
                 <div className="btn-box-x">
-                  <button className="btn-cleare">
+                  <button className="btn-cleare" onClick={clearInput}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512"><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" id="cleare-line" /></svg>
                   </button>
                 </div>
@@ -149,18 +158,26 @@ const AdminAreas = () => {
                 </div>
 
                 <div className='Inputs'>
-                  <input required type="text" name="idarea" autoComplete="off" className="InputRegistro1" />
-                  <label className="LabelRegistro1">ID Área</label>
+  <div className="input-container">
+    <input required type="text" name="idarea" autoComplete="off" className="InputRegistro1" />
+    <label className="LabelRegistro1">ID Área</label>
+  </div>
 
-                  <input required type="text" name="area" autoComplete="off" className="InputRegistro2" />
-                  <label className="LabelRegistro2">Área</label>
+  <div className="input-container">
+    <input required type="text" name="area" autoComplete="off" className="InputRegistro2" />
+    <label className="LabelRegistro2">Área</label>
+  </div>
 
-                  <input required type="text" name="usuario" autoComplete="off" className="InputRegistro3" />
-                  <label className="LabelRegistro3">Usuario</label>
+  <div className="input-container">
+    <input required type="text" name="usuario" autoComplete="off" className="InputRegistro3" />
+    <label className="LabelRegistro3">Usuario</label>
+  </div>
 
-                  <input required type="password" name="constraseña" autoComplete="off" className="InputRegistro4" />
-                  <label className="LabelRegistro4">Contraseña</label>
-                </div>
+  <div className="input-container">
+    <input required type="password" name="constraseña" autoComplete="off" className="InputRegistro4" />
+    <label className="LabelRegistro4">Contraseña</label>
+  </div>
+</div>
 
                 <div className='BotonRegistro flex items-center justify-center'>
                   <button>
@@ -188,18 +205,26 @@ const AdminAreas = () => {
                 </div>
 
                 <div className='Inputs'>
-                  <input required type="text" name="idarea" autoComplete="off" className="InputRegistro1" />
-                  <label className="LabelRegistro1">ID Área</label>
+  <div className="input-container">
+    <input required type="text" name="idarea" autoComplete="off" className="InputRegistro1" />
+    <label className="LabelRegistro1">ID Área</label>
+  </div>
 
-                  <input required type="text" name="area" autoComplete="off" className="InputRegistro2" />
-                  <label className="LabelRegistro2">Área</label>
+  <div className="input-container">
+    <input required type="text" name="area" autoComplete="off" className="InputRegistro2" />
+    <label className="LabelRegistro2">Área</label>
+  </div>
 
-                  <input required type="text" name="usuario" autoComplete="off" className="InputRegistro3" />
-                  <label className="LabelRegistro3">Usuario</label>
+  <div className="input-container">
+    <input required type="text" name="usuario" autoComplete="off" className="InputRegistro3" />
+    <label className="LabelRegistro3">Usuario</label>
+  </div>
 
-                  <input required type="password" name="constraseña" autoComplete="off" className="InputRegistro4" />
-                  <label className="LabelRegistro4">Contraseña</label>
-                </div>
+  <div className="input-container">
+    <input required type="password" name="constraseña" autoComplete="off" className="InputRegistro4" />
+    <label className="LabelRegistro4">Contraseña</label>
+  </div>
+</div>
 
                 <div className='BotonRegistro flex items-center justify-center'>
                   <button>

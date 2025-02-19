@@ -549,17 +549,25 @@ button {
 }
 
 /* Diseño modal - inputs */
-
 #modal div .Inputs {
-  margin-top: 10px;
   width: 100%;
-  height: 60%;
-  padding: 10px;
+  height: 65%;
+  padding-top: 10px;
+  padding-left: 20px;
+  overflow: hidden;
 }
 
 .Inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-container {
   position: relative;
- }
+  display: inline-block;
+  margin-bottom: 10px;
+}
 
 .InputRegistro1 {
   width: 100px;
@@ -570,33 +578,30 @@ button {
   font-size: 1rem;
   color: #353866;
   transition: border 150ms cubic-bezier(0.4,0,0.2,1);
-  margin-bottom: 20px;
- }
+}
 
- .LabelRegistro1 {
+.LabelRegistro1 {
   position: absolute;
   left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #353866;
   pointer-events: none;
-  transform: translateY(0.5rem);
   transition: 150ms cubic-bezier(0.4,0,0.2,1);
- }
+}
 
- .InputRegistro1:focus, .InputRegistro1:valid {
-  outline: none;
-  border: 1.5px solid #353866;
- }
-
- .InputRegistro1:focus ~ .LabelRegistro1, .InputRegistro1:valid ~ .LabelRegistro1 {
+.input-container:has(.InputRegistro1:focus) .LabelRegistro1,
+.input-container:has(.InputRegistro1:valid) .LabelRegistro1 {
+  top: 0;
   transform: translateY(-50%) scale(0.8);
   padding: 0 .5em;
   color: #353866;
   background: white;
   border-radius: 20px;
   border: 1px solid #353866;
- }
+}
 
- .InputRegistro2 {
+.InputRegistro2 {
   width: 300px;
   border: solid 1.5px #353866;
   border-radius: 1rem;
@@ -605,33 +610,30 @@ button {
   font-size: 1rem;
   color: #353866;
   transition: border 150ms cubic-bezier(0.4,0,0.2,1);
-  margin-bottom: 20px;
- }
+}
 
- .LabelRegistro2 {
+.LabelRegistro2 {
   position: absolute;
   left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #353866;
   pointer-events: none;
-  transform: translateY(0.5rem);
   transition: 150ms cubic-bezier(0.4,0,0.2,1);
- }
+}
 
- .InputRegistro2:focus, .InputRegistro2:valid {
-  outline: none;
-  border: 1.5px solid #353866;
- }
-
- .InputRegistro2:focus ~ .LabelRegistro2, .InputRegistro2:valid ~ .LabelRegistro2 {
+.input-container:has(.InputRegistro2:focus) .LabelRegistro2,
+.input-container:has(.InputRegistro2:valid) .LabelRegistro2 {
+  top: 0;
   transform: translateY(-50%) scale(0.8);
   padding: 0 .5em;
   color: #353866;
   background: white;
   border-radius: 20px;
   border: 1px solid #353866;
- }
+}
 
- .InputRegistro3 {
+.InputRegistro3 {
   width: 300px;
   border: solid 1.5px #353866;
   border-radius: 1rem;
@@ -640,33 +642,30 @@ button {
   font-size: 1rem;
   color: #353866;
   transition: border 150ms cubic-bezier(0.4,0,0.2,1);
-  margin-bottom: 20px;
- }
+}
 
- .LabelRegistro3 {
+.LabelRegistro3 {
   position: absolute;
   left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #353866;
   pointer-events: none;
-  transform: translateY(0.5rem);
   transition: 150ms cubic-bezier(0.4,0,0.2,1);
- }
+}
 
- .InputRegistro3:focus, .InputRegistro3:valid {
-  outline: none;
-  border: 1.5px solid #353866;
- }
-
- .InputRegistro3:focus ~ .LabelRegistro3, .InputRegistro3:valid ~ .LabelRegistro3 {
+.input-container:has(.InputRegistro3:focus) .LabelRegistro3,
+.input-container:has(.InputRegistro3:valid) .LabelRegistro3 {
+  top: 0;
   transform: translateY(-50%) scale(0.8);
   padding: 0 .5em;
   color: #353866;
   background: white;
   border-radius: 20px;
   border: 1px solid #353866;
- }
+}
 
- .InputRegistro4 {
+.InputRegistro4 {
   width: 300px;
   border: solid 1.5px #353866;
   border-radius: 1rem;
@@ -675,31 +674,36 @@ button {
   font-size: 1rem;
   color: #353866;
   transition: border 150ms cubic-bezier(0.4,0,0.2,1);
-  margin-bottom: 20px;
- }
+}
 
- .LabelRegistro4 {
+.LabelRegistro4 {
   position: absolute;
   left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #353866;
   pointer-events: none;
-  transform: translateY(0.5rem);
   transition: 150ms cubic-bezier(0.4,0,0.2,1);
- }
+}
 
- .InputRegistro4:focus, .InputRegistro4:valid {
-  outline: none;
-  border: 1.5px solid #353866;
- }
-
- .InputRegistro4:focus ~ .LabelRegistro4, .InputRegistro4:valid ~ .LabelRegistro4 {
+.input-container:has(.InputRegistro4:focus) .LabelRegistro4,
+.input-container:has(.InputRegistro4:valid) .LabelRegistro4 {
+  top: 0;
   transform: translateY(-50%) scale(0.8);
   padding: 0 .5em;
   color: #353866;
   background: white;
   border-radius: 20px;
   border: 1px solid #353866;
- }
+}
+
+.InputRegistro1:focus, .InputRegistro1:valid,
+.InputRegistro2:focus, .InputRegistro2:valid,
+.InputRegistro3:focus, .InputRegistro3:valid,
+.InputRegistro4:focus, .InputRegistro4:valid {
+  outline: none;
+  border: 1.5px solid #353866;
+}
 
 /* Diseño modal - boton guardar registro */
 

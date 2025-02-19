@@ -11,6 +11,7 @@ export default {
       basenaranja: '#ED6B06',
       coloralterno: '#FF0800',
       coloralternodos: '#000',
+      coloralternotres: '#A6A6A6'
     }
   },
   plugins: [],

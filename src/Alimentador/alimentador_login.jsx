@@ -1,17 +1,17 @@
 import React from 'react';
-import '../StylesAdmin/login.css';
+import '../StylesAlimentador/alimentador_login.css';
 import { useNavigate } from 'react-router-dom';
 
 // Iconos
 import { FaUserCircle } from "react-icons/fa";
 import { MdOutlinePassword } from "react-icons/md";
 
-const Login = () => {
+const AlimentadorLogin = () => {
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    navigate("/admin_inicio");
+    navigate("/alimentador_inicio");
   };
 
   return (
@@ -25,7 +25,7 @@ const Login = () => {
         {/* Lado derecho con formulario de sesion */}
         <div className='w-[50%] h-screen bg-basenaranja flex items-center justify-center'>
           <form className="form_main" onSubmit={handleSubmit}>
-            <p className="heading">Acceso Administrador</p>
+            <p className="heading">Acceso Alimentador</p>
             <div className="inputContainer">
               <FaUserCircle className="inputIcon" width={20} height={20} fill="#ED6B06" />
               <input type="text" className="inputField" id="username" placeholder="Usuario" />
@@ -42,4 +42,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default AlimentadorLogin;
