@@ -13,6 +13,8 @@ import AdminRegistros from "./Administrador/admin_registros.jsx";
 import AlimentadorLogin from "./Alimentador/alimentador_login.jsx";
 import AlimentadorInicio from "./Alimentador/alimentador_inicio.jsx";
 import AlimentadorRecopilacion from "./Alimentador/alimentador_recopilacion.jsx";
+import AlimentadorPublicaciones from "./Alimentador/alimentador_publicaciones.jsx";
+import AlimentadorCategorias from "./Alimentador/alimentador_categorias.jsx"
 
 createRoot(document.getElementById("root")).render(
   <Router>
@@ -28,6 +30,8 @@ createRoot(document.getElementById("root")).render(
       <Route path="/alimentador_login" element={<AlimentadorLogin />} />
       <Route path="/alimentador_inicio" element={<AlimentadorInicio />} />
       <Route path="/alimentador_recopilacion" element={<AlimentadorRecopilacion />} />
+      <Route path="/alimentador_publicaciones" element={<AlimentadorPublicaciones />} />
+      <Route path="/alimentador_categorias" element={<AlimentadorCategorias />} />
       
     </Routes>
   </Router>

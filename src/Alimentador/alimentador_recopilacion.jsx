@@ -35,12 +35,12 @@ const AlimentadorRecopilacion = () => {
               <span className="action-content" data-content="Recopilacion" />
             </Link>
 
-            <Link to={''} className="action" type="button">
+            <Link to={'/alimentador_publicaciones'} className="action" type="button">
               <IoMdCloudUpload className="action-icon" color="#353866" />
               <span className="action-content" data-content="Publicaciones" />
             </Link>
 
-            <Link to={''} className="action" type="button">
+            <Link to={'/alimentador_categorias'} className="action" type="button">
               <TbCategoryPlus className="action-icon" color="#353866" />
               <span className="action-content" data-content="Categorias" />
             </Link>
