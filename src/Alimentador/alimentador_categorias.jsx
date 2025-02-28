@@ -30,6 +30,30 @@ const AlimentadorCategorias = () => {
     { categoria: "Mensualidades", descripcion: "Solo se subira informacion de la mensualidad de las licenciaturas", publicaciones: 15 },
   ];
 
+  // Estado para controlar modales
+  const [showNewModal, setShowNewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState(null);
+
+  // Funciones para modales
+  const openNewModal = () => {
+    setShowNewModal(true);
+  };
+
+  const closeNewModal = () => {
+    setShowNewModal(false);
+  };
+
+  const openEditModal = (category) => {
+    setCurrentCategory(category);
+    setShowEditModal(true);
+  };
+
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setCurrentCategory(null);
+  };
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
@@ -73,7 +97,7 @@ const AlimentadorCategorias = () => {
           {/* Titulo */}
           <div className='titulo w-[100%] h-[15%] flex items-center justify-center'>
             <h1 className='titulo-categorias'>Registro de Categorías</h1>
-            <button className='button-categorias'>Nueva Categoría
+            <button className='button-categorias' onClick={openNewModal}>Nueva Categoría
               <span />
             </button>
           </div>
@@ -124,7 +148,7 @@ const AlimentadorCategorias = () => {
 
                       {/* Botón Editar */}
                       <div className='flex justify-between'>
-                        <button className="Btn w-[50%]">Editar
+                        <button className="Btn w-[50%]" onClick={() => openEditModal(cat)}>Editar
                           <svg className="svg" id='svg-editar' viewBox="0 0 400 600">
                             <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32z" />
                           </svg>
@@ -148,6 +172,97 @@ const AlimentadorCategorias = () => {
         </div>
 
       </div>
+
+      {/* Modal para Nueva Categoría */}
+      {showNewModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="modal-categoriaNueva rounded-lg p-8 w-[40%] h-[65%]">
+            <div className="flex items-center justify-center mb-6">
+              <h2 className="text-3xl font-bold text-baseazul">Nueva Categoría</h2>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" >
+                Nombre de la categoría
+              </label>
+              <input
+                className="nueva-categoria"
+                type="text"
+                placeholder="Ingrese el nombre de la categoría"
+              />
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-bold mb-2">Descripción</label>
+
+              <textarea
+                name="description"
+                placeholder="Ingrese la descripción de la categoría."
+                className="descripcion-categoria w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
+              />
+
+            </div>
+
+            <div className="px-4 py-3  flex justify-end gap-2">
+
+              <button className='nueva-categoriaCancelar'
+                onClick={closeNewModal}>
+                Cancelar
+              </button>
+
+              <button className='nueva-categoriaGuardar'
+                onClick={closeNewModal}>
+                Guardar
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+              {/* Modal para Editar Categoría */}
+              {showEditModal && currentCategory && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="modal-categoriaEditar rounded-lg p-8 w-[40%] h-[65%]">
+            <div className="flex items-center justify-center mb-6">
+              <h2 className="text-3xl font-bold text-baseazul">Editar Categoría</h2>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" > Nombre de la categoría </label>
+              <input
+                className="input-editarCategotria"
+                type="text"
+                defaultValue={currentCategory.categoria}
+              />
+            </div>
+                    
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-bold mb-2">Descripción</label>
+              <textarea
+                name="description"
+                placeholder="Ingrese la descripción de la categoría."
+                className="descripcion-editarCategoria w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
+                defaultValue={currentCategory.descripcion}
+              />
+
+            </div>
+            <div className="px-4 py-3  flex justify-end gap-2">
+              <button className='cancelar-editarCategoria'
+                onClick={closeEditModal}>
+                Cancelar
+              </button>
+
+              <button className='guardar-editarCategoria'
+                onClick={closeEditModal}>
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
     </div>
   )
 }
