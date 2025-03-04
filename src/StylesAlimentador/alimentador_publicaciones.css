@@ -1180,7 +1180,7 @@ body{
   outline: none;
 }
 
-.guardar-editar :hover {
+.guardar-editar:hover {
   background-color: #353866;
   color: #fff;
 }

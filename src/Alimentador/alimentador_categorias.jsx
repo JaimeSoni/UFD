@@ -220,14 +220,14 @@ const AlimentadorCategorias = () => {
         </div>
       )}
 
-              {/* Modal para Editar Categoría */}
-              {showEditModal && currentCategory && (
+      {/* Modal para Editar Categoría */}
+      {showEditModal && currentCategory && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="modal-categoriaEditar rounded-lg p-8 w-[40%] h-[65%]">
             <div className="flex items-center justify-center mb-6">
               <h2 className="text-3xl font-bold text-baseazul">Editar Categoría</h2>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" > Nombre de la categoría </label>
               <input
@@ -236,7 +236,7 @@ const AlimentadorCategorias = () => {
                 defaultValue={currentCategory.categoria}
               />
             </div>
-                    
+
             <div className="mb-6">
               <label className="block text-gray-700 text-sm font-bold mb-2">Descripción</label>
               <textarea
