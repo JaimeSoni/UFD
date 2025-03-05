@@ -3,15 +3,16 @@ import '../StylesAlimentador/alimentador_recopilacion.css'
 
 import { Link } from 'react-router-dom';
 
-{/* Iconos Menu */}
+{/* Iconos Menu */ }
 import { FaHome } from "react-icons/fa";
 import { BiSolidCollection } from "react-icons/bi";
 import { IoMdCloudUpload } from "react-icons/io";
 import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
 // Iconos Recopilacion
-import { VscFileSubmodule } from "react-icons/vsc"; 
+import { VscFileSubmodule } from "react-icons/vsc";
 import { GrDocumentUpdate } from "react-icons/gr";
 import { CiLink } from "react-icons/ci";
 import { TbTextRecognition } from "react-icons/tb";
@@ -19,8 +20,8 @@ import { TbTextRecognition } from "react-icons/tb";
 const AlimentadorRecopilacion = () => {
   return (
     <div>
-        <div className='w-screen h-screen bg-baseazul flex'>
-          <div className="w-[6%] h-screen bg-baseazul flex items-center justify-center relative">
+      <div className='w-screen h-screen bg-baseazul flex'>
+        <div className="w-[6%] h-screen bg-baseazul flex items-center justify-center relative">
 
           {/* Menú izquierdo */}
           <div className="action-wrap bg-basenaranja z-10 flex flex-col items-start absolute left-3">
@@ -43,6 +44,11 @@ const AlimentadorRecopilacion = () => {
             <Link to={'/alimentador_categorias'} className="action" type="button">
               <TbCategoryPlus className="action-icon" color="#353866" />
               <span className="action-content" data-content="Categorias" />
+            </Link>
+
+            <Link to={''} className="action" type="button">
+              <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
+              <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
             <Link to={'/alimentador_login'} className="action" type="button">
@@ -110,10 +116,10 @@ const AlimentadorRecopilacion = () => {
               </div>
 
               <div className="card resumen">
-                  <div>
-                    <TbTextRecognition className='w-[40px] h-[40px] ml-[70px] text-basenaranja' />
-                    <p className="tip">Palabras Clave</p>
-                    <p className="second-text">87 palabras clave actualmente</p>
+                <div>
+                  <TbTextRecognition className='w-[40px] h-[40px] ml-[70px] text-basenaranja' />
+                  <p className="tip">Palabras Clave</p>
+                  <p className="second-text">87 palabras clave actualmente</p>
                 </div>
               </div>
 

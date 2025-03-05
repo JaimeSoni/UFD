@@ -9,6 +9,7 @@ import { BiSolidCollection } from "react-icons/bi";
 import { IoMdCloudUpload } from "react-icons/io";
 import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
 const AlimentadorInicio = () => {
   return (
@@ -38,6 +39,11 @@ const AlimentadorInicio = () => {
         <Link to={'/alimentador_categorias'} className="action" type="button">
           <TbCategoryPlus className="action-icon" color="#353866" />
           <span className="action-content" data-content="Categorias" />
+        </Link>
+
+        <Link to={''} className="action" type="button">
+          <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
+          <span className="action-content" data-content="Doc. Internos" />
         </Link>
 
         <Link to={'/alimentador_login'} className="action" type="button">

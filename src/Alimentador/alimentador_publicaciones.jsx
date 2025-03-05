@@ -8,6 +8,7 @@ import { BiSolidCollection } from "react-icons/bi";
 import { IoMdCloudUpload } from "react-icons/io";
 import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
 // Iconos de los articulos
 import { BiChevronDownCircle } from "react-icons/bi";
@@ -185,22 +186,32 @@ const AlimentadorPublicaciones = () => {
               <FaHome className="action-icon" color="#353866" />
               <span className="action-content" data-content="Inicio" />
             </Link>
+
             <Link to={'/alimentador_recopilacion'} className="action" type="button">
               <BiSolidCollection className="action-icon" color="#353866" />
               <span className="action-content" data-content="Recopilacion" />
             </Link>
+
             <Link to={'/alimentador_publicaciones'} className="action" type="button">
               <IoMdCloudUpload className="action-icon" color="#353866" />
               <span className="action-content" data-content="Publicaciones" />
             </Link>
+
             <Link to={'/alimentador_categorias'} className="action" type="button">
               <TbCategoryPlus className="action-icon" color="#353866" />
               <span className="action-content" data-content="Categorias" />
             </Link>
+
+            <Link to={''} className="action" type="button">
+              <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
+              <span className="action-content" data-content="Categorias" />
+            </Link>
+
             <Link to={'/alimentador_login'} className="action" type="button">
               <RiLogoutCircleLine className="action-icon" color="#353866" />
               <span className="action-content" data-content="Salir" />
             </Link>
+
           </div>
         </div>
 

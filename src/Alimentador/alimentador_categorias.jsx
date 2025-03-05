@@ -9,9 +9,7 @@ import { BiSolidCollection } from "react-icons/bi";
 import { IoMdCloudUpload } from "react-icons/io";
 import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
-
-// Iconos de la tabla
-import { MdDeleteForever } from "react-icons/md";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
 const AlimentadorCategorias = () => {
 
@@ -80,6 +78,11 @@ const AlimentadorCategorias = () => {
 
             <Link to={'/alimentador_categorias'} className="action" type="button">
               <TbCategoryPlus className="action-icon" color="#353866" />
+              <span className="action-content" data-content="Categorias" />
+            </Link>
+
+            <Link to={''} className="action" type="button">
+              <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
               <span className="action-content" data-content="Categorias" />
             </Link>
 
