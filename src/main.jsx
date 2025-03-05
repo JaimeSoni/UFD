@@ -9,7 +9,7 @@ import LoginUFD from "./login_ufd.jsx";
 import Login from "./Administrador/login.jsx";
 import AdminInicio from "./Administrador/admin_inicio.jsx";
 import AdminAreas from "./Administrador/admin_areas.jsx";
-import AdminAcceso from "./Administrador/admin_acceso.jsx";
+import AdminDocs from "./Administrador/admin_docs.jsx";
 import AdminRegistros from "./Administrador/admin_registros.jsx";
 
 // Alimentador
@@ -32,7 +32,7 @@ createRoot(document.getElementById("root")).render(
       <Route path="/" element={<Login />} />
       <Route path="/admin_inicio" element={<AdminInicio />} />
       <Route path="/admin_areas" element={<AdminAreas />} />
-      <Route path="/admin_acceso" element={<AdminAcceso />} />
+      <Route path="/admin_docs" element={<AdminDocs />} />
       <Route path="/admin_registros" element={<AdminRegistros />}/>
 
       {/* Alimentador */}

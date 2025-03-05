@@ -3,7 +3,7 @@ import './login_ufd.css'
 
 // Iconos
 import { FaUserCircle } from "react-icons/fa";
-import { MdOutlinePassword } from "react-icons/md";
+import { MdOutlinePassword } from "react-icons/md"; 
 
 const LoginUFD = () => {
 

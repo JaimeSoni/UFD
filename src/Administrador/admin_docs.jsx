@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import '../StylesAdmin/admin_acceso.css'
+import '../StylesAdmin/admin_docs.css'
 
 {/* Iconos */}
 import { FaHome } from "react-icons/fa";
@@ -12,12 +12,10 @@ import { BiChevronDownCircle, BiSolidEditAlt } from "react-icons/bi"; // Added m
 
 // Simulación de datos de publicaciones con `id` único
 const publicaciones = [
-  { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "hola", documentos: "", urls: "" },
-  { id: "pub2", fecha: "22/02/2025", categoria: "Becas", tema: "Becas disponibles para el semestre siguiente.", descripcion: "", palabrasClave: "", documentos: "", urls: "" },
-  { id: "pub3", fecha: "23/02/2025", categoria: "Cursos", tema: "Cursos extracurriculares para mejorar habilidades.", descripcion: "", palabrasClave: "", documentos: "", urls: "" },
+  { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "hola", documentos: "", urls: "" }
 ];
 
-const AdminAcceso = () => {
+const AdminDocs = () => {
   const [expandedId, setExpandedId] = useState(null);
 
   // Funcion de la X en los filtros
@@ -57,7 +55,7 @@ const AdminAcceso = () => {
               <span className="action-content" data-content="Áreas" />
             </Link>
             
-            <Link to={'/admin_acceso'} className="action" type="button">
+            <Link to={'/admin_docs'} className="action" type="button">
               <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
@@ -79,7 +77,7 @@ const AdminAcceso = () => {
         {/* Titulo */}
         <div className='w-[94%] h-screen'>
           <div className='w-[100%] h-[15%] flex'>
-            <h1 id='titulo'>Últimos Accesos Registrados</h1>
+            <h1 id='titulo'>Documentos Internos UFD</h1>
           </div>
 
           {/* Buscador */}
@@ -164,4 +162,4 @@ const AdminAcceso = () => {
   )
 }
 
-export default AdminAcceso
+export default AdminDocs

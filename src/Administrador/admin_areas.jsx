@@ -48,7 +48,7 @@ const AdminAreas = () => {
               <span className="action-content" data-content="Áreas" />
             </Link>
             
-            <Link to={'/admin_acceso'} className="action" type="button">
+            <Link to={'/admin_docs'} className="action" type="button">
               <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
               <span className="action-content" data-content="Doc. Internos" />
             </Link>

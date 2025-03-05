@@ -154,9 +154,9 @@ const AlimentadorCategorias = () => {
                           </svg>
                         </button>
 
-                        <button className="Btn w-[50%]">Borrar
-                          <svg className='svg' id='svg-eliminar' viewBox="0 0 20 30">
-                            <path d="M 13 3 A 1.0001 1.0001 0 0 0 11.986328 4 L 6 4 A 1.0001 1.0001 0 1 0 6 6 L 24 6 A 1.0001 1.0001 0 1 0 24 4 L 18.013672 4 A 1.0001 1.0001 0 0 0 17 3 L 13 3 z M 6 8 L 6 24 C 6 25.105 6.895 26 8 26 L 22 26 C 23.105 26 24 25.105 24 24 L 24 8 L 6 8 z"></path>
+                        <button className="Btn w-[50%]">Bajar
+                          <svg className="svg" id='svg-bajar' viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 20V7m0 13-4-4m4 4 4-4m4-12v13m0-13 4 4m-4-4-4 4" />
                           </svg>
                         </button>
                       </div>
