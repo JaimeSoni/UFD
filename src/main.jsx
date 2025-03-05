@@ -2,6 +2,9 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+// General
+import LoginUFD from "./login_ufd.jsx";
+
 // Administrador
 import Login from "./Administrador/login.jsx";
 import AdminInicio from "./Administrador/admin_inicio.jsx";
@@ -16,9 +19,15 @@ import AlimentadorRecopilacion from "./Alimentador/alimentador_recopilacion.jsx"
 import AlimentadorPublicaciones from "./Alimentador/alimentador_publicaciones.jsx";
 import AlimentadorCategorias from "./Alimentador/alimentador_categorias.jsx"
 
+// Usuario Final
+import UFInicio from "./UsuarioFinal/uf_inicio.jsx";
+
 createRoot(document.getElementById("root")).render(
   <Router>
     <Routes>
+      {/* General */}
+      <Route path="/login_ufd" element={<LoginUFD />} />
+
       {/* Administrador */}
       <Route path="/" element={<Login />} />
       <Route path="/admin_inicio" element={<AdminInicio />} />
@@ -32,6 +41,9 @@ createRoot(document.getElementById("root")).render(
       <Route path="/alimentador_recopilacion" element={<AlimentadorRecopilacion />} />
       <Route path="/alimentador_publicaciones" element={<AlimentadorPublicaciones />} />
       <Route path="/alimentador_categorias" element={<AlimentadorCategorias />} />
+
+      {/* Usuario Final */}
+      <Route path="/uf_inicio" element={<UFInicio />} />
       
     </Routes>
   </Router>
