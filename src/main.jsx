@@ -18,7 +18,8 @@ import AlimentadorInicio from "./Alimentador/alimentador_inicio.jsx";
 import AlimentadorRecopilacion from "./Alimentador/alimentador_recopilacion.jsx";
 import AlimentadorPublicaciones from "./Alimentador/alimentador_publicaciones.jsx";
 import AlimentadorCategorias from "./Alimentador/alimentador_categorias.jsx"
-import AlimentadorInternos from "./Alimentador/alimentador_internos.jsx";
+import AlimentadorInterno from "./Alimentador/alimentador_interno.jsx";
+
 
 // Usuario Final
 import UFInicio from "./UsuarioFinal/uf_inicio.jsx";
@@ -36,13 +37,15 @@ createRoot(document.getElementById("root")).render(
       <Route path="/admin_docs" element={<AdminDocs />} />
       <Route path="/admin_registros" element={<AdminRegistros />}/>
 
+
       {/* Alimentador */}
       <Route path="/alimentador_login" element={<AlimentadorLogin />} />
       <Route path="/alimentador_inicio" element={<AlimentadorInicio />} />
       <Route path="/alimentador_recopilacion" element={<AlimentadorRecopilacion />} />
       <Route path="/alimentador_publicaciones" element={<AlimentadorPublicaciones />} />
       <Route path="/alimentador_categorias" element={<AlimentadorCategorias />} />
-      <Route path="/alimentador_internos" element={<AlimentadorInternos />} />
+      <Route path="/alimentador_interno" element={<AlimentadorInterno />} />
+   
 
       {/* Usuario Final */}
       <Route path="/uf_inicio" element={<UFInicio />} />

@@ -202,9 +202,9 @@ const AlimentadorPublicaciones = () => {
               <span className="action-content" data-content="Categorias" />
             </Link>
 
-            <Link to={''} className="action" type="button">
+            <Link to={'/alimentador_interno'} className="action" type="button">
               <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
-              <span className="action-content" data-content="Categorias" />
+              <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
             <Link to={'/alimentador_login'} className="action" type="button">
