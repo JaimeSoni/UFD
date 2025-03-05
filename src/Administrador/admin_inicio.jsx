@@ -6,7 +6,7 @@ import { FaHome } from "react-icons/fa";
 import { TfiWorld } from "react-icons/tfi";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { Link } from 'react-router-dom';
-import { RxLapTimer } from "react-icons/rx";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 import { FaUsers } from "react-icons/fa";
 
 const AdminInicio = () => {
@@ -30,8 +30,8 @@ const AdminInicio = () => {
         </Link>
 
         <Link to={'/admin_acceso'} className="action" type="button">
-          <RxLapTimer className="action-icon" color="#353866" />
-          <span className="action-content" data-content="Mis Accesos" />
+          <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
+          <span className="action-content" data-content="Doc. Internos" />
         </Link>
 
         <Link to={'/admin_registros'} className="action" type="button">
