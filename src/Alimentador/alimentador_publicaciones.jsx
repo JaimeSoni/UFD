@@ -313,6 +313,16 @@ const AlimentadorPublicaciones = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
+              <div className='flex items-center justify-center mb-5'>
+                <div id="firstFilter" className="filter-switch pt-9">
+                  <input defaultChecked id="option1" name="options" type="radio" />
+                  <label className="option" htmlFor="option1">Público</label>
+                  <input id="option2" name="options" type="radio" />
+                  <label className="option" htmlFor="option2">Privado</label>
+                  <span className="background" />
+                </div>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex gap-3">
                   <div className="w-[20%]">
