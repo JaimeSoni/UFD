@@ -1,7 +1,19 @@
 import React, { useState } from 'react'
 import '../StylesUsuarioFinal/uf_inicio.css'
 
+import { Link } from 'react-router-dom';
+
+import { BiChevronDownCircle } from "react-icons/bi";
+
+
+// Simulación de datos de publicaciones con `id` único
+const publicaciones = [
+  { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "hola", documentos: "", urls: "" }
+];
+
 const UFInicio = () => {
+  const [expandedId, setExpandedId] = useState(null);
+      
 
   // Función de filtro de búsqueda
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
@@ -12,6 +24,13 @@ const UFInicio = () => {
   const clearInput = () => {
     setfiltroPublicacion('');
   };
+
+  //Resultador
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+};
+
+
 
   return (
     <div className='w-screen h-screen'>
@@ -71,9 +90,55 @@ const UFInicio = () => {
       </div>
 
       {/* Resultador */}
-      <div className='w-[100%] h-[50%]'>
+     <div className='flex items-center justify-center'>
+     <div className='resultados-final w-[90%] h-[50%] mt-3 overflow-y-auto'>
+        {publicaciones.map((publicacion) => (
+          <div key={publicacion.id} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
+            {/* Contenedor principal */}
+            <div className="flex h-[50px] items-center justify-center">
+              <div className='fecha-final w-[15%] flex items-center justify-center text-xl'>
+                <h1>{publicacion.fecha}</h1>
+              </div>
 
+              <div className='categoria-final w-[15%] flex items-center justify-center text-xl'>
+                <h1 className='bg-basenaranja p-2 rounded-[15px] text-baseblanco'>{publicacion.categoria}</h1>
+              </div>
+
+              <div className='tema-final w-[50%] flex items-center justify-center text-xl'>
+                <h1>{publicacion.tema}</h1>
+              </div>
+
+              <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
+                <button className='icono-final' onClick={() => toggleExpand(publicacion.id)} >
+                  <BiChevronDownCircle className='text-basenaranja' />
+                </button>
+              </div>
+            </div>
+
+            <div
+              className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
+                }`}
+            >
+              <div className="descripcion p-2 h-[120px]">
+                <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
+              </div>
+              <div className="palabras-clave p-2 h-[100px]">
+                <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-[20px]'>{publicacion.palabrasClave}</span></p>
+              </div>
+
+              <div className='flex'>
+                <div className="documentos p-2 w-[50%] h-[80px]">
+                  <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
+                </div>
+                <div className="urls p-2 w-[50%] h-[80px]">
+                  <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+     </div>
 
     </div>
   )

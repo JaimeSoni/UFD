@@ -284,3 +284,79 @@ body {
     -moz-transition: box-shadow 0.2s ease-in;
     transition: box-shadow 0.2s ease-in;
   }
+
+  /*Resultador*/
+
+  .resultados-final{
+    padding: 5px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .titulos-resultados-final{
+    color: #353866;
+  }
+
+  .textos-resultados-final{
+    color: black;
+  }
+
+  .articulos-finales {
+    background: #C8C8C8; 
+    width: 100%;
+    height: 70px;
+    border-radius: 10px;
+    transition: height 1s ease-in-out;
+    overflow: hidden;
+    margin-bottom: 10px;
+    padding-top: 10px;
+  }
+
+  .articulos-finales.expanded {
+    transition: 1s;
+    height: 370px;
+  }
+
+  .icono-final {
+    transform: rotate(0deg);
+    transition: transform 1s ease-in-out;
+  }
+
+  .articulos-finales.expanded .icono-final {
+    transform: rotate(180deg);
+  }
+
+  .expandir-contraer .icono-expandir-articluo:hover {
+    color: white;
+  }
+
+  .articulos-proivados.expanded .fecha-final {
+    height: 20%;
+  }
+
+  .fecha-final {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .articulos-finales.expanded .categoria-final {
+    height: 20%;
+  }
+
+  .categoria-final {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .articulos-finales.expanded .tema-final {
+    height: 20%;
+  }
+
+  .tema-final {
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .articulos-finales.expanded .expandir-contraer {
+    height: 20%;
+  }
+
+  .articulos-finales.expanded .editar-articulo {
+    height: 20%;
+  }
