@@ -364,7 +364,7 @@ button.pf-uf:active {
 }
 
 /*Calificar*/
-#heart {
+input[id^="heart-"] {
   display: none;
 }
 
@@ -444,4 +444,118 @@ button.pf-uf:active {
   100% {
     transform: scale(1.2);
   }
+}
+
+/* Diseño del modal del filtro */
+
+.modal-overlay-uf {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content-uf {
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  position: relative;
+  width: 500px;
+  height: 500px;
+}
+
+.titulo-filtro-uf {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: #353866;
+}
+
+.resumir-filtro-uf {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: #353866;
+}
+
+/* Diseño de options del fitro */
+
+.filter-switch-uf {
+  border: 2px solid #ED6B06;
+  border-radius: 30px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 400px;
+  overflow: hidden;
+}
+
+.filter-switch-uf input {
+  display: none;
+  text-align: center;
+}
+
+.filter-switch-uf label {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.5s;
+  font-weight: 500;
+  font-size: 18px;
+  margin-top: 35px;
+}
+
+.filter-switch-uf .background-uf {
+  position: absolute;
+  width: 30%;
+  height: 28px;
+  background-color: #ED6B06;
+  top: 4px;
+  left: 4px;
+  border-radius: 30px;
+  transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#option2-uf:checked ~ .background-uf {
+  left: 35%;
+}
+
+#option3-uf:checked ~ .background-uf {
+  left: 69%;
+}
+
+#option1-uf:checked + label[for="option1-uf"] {
+  color: white;
+  font-weight: bold;
+}
+
+#option2-uf:checked + label[for="option2-uf"] {
+  color: white;
+  font-weight: bold;
+}
+
+#option3-uf:checked + label[for="option3-uf"] {
+  color: white;
+  font-weight: bold;
+}
+
+#option1-uf:not(:checked) + label[for="option1-uf"],
+#option2-uf:not(:checked) + label[for="option2-uf"],
+#option3-uf:not(:checked) + label[for="option3-uf"] {
+  color: black;
+}
+
+/* Titulo areas uf */
+
+.uf-titulo-areas {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: #353866;
 }

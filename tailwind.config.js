@@ -12,7 +12,8 @@ export default {
       coloralterno: '#FF0800',
       coloralternodos: '#000',
       coloralternotres: '#A6A6A6',
-      baseblanco: '#FFF'
+      baseblanco: '#FFF',
+      coloralternocuatro: '#D9D9D9'
     }
   },
   plugins: [],
