@@ -91,10 +91,34 @@
     letter-spacing: 1px;
     margin: 10px;
     cursor: pointer;
-    margin-top: 30px;
+    margin-top: 15px;
+    margin-bottom: 30px;
   }
 
 .heading {
     color: #ED6B06;
     font-weight: bold;
+}
+
+/* Diseño del mensaje de error */
+
+.error-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.error-message {
+  background-color: #d9534f; /* Rojo de error */
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+  font-size: 14px;
+  font-weight: bold;
+  position: relative;
+  z-index: 10;
 }
