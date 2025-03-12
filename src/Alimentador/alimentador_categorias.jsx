@@ -10,6 +10,7 @@ import { IoMdCloudUpload } from "react-icons/io";
 import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
+import { PiSmileySad } from "react-icons/pi";
 
 const AlimentadorCategorias = () => {
 
@@ -26,7 +27,18 @@ const AlimentadorCategorias = () => {
   // Datos de simulacion
   const categorias = [
     { categoria: "Mensualidades", descripcion: "Solo se subira informacion de la mensualidad de las licenciaturas", publicaciones: 15 },
+    { categoria: "Becas", descripcion: "Información sobre becas y ayudas financieras", publicaciones: 8 },
+    { categoria: "Eventos", descripcion: "Calendario de eventos académicos y culturales", publicaciones: 22 },
+    { categoria: "Inscripciones", descripcion: "Procesos y fechas de inscripción a programas", publicaciones: 12 },
   ];
+
+  // Filtrar categorías según el texto de búsqueda
+  const categoriasFiltradas = categorias.filter(cat => 
+    filtroPublicacion && (
+      cat.categoria.toLowerCase().includes(filtroPublicacion.toLowerCase()) || 
+      cat.descripcion.toLowerCase().includes(filtroPublicacion.toLowerCase())
+    )
+  );
 
   // Estado para controlar modales
   const [showNewModal, setShowNewModal] = useState(false);
@@ -130,46 +142,60 @@ const AlimentadorCategorias = () => {
           </div>
 
           {/* Tabla */}
-          <div className='tabla-categorias w-[95%] h-[65%] mt-6 ml-6 bg-baseblanco'>
-            <table className='w-[100%]'>
-              <thead>
-                <tr>
-                  <th className='border-2 border-basenaranja w-[20%]'>Categoría</th>
-                  <th className='border-2 border-basenaranja w-[45%]'>Descripción</th>
-                  <th className='border-2 border-basenaranja w-[15%]'>Publicaciones</th>
-                  <th className='border-2 border-basenaranja w-[20%]'>Acción</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {categorias.map((cat, index) => (
-                  <tr key={index}>
-                    <td className='border-2 border-basenaranja'>{cat.categoria}</td>
-                    <td className='border-2 border-basenaranja'>{cat.descripcion}</td>
-                    <td className='border-2 border-basenaranja'>{cat.publicaciones} publicaciones</td>
-                    <td className='border-2 border-basenaranja w-[100%]'>
-
-                      {/* Botón Editar */}
-                      <div className='flex justify-between'>
-                        <button className="Btn w-[50%]" onClick={() => openEditModal(cat)}>Editar
-                          <svg className="svg" id='svg-editar' viewBox="0 0 400 600">
-                            <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32z" />
-                          </svg>
-                        </button>
-
-                        <button className="Btn w-[50%]">Bajar
-                          <svg className="svg" id='svg-bajar' viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 20V7m0 13-4-4m4 4 4-4m4-12v13m0-13 4 4m-4-4-4 4" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
+          <div className='tabla-categorias w-[95%] h-[65%] mt-6 ml-6 '>
+            {!filtroPublicacion ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="text-8xl mb-4 ">
+                  <TbCategoryPlus className='text-baseblanco' />
+                </div>
+                <p className="text-xl font-bold text-baseblanco">Utilice el filtro para buscar las categorías.</p>
+              </div>
+            ) : categoriasFiltradas.length > 0 ? (
+              <table className='w-[100%] bg-baseblanco'>
+                <thead>
+                  <tr>
+                    <th className='border-2 border-basenaranja w-[20%]'>Categoría</th>
+                    <th className='border-2 border-basenaranja w-[45%]'>Descripción</th>
+                    <th className='border-2 border-basenaranja w-[15%]'>Publicaciones</th>
+                    <th className='border-2 border-basenaranja w-[20%]'>Acción</th>
                   </tr>
-                ))}
-              </tbody>
+                </thead>
 
-            </table>
+                <tbody>
+                  {categoriasFiltradas.map((cat, index) => (
+                    <tr key={index}>
+                      <td className='border-2 border-basenaranja'>{cat.categoria}</td>
+                      <td className='border-2 border-basenaranja'>{cat.descripcion}</td>
+                      <td className='border-2 border-basenaranja'>{cat.publicaciones} publicaciones</td>
+                      <td className='border-2 border-basenaranja w-[100%]'>
 
+                        {/* Botón Editar */}
+                        <div className='flex justify-between'>
+                          <button className="Btn w-[50%]" onClick={() => openEditModal(cat)}>Editar
+                            <svg className="svg" id='svg-editar' viewBox="0 0 400 600">
+                              <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32z" />
+                            </svg>
+                          </button>
+
+                          <button className="Btn w-[50%]">Bajar
+                            <svg className="svg" id='svg-bajar' viewBox="0 0 24 24">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 20V7m0 13-4-4m4 4 4-4m4-12v13m0-13 4 4m-4-4-4 4" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="text-8xl mb-4">
+                <PiSmileySad className='text-baseblanco'/>
+                </div>
+                <p className="text-xl font-bold text-baseblanco">No se encontraron resultados para "{filtroPublicacion}"</p>
+              </div>
+            )}
           </div>
 
         </div>

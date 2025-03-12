@@ -14,6 +14,10 @@ import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 import { BiChevronDownCircle } from "react-icons/bi";
 import { BiSolidEditAlt } from "react-icons/bi";
 
+
+//Icono de la busqueda no encontrada
+import { PiSmileySad } from "react-icons/pi";
+
 // Iconos del Modal
 import { CgAdd } from "react-icons/cg";
 import { GrDocumentUpdate } from "react-icons/gr";
@@ -51,7 +55,7 @@ const AlimentadorPublicaciones = () => {
 
   // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
   const filtroResultados = filtroPublicacion.trim()
-  ? publicaciones.filter(publicacion => {
+    ? publicaciones.filter(publicacion => {
       const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
       return (
         (publicacion.categoria?.toLowerCase() || '').includes(terminoBusqueda) ||
@@ -59,7 +63,7 @@ const AlimentadorPublicaciones = () => {
         (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda)
       );
     })
-  : [];
+    : [];
 
 
   // Funciones para artículos
@@ -273,11 +277,20 @@ const AlimentadorPublicaciones = () => {
           {/* Articulos */}
           <div className='resultados w-full h-[70%] mt-3 overflow-y-auto'>
             {filtroPublicacion.trim() === '' ? (
-              <div className="flex justify-center items-center h-32 text-gray-500">
+              <div className="flex justify-center items-center h-32 text-gray-500 qlk,">
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 ">
+                  <div className="text-8xl mb-4 pt-60">
+                    <TbCategoryPlus className='text-baseblanco'/>
+                  </div>
+                  <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener tu búsqueda.</p>
+                </div>
               </div>
             ) : filtroResultados.length === 0 ? (
-              <div className="flex justify-center items-center h-32 text-coloralternodos">
-                No se encontraron resultados para "{filtroPublicacion}"
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="text-8xl mb-4">
+                  <PiSmileySad className='text-baseblanco' />
+                </div>
+                <p className="text-xl  font-bold text-baseblanco">No se encontraron los resultados "{filtroPublicacion}".</p>
               </div>
             ) : (
               filtroResultados.map((publicacion) => (

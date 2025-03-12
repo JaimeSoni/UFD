@@ -10,9 +10,29 @@ import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
-// Simulación de datos de publicaciones con `id` único
+// Simulación de datos de publicaciones con varias categorías y datos de ejemplo
 const publicaciones = [
-    { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "hola", documentos: "", urls: "" }
+    { 
+        id: "pub1", 
+        fecha: "21/02/2025", 
+        categoria: "Colegiaturas", 
+        tema: "Mensualidad sobre los semestres para la preparatoria.", 
+        descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", 
+        palabrasClave: "colegiatura, mensualidad, pago, semestre", 
+        documentos: "colegiatura_2025.pdf", 
+        urls: "https://ejemplo.com/colegiatura" 
+    },
+    { 
+        id: "pub2", 
+        fecha: "15/02/2025", 
+        categoria: "Becas", 
+        tema: "Convocatoria de becas para el ciclo escolar 2025-2026", 
+        descripcion: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia doloribus omnis dignissimos harum amet officiis enim at sint reprehenderit quidem vel nulla rerum accusamus consequatur optio, corrupti ullam quam alias.", 
+        palabrasClave: "becas, ayuda financiera, convocatoria, solicitud", 
+        documentos: "convocatoria_becas_2025.pdf", 
+        urls: "https://ejemplo.com/becas" 
+    }
+
 ];
 
 function AlimentadorInterno() {
@@ -32,6 +52,27 @@ function AlimentadorInterno() {
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
     };
+    
+    // Función para filtrar las publicaciones según el texto de búsqueda
+    const filtrarPublicaciones = () => {
+        if (!filtroDoc.trim()) {
+            return publicaciones; // Si no hay texto de búsqueda, devolver todas las publicaciones
+        }
+        
+        const terminoBusqueda = filtroDoc.toLowerCase();
+        
+        return publicaciones.filter(pub => 
+            pub.categoria.toLowerCase().includes(terminoBusqueda) ||
+            pub.tema.toLowerCase().includes(terminoBusqueda) ||
+            pub.descripcion.toLowerCase().includes(terminoBusqueda) ||
+            pub.palabrasClave.toLowerCase().includes(terminoBusqueda) ||
+            pub.documentos.toLowerCase().includes(terminoBusqueda) ||
+            pub.fecha.toLowerCase().includes(terminoBusqueda)
+        );
+    };
+    
+    // Obtener las publicaciones filtradas
+    const publicacionesFiltradas = filtrarPublicaciones();
     
     return (
         <div className="w-screen h-screen bg-baseazul flex">
@@ -112,51 +153,57 @@ function AlimentadorInterno() {
 
                 {/* Articulos privados */}
                 <div className='resultados-articulos w-[98%] h-[70%] mt-3 overflow-y-auto'>
-                    {publicaciones.map((publicacion) => (
-                        <div key={publicacion.id} className={`articulos-privados p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
-                            {/* Contenedor principal */}
-                            <div className="flex h-[50px] items-center justify-center">
-                                <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
-                                    <h1>{publicacion.fecha}</h1>
-                                </div>
-
-                                <div className='categoria-articulo w-[15%] flex items-center justify-center text-xl'>
-                                    <h1 className='bg-basenaranja p-2 rounded-[15px] text-baseblanco'>{publicacion.categoria}</h1>
-                                </div>
-
-                                <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
-                                    <h1>{publicacion.tema}</h1>
-                                </div>
-
-                                <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
-                                    <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id)} >
-                                        <BiChevronDownCircle className='text-basenaranja' />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div
-                                className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
-                                    }`}
-                            >
-                                <div className="descripcion p-2 h-[120px]">
-                                    <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
-                                </div>
-                                <div className="palabras-clave p-2 h-[100px]">
-                                    <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-[20px]'>{publicacion.palabrasClave}</span></p>
-                                </div>
-
-                                <div className='flex'>
-                                    <div className="documentos p-2 w-[50%] h-[80px]">
-                                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
+                    {publicacionesFiltradas.length > 0 ? (
+                        publicacionesFiltradas.map((publicacion) => (
+                            <div key={publicacion.id} className={`articulos-privados p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
+                                {/* Contenedor principal */}
+                                <div className="flex h-[50px] items-center justify-center">
+                                    <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
+                                        <h1>{publicacion.fecha}</h1>
                                     </div>
-                                    <div className="urls p-2 w-[50%] h-[80px]">
-                                        <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
+
+                                    <div className='categoria-articulo w-[15%] flex items-center justify-center text-xl'>
+                                        <h1 className='bg-basenaranja p-2 rounded-[15px] text-baseblanco'>{publicacion.categoria}</h1>
+                                    </div>
+
+                                    <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
+                                        <h1>{publicacion.tema}</h1>
+                                    </div>
+
+                                    <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
+                                        <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id)} >
+                                            <BiChevronDownCircle className='text-basenaranja' />
+                                        </button>
                                     </div>
                                 </div>
+
+                                <div
+                                    className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
+                                        }`}
+                                >
+                                    <div className="descripcion p-2 h-[120px]">
+                                        <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
+                                    </div>
+                                    <div className="palabras-clave p-2 h-[100px]">
+                                        <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-[20px]'>{publicacion.palabrasClave}</span></p>
+                                    </div>
+
+                                    <div className='flex'>
+                                        <div className="documentos p-2 w-[50%] h-[80px]">
+                                            <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
+                                        </div>
+                                        <div className="urls p-2 w-[50%] h-[80px]">
+                                            <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        ))
+                    ) : (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-xl font-bold text-baseblanco">No se escuentra la búsqueda. </p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
         </div>
