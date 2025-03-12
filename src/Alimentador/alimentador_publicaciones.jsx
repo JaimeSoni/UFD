@@ -49,6 +49,19 @@ const AlimentadorPublicaciones = () => {
 
   const categories = ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Categoria 5', 'Categoria 6', 'Categoria 7', 'Categoria 8'];
 
+  // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
+  const filtroResultados = filtroPublicacion.trim()
+  ? publicaciones.filter(publicacion => {
+      const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
+      return (
+        (publicacion.categoria?.toLowerCase() || '').includes(terminoBusqueda) ||
+        (publicacion.tema?.toLowerCase() || '').includes(terminoBusqueda) ||
+        (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda)
+      );
+    })
+  : [];
+
+
   // Funciones para artículos
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
@@ -258,59 +271,67 @@ const AlimentadorPublicaciones = () => {
           </div>
 
           {/* Articulos */}
-          <div className='resultados w-[99%] h-[70%] mt-3 overflow-y-auto'>
-            {publicaciones.map((publicacion) => (
-              <div key={publicacion.id} className={`articulos p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
-
-                {/* Contenedor principal */}
-                <div className="flex h-[50px] items-center justify-center">
-                  <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
-                    <h1>{publicacion.fecha}</h1>
-                  </div>
-
-                  <div className='categoria-articulo w-[15%] flex items-center justify-center text-xl'>
-                    <h1 className='bg-basenaranja p-2 rounded-[15px] text-baseblanco'>{publicacion.categoria}</h1>
-                  </div>
-
-                  <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
-                    <h1>{publicacion.tema}</h1>
-                  </div>
-
-                  <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
-                    <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id)} >
-                      <BiChevronDownCircle className='text-basenaranja' />
-                    </button>
-                  </div>
-
-                  <div className='editar-articulo w-[10%] flex items-center justify-center text-4xl'>
-                    <button onClick={() => openEditModal(publicacion)}>
-                      <BiSolidEditAlt className='text-baseazul' />
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
-                    }`}
-                >
-                  <div className="descripcion p-2 h-[120px]">
-                    <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
-                  </div>
-                  <div className="palabras-clave p-2 h-[100px]">
-                    <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-[20px]'>{publicacion.palabrasClave}</span></p>
-                  </div>
-
-                  <div className='flex'>
-                    <div className="documentos p-2 w-[50%] h-[80px]">
-                      <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
-                    </div>
-                    <div className="urls p-2 w-[50%] h-[80px]">
-                      <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
-                    </div>
-                  </div>
-                </div>
+          <div className='resultados w-full h-[70%] mt-3 overflow-y-auto'>
+            {filtroPublicacion.trim() === '' ? (
+              <div className="flex justify-center items-center h-32 text-gray-500">
               </div>
-            ))}
+            ) : filtroResultados.length === 0 ? (
+              <div className="flex justify-center items-center h-32 text-coloralternodos">
+                No se encontraron resultados para "{filtroPublicacion}"
+              </div>
+            ) : (
+              filtroResultados.map((publicacion) => (
+                <div key={publicacion.id} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
+
+                  {/* Contenedor principal */}
+                  <div className="flex h-[50px] items-center justify-center">
+                    <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
+                      <h1>{publicacion.fecha}</h1>
+                    </div>
+
+                    <div className='categoria-articulo w-[15%] flex items-center justify-center text-xl'>
+                      <h1 className='bg-basenaranja p-2 rounded-lg text-baseblanco'>{publicacion.categoria}</h1>
+                    </div>
+
+                    <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
+                      <h1>{publicacion.tema}</h1>
+                    </div>
+
+                    <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
+                      <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id)}>
+                        <BiChevronDownCircle className='text-basenaranja' />
+                      </button>
+                    </div>
+
+                    <div className='editar-articulo w-[10%] flex items-center justify-center text-4xl'>
+                      <button onClick={() => openEditModal(publicacion)}>
+                        <BiSolidEditAlt className='text-baseazul' />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"}`}
+                  >
+                    <div className="descripcion p-2 h-[120px]">
+                      <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
+                    </div>
+                    <div className="palabras-clave p-2 h-[100px]">
+                      <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabrasClave}</span></p>
+                    </div>
+
+                    <div className='flex'>
+                      <div className="documentos p-2 w-1/2 h-[80px]">
+                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
+                      </div>
+                      <div className="urls p-2 w-1/2 h-[80px]">
+                        <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
