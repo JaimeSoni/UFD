@@ -9,6 +9,7 @@ import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 import { PiSmileySad } from "react-icons/pi";
+import Swal from 'sweetalert2';
 
 const AlimentadorCategorias = () => {
   const navigate = useNavigate();
@@ -103,6 +104,7 @@ const AlimentadorCategorias = () => {
       if (data.success) {
         fetchCategorias();
         closeNewModal();
+        alertaGuardada();
       } else {
         console.error(data.message);
       }
@@ -124,6 +126,8 @@ const AlimentadorCategorias = () => {
       if (data.success) {
         fetchCategorias();
         closeEditModal();
+        alertaEditada();
+
       } else {
         console.error(data.message);
       }
@@ -131,6 +135,28 @@ const AlimentadorCategorias = () => {
       console.error("Error al actualizar la categoría:", error);
     }
   };
+
+  //Alerta
+  const alertaGuardada = () => {
+    Swal.fire({
+      title: "Categoria Guardada Correctamente",
+      icon: "success",
+      color: '#000',
+      confirmButtonColor: "#ED6B06",
+      draggable: true
+    });
+  }
+
+  const alertaEditada = () => {
+    Swal.fire({
+      title: "Categoria Editada Correctamente",
+      icon: "success",
+      color: '#000',
+      confirmButtonColor: "#ED6B06",
+      draggable: true
+    });
+  }
+
 
   return (
     <div>
