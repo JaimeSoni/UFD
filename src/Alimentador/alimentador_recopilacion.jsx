@@ -1,5 +1,6 @@
 import React from 'react'
 import '../StylesAlimentador/alimentador_recopilacion.css'
+import { useNavigate } from 'react-router-dom';
 
 import { Link } from 'react-router-dom';
 
@@ -18,6 +19,15 @@ import { CiLink } from "react-icons/ci";
 import { TbTextRecognition } from "react-icons/tb";
 
 const AlimentadorRecopilacion = () => {
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
@@ -51,7 +61,7 @@ const AlimentadorRecopilacion = () => {
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
-            <Link to={'/alimentador_login'} className="action" type="button">
+            <Link to={'/alimentador_login'} onClick={handleLogout} className="action" type="button">
               <RiLogoutCircleLine className="action-icon" color="#353866" />
               <span className="action-content" data-content="Salir" />
             </Link>

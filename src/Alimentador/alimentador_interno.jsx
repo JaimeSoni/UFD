@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../StylesAlimentador/alimentador_interno.css'
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 {/* Iconos */}
 import { FaHome } from "react-icons/fa";
@@ -36,6 +37,15 @@ const publicaciones = [
 ];
 
 function AlimentadorInterno() {
+
+    const navigate = useNavigate();
+    
+      const handleLogout = () => {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('userData');
+        navigate('/login');
+      };
+    
     const [expandedId, setExpandedId] = useState(null);
     
     // Funcion de la X en los filtros
@@ -107,7 +117,7 @@ function AlimentadorInterno() {
                         <span className="action-content" data-content="Doc. Internos" />
                     </Link>
 
-                    <Link to={'/alimentador_login'} className="action" type="button">
+                    <Link to={'/alimentador_login'} onClick={handleLogout} className="action" type="button">
                         <RiLogoutCircleLine className="action-icon" color="#353866" />
                         <span className="action-content" data-content="Salir" />
                     </Link>

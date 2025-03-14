@@ -30,7 +30,11 @@ const AlimentadorLogin = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Redirigir a la página de inicio
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userData', JSON.stringify({
+          usuario: usuario,
+          area: data.area
+        }));
         navigate("/alimentador_inicio");
       } else {
         // Mostrar mensaje de error

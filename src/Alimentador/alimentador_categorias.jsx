@@ -1,9 +1,7 @@
-import React, { useState } from 'react'
-import '../StylesAlimentador/alimentador_categorias.css'
-
+import React, { useState, useEffect } from 'react';
+import '../StylesAlimentador/alimentador_categorias.css';
+import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-
-{/* Iconos */ }
 import { FaHome } from "react-icons/fa";
 import { BiSolidCollection } from "react-icons/bi";
 import { IoMdCloudUpload } from "react-icons/io";
@@ -13,40 +11,57 @@ import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 import { PiSmileySad } from "react-icons/pi";
 
 const AlimentadorCategorias = () => {
+  const navigate = useNavigate();
+  const [filtroPublicacion, setFiltroPublicacion] = useState('');
+  const [categorias, setCategorias] = useState([]);
+  const [showNewModal, setShowNewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState(null);
+  const [newCategory, setNewCategory] = useState({ nombre: '', descripcion: '' });
+  const [editCategory, setEditCategory] = useState({ nombre: '', descripcion: '' });
 
-  // Función de filtro de búsqueda
-  const [filtroPublicacion, setfiltroPublicacion] = useState('');
+  useEffect(() => {
+    // Cargar categorías desde la API
+    fetchCategorias();
+  }, []);
+
+  const fetchCategorias = async () => {
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_categorias.php');
+      const data = await response.json();
+      if (data.success) {
+        setCategorias(data.categorias);
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error al obtener categorías:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
+
   const handleInputChange = (e) => {
-    setfiltroPublicacion(e.target.value);
+    setFiltroPublicacion(e.target.value);
   };
 
   const clearInput = () => {
-    setfiltroPublicacion('');
+    setFiltroPublicacion('');
   };
 
-  // Datos de simulacion
-  const categorias = [
-    { categoria: "Mensualidades", descripcion: "Solo se subira informacion de la mensualidad de las licenciaturas", publicaciones: 15 },
-    { categoria: "Becas", descripcion: "Información sobre becas y ayudas financieras", publicaciones: 8 },
-    { categoria: "Eventos", descripcion: "Calendario de eventos académicos y culturales", publicaciones: 22 },
-    { categoria: "Inscripciones", descripcion: "Procesos y fechas de inscripción a programas", publicaciones: 12 },
-  ];
-
-  // Filtrar categorías según el texto de búsqueda
-  const categoriasFiltradas = categorias.filter(cat => 
+  const categoriasFiltradas = categorias.filter(cat =>
     filtroPublicacion && (
-      cat.categoria.toLowerCase().includes(filtroPublicacion.toLowerCase()) || 
+      cat.categoria.toLowerCase().includes(filtroPublicacion.toLowerCase()) ||
       cat.descripcion.toLowerCase().includes(filtroPublicacion.toLowerCase())
     )
   );
 
-  // Estado para controlar modales
-  const [showNewModal, setShowNewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState(null);
-
-  // Funciones para modales
   const openNewModal = () => {
+    setNewCategory({ nombre: '', descripcion: '' });
     setShowNewModal(true);
   };
 
@@ -56,6 +71,7 @@ const AlimentadorCategorias = () => {
 
   const openEditModal = (category) => {
     setCurrentCategory(category);
+    setEditCategory({ nombre: category.categoria, descripcion: category.descripcion });
     setShowEditModal(true);
   };
 
@@ -64,52 +80,91 @@ const AlimentadorCategorias = () => {
     setCurrentCategory(null);
   };
 
+  const handleNewCategoryChange = (e) => {
+    const { name, value } = e.target;
+    setNewCategory(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditCategoryChange = (e) => {
+    const { name, value } = e.target;
+    setEditCategory(prev => ({ ...prev, [name]: value }));
+  };
+
+  const saveNewCategory = async () => {
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/guardar_categoria.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCategory),
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchCategorias();
+        closeNewModal();
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error al guardar la nueva categoría:", error);
+    }
+  };
+
+  const saveEditCategory = async () => {
+    try {
+      const response = await fetch(`http://localhost/UFD/src/BackEnd/actualizar_categoria.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: currentCategory.id, ...editCategory }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchCategorias();
+        closeEditModal();
+      } else {
+        console.error(data.message);
+      }
+    } catch (error) {
+      console.error("Error al actualizar la categoría:", error);
+    }
+  };
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
         <div className="w-[6%] h-screen bg-baseazul flex items-center justify-center relative">
-
-          {/* Menú izquierdo */}
           <div className="action-wrap bg-basenaranja z-10 flex flex-col items-start absolute left-3">
-
-
             <Link to={'/alimentador_inicio'} className="action" type="button">
               <FaHome className="action-icon" color="#353866" />
               <span className="action-content" data-content="Inicio" />
             </Link>
-
             <Link to={'/alimentador_recopilacion'} className="action" type="button">
               <BiSolidCollection className="action-icon" color="#353866" />
               <span className="action-content" data-content="Recopilacion" />
             </Link>
-
             <Link to={'/alimentador_publicaciones'} className="action" type="button">
               <IoMdCloudUpload className="action-icon" color="#353866" />
               <span className="action-content" data-content="Publicaciones" />
             </Link>
-
             <Link to={'/alimentador_categorias'} className="action" type="button">
               <TbCategoryPlus className="action-icon" color="#353866" />
               <span className="action-content" data-content="Categorias" />
             </Link>
-
             <Link to={'/alimentador_interno'} className="action" type="button">
               <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
-
-            <Link to={'/alimentador_login'} className="action" type="button">
+            <Link to={'/alimentador_login'} onClick={handleLogout} className="action" type="button">
               <RiLogoutCircleLine className="action-icon" color="#353866" />
               <span className="action-content" data-content="Salir" />
             </Link>
-
           </div>
-
         </div>
 
         <div className='w-[94%] h-screen'>
-
-          {/* Titulo */}
           <div className='titulo w-[100%] h-[15%] flex items-center justify-center'>
             <h1 className='titulo-categorias'>Registro de Categorías</h1>
             <button className='button-categorias' onClick={openNewModal}>Nueva Categoría
@@ -117,7 +172,6 @@ const AlimentadorCategorias = () => {
             </button>
           </div>
 
-          {/* Filtro de búsqueda */}
           <div className='buscador w-[100%] h-[10%] flex items-center justify-center'>
             <div className="search-panels-filtro">
               <div className="search-group">
@@ -132,7 +186,7 @@ const AlimentadorCategorias = () => {
                 </div>
                 <div className="btn-box-x">
                   <button className="btn-cleare" onClick={clearInput}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">
+                    <svg xmlns="http://www.w                    .org/2000/svg" height="1em" viewBox="0 0 384 512">
                       <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
                     </svg>
                   </button>
@@ -191,7 +245,7 @@ const AlimentadorCategorias = () => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <div className="text-8xl mb-4">
-                <PiSmileySad className='text-baseblanco'/>
+                  <PiSmileySad className='text-baseblanco' />
                 </div>
                 <p className="text-xl font-bold text-baseblanco">No se encontraron resultados para "{filtroPublicacion}"</p>
               </div>
@@ -211,39 +265,38 @@ const AlimentadorCategorias = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" >
+              <label className="block text-gray-700 text-sm font-bold mb-2">
                 Nombre de la categoría
               </label>
               <input
                 className="nueva-categoria"
                 type="text"
+                name="nombre"
                 placeholder="Ingrese el nombre de la categoría"
+                value={newCategory.nombre}
+                onChange={handleNewCategoryChange}
               />
             </div>
 
             <div className="mb-6">
               <label className="block text-gray-700 text-sm font-bold mb-2">Descripción</label>
-
               <textarea
-                name="description"
+                name="descripcion"
                 placeholder="Ingrese la descripción de la categoría."
                 className="descripcion-categoria w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
+                value={newCategory.descripcion}
+                onChange={handleNewCategoryChange}
               />
-
             </div>
 
-            <div className="px-4 py-3  flex justify-end gap-2">
-
-              <button className='nueva-categoriaCancelar'
-                onClick={closeNewModal}>
+            <div className="px-4 py-3 flex justify-end gap-2">
+              <button className='nueva-categoriaCancelar' onClick={closeNewModal}>
                 Cancelar
               </button>
 
-              <button className='nueva-categoriaGuardar'
-                onClick={closeNewModal}>
+              <button className='nueva-categoriaGuardar' onClick={saveNewCategory}>
                 Guardar
               </button>
-
             </div>
           </div>
         </div>
@@ -258,42 +311,40 @@ const AlimentadorCategorias = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" > Nombre de la categoría </label>
+              <label className="block text-gray-700 text-sm font-bold mb-2"> Nombre de la categoría </label>
               <input
                 className="input-editarCategotria"
                 type="text"
-                defaultValue={currentCategory.categoria}
+                name="nombre"
+                value={editCategory.nombre}
+                onChange={handleEditCategoryChange}
               />
             </div>
 
             <div className="mb-6">
               <label className="block text-gray-700 text-sm font-bold mb-2">Descripción</label>
               <textarea
-                name="description"
+                name="descripcion"
                 placeholder="Ingrese la descripción de la categoría."
                 className="descripcion-editarCategoria w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
-                defaultValue={currentCategory.descripcion}
+                value={editCategory.descripcion}
+                onChange={handleEditCategoryChange}
               />
-
             </div>
-            <div className="px-4 py-3  flex justify-end gap-2">
-              <button className='cancelar-editarCategoria'
-                onClick={closeEditModal}>
+            <div className="px-4 py-3 flex justify-end gap-2">
+              <button className='cancelar-editarCategoria' onClick={closeEditModal}>
                 Cancelar
               </button>
 
-              <button className='guardar-editarCategoria'
-                onClick={closeEditModal}>
+              <button className='guardar-editarCategoria' onClick={saveEditCategory}>
                 Guardar
               </button>
             </div>
           </div>
         </div>
       )}
-
-
     </div>
-  )
+  );
 }
 
-export default AlimentadorCategorias
+export default AlimentadorCategorias;

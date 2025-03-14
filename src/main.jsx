@@ -1,9 +1,10 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
 
 // General
 import LoginUFD from "./login_ufd.jsx";
+import ProtectedRoute from "./BackEnd/protectedRoute.jsx";
 
 // Administrador
 import Login from "./Administrador/login.jsx";
@@ -25,7 +26,7 @@ import AlimentadorInterno from "./Alimentador/alimentador_interno.jsx";
 import UFInicio from "./UsuarioFinal/uf_inicio.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <Router>
+  <BrowserRouter>
     <Routes>
       {/* General */}
       <Route path="/login_ufd" element={<LoginUFD />} />
@@ -35,21 +36,32 @@ createRoot(document.getElementById("root")).render(
       <Route path="/admin_inicio" element={<AdminInicio />} />
       <Route path="/admin_areas" element={<AdminAreas />} />
       <Route path="/admin_docs" element={<AdminDocs />} />
-      <Route path="/admin_registros" element={<AdminRegistros />}/>
+      <Route path="/admin_registros" element={<AdminRegistros />} />
 
 
       {/* Alimentador */}
       <Route path="/alimentador_login" element={<AlimentadorLogin />} />
-      <Route path="/alimentador_inicio" element={<AlimentadorInicio />} />
-      <Route path="/alimentador_recopilacion" element={<AlimentadorRecopilacion />} />
-      <Route path="/alimentador_publicaciones" element={<AlimentadorPublicaciones />} />
-      <Route path="/alimentador_categorias" element={<AlimentadorCategorias />} />
-      <Route path="/alimentador_interno" element={<AlimentadorInterno />} />
-   
+      
+      {/* Rutas Protegidas */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/alimentador_inicio" element={<AlimentadorInicio />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/alimentador_recopilacion" element={<AlimentadorRecopilacion />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/alimentador_publicaciones" element={<AlimentadorPublicaciones />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/alimentador_categorias" element={<AlimentadorCategorias />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/alimentador_interno" element={<AlimentadorInterno />} />
+      </Route>
 
       {/* Usuario Final */}
       <Route path="/uf_inicio" element={<UFInicio />} />
-      
+
     </Routes>
-  </Router>
+  </BrowserRouter>
 );

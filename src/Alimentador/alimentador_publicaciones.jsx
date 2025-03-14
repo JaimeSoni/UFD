@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../StylesAlimentador/alimentador_publicaciones.css';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // Iconos Menu
 import { FaHome } from "react-icons/fa";
@@ -30,6 +31,15 @@ const publicaciones = [
 ];
 
 const AlimentadorPublicaciones = () => {
+
+  const navigate = useNavigate();
+  
+    const handleLogout = () => {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('userData');
+      navigate('/login');
+    };
+
   const [expandedId, setExpandedId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -224,7 +234,7 @@ const AlimentadorPublicaciones = () => {
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
-            <Link to={'/alimentador_login'} className="action" type="button">
+            <Link to={'/alimentador_login'} onClick={handleLogout} className="action" type="button">
               <RiLogoutCircleLine className="action-icon" color="#353866" />
               <span className="action-content" data-content="Salir" />
             </Link>
