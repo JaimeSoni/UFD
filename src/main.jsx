@@ -25,6 +25,9 @@ import AlimentadorInterno from "./Alimentador/alimentador_interno.jsx";
 // Usuario Final
 import UFInicio from "./UsuarioFinal/uf_inicio.jsx";
 
+// Prueba
+import Prueba from "./prueba.jsx";
+
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <Routes>
@@ -61,6 +64,9 @@ createRoot(document.getElementById("root")).render(
 
       {/* Usuario Final */}
       <Route path="/uf_inicio" element={<UFInicio />} />
+
+      {/* Prueba */}
+      <Route path="/prueba" element={<Prueba />} />
 
     </Routes>
   </BrowserRouter>
