@@ -127,7 +127,6 @@ const AlimentadorCategorias = () => {
         fetchCategorias();
         closeEditModal();
         alertaEditada();
-
       } else {
         console.error(data.message);
       }
@@ -135,11 +134,60 @@ const AlimentadorCategorias = () => {
       console.error("Error al actualizar la categoría:", error);
     }
   };
+  
+  // Borrar categoría
+  const deleteCategory = async (categoryId) => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Está seguro?",
+        text: "Esta acción no se puede revertir",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ED6B06",
+        cancelButtonColor: "#d33",
+        color:"#000",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+      });
+
+      if (result.isConfirmed) {
+        const response = await fetch('http://localhost/UFD/src/BackEnd/eliminar_categoria.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: categoryId }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          fetchCategorias();
+          alertaEliminada();
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: data.message || "No se pudo eliminar la categoría",
+            icon: "error",
+            confirmButtonColor: "#ED6B06",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error al eliminar la categoría:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al procesar la solicitud",
+        icon: "error",
+        confirmButtonColor: "#ED6B06",
+      });
+    }
+  };
 
   //Alerta
   const alertaGuardada = () => {
     Swal.fire({
-      title: "Categoria Guardada Correctamente",
+      title: "Categoría Guardada Correctamente",
       icon: "success",
       color: '#000',
       confirmButtonColor: "#ED6B06",
@@ -149,7 +197,7 @@ const AlimentadorCategorias = () => {
 
   const alertaEditada = () => {
     Swal.fire({
-      title: "Categoria Editada Correctamente",
+      title: "Categoría Editada Correctamente",
       icon: "success",
       color: '#000',
       confirmButtonColor: "#ED6B06",
@@ -157,6 +205,15 @@ const AlimentadorCategorias = () => {
     });
   }
 
+  const alertaEliminada = () => {
+    Swal.fire({
+      title: "Categoría Eliminada Correctamente",
+      icon: "success",
+      color: '#000',
+      confirmButtonColor: "#ED6B06",
+      draggable: true
+    });
+  };
 
   return (
     <div>
@@ -212,7 +269,7 @@ const AlimentadorCategorias = () => {
                 </div>
                 <div className="btn-box-x">
                   <button className="btn-cleare" onClick={clearInput}>
-                    <svg xmlns="http://www.w                    .org/2000/svg" height="1em" viewBox="0 0 384 512">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512">
                       <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
                     </svg>
                   </button>
@@ -257,9 +314,9 @@ const AlimentadorCategorias = () => {
                             </svg>
                           </button>
 
-                          <button className="Btn w-[50%]">Bajar
-                            <svg className="svg" id='svg-bajar' viewBox="0 0 24 24">
-                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 20V7m0 13-4-4m4 4 4-4m4-12v13m0-13 4 4m-4-4-4 4" />
+                          <button className="Btn w-[50%]" onClick={() => deleteCategory(cat.id)}>Borrar
+                            <svg className='svg' id='svg-borrar' viewBox="0 0 30 30">
+                              <path d="M 13 3 A 1.0001 1.0001 0 0 0 11.986328 4 L 6 4 A 1.0001 1.0001 0 1 0 6 6 L 24 6 A 1.0001 1.0001 0 1 0 24 4 L 18.013672 4 A 1.0001 1.0001 0 0 0 17 3 L 13 3 z M 6 8 L 6 24 C 6 25.105 6.895 26 8 26 L 22 26 C 23.105 26 24 25.105 24 24 L 24 8 L 6 8 z" />
                             </svg>
                           </button>
                         </div>
