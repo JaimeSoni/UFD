@@ -1239,8 +1239,10 @@ body{
 
 .dropdown-options {
   position: absolute;
-  background-color: white;
-  border: 1px solid #ccc;
+  width: 180px;
+  height: 100px;
+  margin-top: 14%;
+  margin-left: 74%;
   z-index: 1000;
 }
 
@@ -1248,5 +1250,13 @@ body{
   display: block;
   width: 100%;
   padding: 10px;
-  text-align: left;
+  text-align: center;
+  margin-bottom: 5px;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  color: white;
+  border-radius: 100px;
+}
+
+.dropdown-options button:hover {
+  color: #353866;
 }

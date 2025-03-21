@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../StylesAlimentador/alimentador_publicaciones.css';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +31,7 @@ const publicaciones = [
 
 const AlimentadorPublicaciones = () => {
   const navigate = useNavigate();
-  
+
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userData');
@@ -43,7 +43,7 @@ const AlimentadorPublicaciones = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
   const [currentPublication, setCurrentPublication] = useState(null);
-  const [isPublic, setIsPublic] = useState(true); // Estado para determinar si es público o privado
+  const [isPublic, setIsPublic] = useState(true);
 
   // Estados para el Modal
   const [formData, setFormData] = useState({
@@ -55,13 +55,59 @@ const AlimentadorPublicaciones = () => {
     files: [],
     urls: []
   });
+
   const [keyword, setKeyword] = useState('');
   const [url, setUrl] = useState('');
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
+  // Mandar a llamar las categorias
+
+  const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false); // Estado para el dropdown de opciones
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const categories = ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Categoria 5', 'Categoria 6', 'Categoria 7', 'Categoria 8'];
+  // Función para cargar las categorías desde el servidor
+  const fetchCategories = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_categorias.php');
+
+      if (!response.ok) {
+        throw new Error('No se pudieron cargar las categorías');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Extraemos solo los nombres de las categorías para el dropdown
+        const categoriasNombres = data.categorias.map(cat => cat.categoria);
+        setCategories(categoriasNombres);
+      } else {
+        throw new Error(data.message || 'Error al cargar las categorías');
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error al cargar categorías:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cargar categorías cuando el componente se monta
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const selectCategory = (categoria) => {
+    setSelectedCategory(categoria);
+    setIsDropdownOpen(false);
+  };
 
   // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
   const filtroResultados = filtroPublicacion.trim()
@@ -125,15 +171,6 @@ const AlimentadorPublicaciones = () => {
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const selectCategory = (category) => {
-    setSelectedCategory(category);
-    setIsDropdownOpen(false);
   };
 
   const handleChange = (e) => {
@@ -261,8 +298,8 @@ const AlimentadorPublicaciones = () => {
             </button>
             {isDropdownVisible && (
               <div className="dropdown-options">
-                <button onClick={() => handleOptionSelect('publico')}>art. público</button>
-                <button onClick={() => handleOptionSelect('privado')}>art. privado</button>
+                <button className='bg-basenaranja' onClick={() => handleOptionSelect('publico')}>Art. Público</button>
+                <button className='bg-basenaranja' onClick={() => handleOptionSelect('privado')}>Art. Privado</button>
               </div>
             )}
           </div>
@@ -305,7 +342,7 @@ const AlimentadorPublicaciones = () => {
               <div className="flex justify-center items-center h-32 text-gray-500 qlk,">
                 <div className="flex flex-col items-center justify-center h-full text-gray-500 ">
                   <div className="text-8xl mb-4 pt-60">
-                    <TbCategoryPlus className='text-baseblanco'/>
+                    <TbCategoryPlus className='text-baseblanco' />
                   </div>
                   <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener tu búsqueda.</p>
                 </div>
@@ -619,9 +656,14 @@ const AlimentadorPublicaciones = () => {
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
-                      <div className="main-editar" onClick={toggleDropdown}>
+                      <div className="main" onClick={toggleDropdown}>
                         {selectedCategory || 'Selecciona la categoría'}
-                        <input type="checkbox" className="inp" checked={isDropdownOpen} onChange={toggleDropdown} />
+                        <input
+                          type="checkbox"
+                          className="inp"
+                          checked={isDropdownOpen}
+                          onChange={toggleDropdown}
+                        />
                         <div className="bar">
                           <span className="top bar-list"></span>
                           <span className="middle bar-list"></span>
@@ -629,18 +671,28 @@ const AlimentadorPublicaciones = () => {
                         </div>
 
                         {isDropdownOpen && (
-                          <div className="menu-categoria">
-                            <div className="menu-editar">
-                              {categories.map((categoria, index) => (
-                                <div
-                                  key={index}
-                                  className="lista-categoria"
-                                  onClick={() => selectCategory(categoria)}
-                                >
-                                  {categoria}
-                                </div>
-                              ))}
-                            </div>
+                          <div className="menu-container">
+                            {isLoading ? (
+                              <div className="p-2 text-center">Cargando...</div>
+                            ) : error ? (
+                              <div className="p-2 text-center text-red-500">{error}</div>
+                            ) : (
+                              <div className="menu-scroll">
+                                {categories.length > 0 ? (
+                                  categories.map((categoria, index) => (
+                                    <div
+                                      key={index}
+                                      className="menu-list"
+                                      onClick={() => selectCategory(categoria)}
+                                    >
+                                      {categoria}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="p-2 text-center">No hay categorías disponibles</div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
