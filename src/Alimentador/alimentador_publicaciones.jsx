@@ -15,7 +15,6 @@ import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 import { BiChevronDownCircle } from "react-icons/bi";
 import { BiSolidEditAlt } from "react-icons/bi";
 
-
 //Icono de la busqueda no encontrada
 import { PiSmileySad } from "react-icons/pi";
 
@@ -31,20 +30,20 @@ const publicaciones = [
 ];
 
 const AlimentadorPublicaciones = () => {
-
   const navigate = useNavigate();
   
-    const handleLogout = () => {
-      localStorage.removeItem('isAuthenticated');
-      localStorage.removeItem('userData');
-      navigate('/login');
-    };
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userData');
+    navigate('/login');
+  };
 
   const [expandedId, setExpandedId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
   const [currentPublication, setCurrentPublication] = useState(null);
+  const [isPublic, setIsPublic] = useState(true); // Estado para determinar si es público o privado
 
   // Estados para el Modal
   const [formData, setFormData] = useState({
@@ -60,6 +59,7 @@ const AlimentadorPublicaciones = () => {
   const [url, setUrl] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false); // Estado para el dropdown de opciones
 
   const categories = ['Categoria 1', 'Categoria 2', 'Categoria 3', 'Categoria 4', 'Categoria 5', 'Categoria 6', 'Categoria 7', 'Categoria 8'];
 
@@ -74,7 +74,6 @@ const AlimentadorPublicaciones = () => {
       );
     })
     : [];
-
 
   // Funciones para artículos
   const toggleExpand = (id) => {
@@ -203,6 +202,16 @@ const AlimentadorPublicaciones = () => {
     closeEditModal();
   };
 
+  const toggleDropdownVisibility = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleOptionSelect = (option) => {
+    setIsDropdownVisible(false);
+    setIsPublic(option === 'publico');
+    openModal();
+  };
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
@@ -246,10 +255,16 @@ const AlimentadorPublicaciones = () => {
           {/* Titulo */}
           <div className='titulo w-[100%] h-[15%] flex items-center justify-center'>
             <h1 className='titulo-publicaciones'>Registro de Publicaciones</h1>
-            <button className='button-publicaciones' onClick={openModal}>
+            <button className='button-publicaciones' onClick={toggleDropdownVisibility}>
               Nueva Publicación
               <span />
             </button>
+            {isDropdownVisible && (
+              <div className="dropdown-options">
+                <button onClick={() => handleOptionSelect('publico')}>art. público</button>
+                <button onClick={() => handleOptionSelect('privado')}>art. privado</button>
+              </div>
+            )}
           </div>
 
           {/* Filtro de búsqueda */}
@@ -364,20 +379,12 @@ const AlimentadorPublicaciones = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
             <div className="px-4 py-3 flex justify-center items-center">
-              <h2 className="text-3xl text-baseazul font-semibold text-gray-800">Nueva Publicación</h2>
+              <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
+                {isPublic ? "Artículos Públicos" : "Artículos Privados"}
+              </h2>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
-              <div className='flex items-center justify-center mb-5'>
-                <div id="firstFilter" className="filter-switch pt-9">
-                  <input defaultChecked id="option1" name="options" type="radio" />
-                  <label className="option" htmlFor="option1">Público</label>
-                  <input id="option2" name="options" type="radio" />
-                  <label className="option" htmlFor="option2">Privado</label>
-                  <span className="background" />
-                </div>
-              </div>
-
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex gap-3">
                   <div className="w-[20%]">
