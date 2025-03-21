@@ -61,12 +61,19 @@ const AlimentadorPublicaciones = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   // Mandar a llamar las categorias
-
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Para el modal de nueva publicación
+  const [categoriaPublicacionNueva, setCategoriaPublicacionNueva] = useState('');
+  const [dropdownPublicacionNuevaAbierto, setDropdownPublicacionNuevaAbierto] = useState(false);
+
+  // Para el modal de editar publicación
+  const [categoriaPublicacionEditar, setCategoriaPublicacionEditar] = useState('');
+  const [dropdownPublicacionEditarAbierto, setDropdownPublicacionEditarAbierto] = useState(false);
 
   // Función para cargar las categorías desde el servidor
   const fetchCategories = async () => {
@@ -145,10 +152,13 @@ const AlimentadorPublicaciones = () => {
       files: [],
       urls: []
     });
+    setCategoriaPublicacionNueva('');
     setIsModalOpen(true);
   };
 
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const openEditModal = (publicacion) => {
     setCurrentPublication(publicacion);
@@ -156,11 +166,12 @@ const AlimentadorPublicaciones = () => {
       date: publicacion.fecha,
       category: publicacion.categoria,
       topic: publicacion.tema,
-      description: publicacion.descripcion,
-      keywords: publicacion.palabrasClave.split(','),
+      description: publicacion.descripcion || '',
+      keywords: publicacion.palabrasClave ? publicacion.palabrasClave.split(',') : [],
       files: [],
-      urls: publicacion.urls.split(',')
+      urls: publicacion.urls ? publicacion.urls.split(',') : []
     });
+    setCategoriaPublicacionEditar(publicacion.categoria);
     setIsEditModalOpen(true);
   };
 
@@ -247,6 +258,28 @@ const AlimentadorPublicaciones = () => {
     setIsDropdownVisible(false);
     setIsPublic(option === 'publico');
     openModal();
+  };
+
+  // Para el modal de nueva publicación
+  const toggleDropdownNuevo = () => {
+    setDropdownPublicacionNuevaAbierto(!dropdownPublicacionNuevaAbierto);
+  };
+
+  const seleccionarCategoriaNueva = (categoria) => {
+    setCategoriaPublicacionNueva(categoria);
+    setFormData({ ...formData, category: categoria });
+    setDropdownPublicacionNuevaAbierto(false);
+  };
+
+  // Para el modal de editar publicación
+  const toggleDropdownEditar = () => {
+    setDropdownPublicacionEditarAbierto(!dropdownPublicacionEditarAbierto);
+  };
+
+  const seleccionarCategoriaEditar = (categoria) => {
+    setCategoriaPublicacionEditar(categoria);
+    setFormData({ ...formData, category: categoria });
+    setDropdownPublicacionEditarAbierto(false);
   };
 
   return (
@@ -339,8 +372,8 @@ const AlimentadorPublicaciones = () => {
           {/* Articulos */}
           <div className='resultados w-full h-[70%] mt-3 overflow-y-auto'>
             {filtroPublicacion.trim() === '' ? (
-              <div className="flex justify-center items-center h-32 text-gray-500 qlk,">
-                <div className="flex flex-col items-center justify-center h-full text-gray-500 ">
+              <div className="flex justify-center items-center h-32 text-gray-500">
+                <div className="flex flex-col items-center justify-center h-full text-gray-500">
                   <div className="text-8xl mb-4 pt-60">
                     <TbCategoryPlus className='text-baseblanco' />
                   </div>
@@ -352,7 +385,7 @@ const AlimentadorPublicaciones = () => {
                 <div className="text-8xl mb-4">
                   <PiSmileySad className='text-baseblanco' />
                 </div>
-                <p className="text-xl  font-bold text-baseblanco">No se encontraron los resultados "{filtroPublicacion}".</p>
+                <p className="text-xl font-bold text-baseblanco">No se encontraron los resultados "{filtroPublicacion}".</p>
               </div>
             ) : (
               filtroResultados.map((publicacion) => (
@@ -389,18 +422,18 @@ const AlimentadorPublicaciones = () => {
                     className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"}`}
                   >
                     <div className="descripcion p-2 h-[120px]">
-                      <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
+                      <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion || 'Sin descripción'}</span></p>
                     </div>
                     <div className="palabras-clave p-2 h-[100px]">
-                      <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabrasClave}</span></p>
+                      <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabrasClave || 'Sin palabras clave'}</span></p>
                     </div>
 
                     <div className='flex'>
                       <div className="documentos p-2 w-1/2 h-[80px]">
-                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
+                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'>{publicacion.documentos || 'Sin documentos'}</span></p>
                       </div>
                       <div className="urls p-2 w-1/2 h-[80px]">
-                        <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
+                        <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls || 'Sin URLs'}</span></p>
                       </div>
                     </div>
                   </div>
@@ -448,23 +481,23 @@ const AlimentadorPublicaciones = () => {
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
-                      <div className="main" onClick={toggleDropdown}>
-                        {selectedCategory || 'Selecciona la categoría'}
-                        <input type="checkbox" className="inp" checked={isDropdownOpen} onChange={toggleDropdown} />
+                      <div className="main" onClick={toggleDropdownNuevo}>
+                        {categoriaPublicacionNueva || 'Selecciona la categoría'}
+                        <input type="checkbox" className="inp" checked={dropdownPublicacionNuevaAbierto} onChange={toggleDropdownNuevo} />
                         <div className="bar">
                           <span className="top bar-list"></span>
                           <span className="middle bar-list"></span>
                           <span className="bottom bar-list"></span>
                         </div>
 
-                        {isDropdownOpen && (
+                        {dropdownPublicacionNuevaAbierto && (
                           <div className="menu-container">
                             <div className="menu-scroll">
                               {categories.map((categoria, index) => (
                                 <div
                                   key={index}
                                   className="menu-list"
-                                  onClick={() => selectCategory(categoria)}
+                                  onClick={() => seleccionarCategoriaNueva(categoria)}
                                 >
                                   {categoria}
                                 </div>
@@ -548,7 +581,7 @@ const AlimentadorPublicaciones = () => {
                     <div className="space-y-1">
                       {formData.urls.map((linkUrl, index) => (
                         <div key={index} className="flex items-center justify-between py-1 px-3 bg-gray-50 rounded text-sm">
-                          <a href={linkUrl} target="blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
+                          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
                             {linkUrl}
                           </a>
                           <button
@@ -656,13 +689,13 @@ const AlimentadorPublicaciones = () => {
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
-                      <div className="main" onClick={toggleDropdown}>
+                      <div className="main" onClick={toggleDropdownEditar}>
                         {selectedCategory || 'Selecciona la categoría'}
                         <input
                           type="checkbox"
                           className="inp"
                           checked={isDropdownOpen}
-                          onChange={toggleDropdown}
+                          onChange={toggleDropdownEditar}
                         />
                         <div className="bar">
                           <span className="top bar-list"></span>
@@ -821,6 +854,8 @@ const AlimentadorPublicaciones = () => {
         </div>
       )}
     </div>
+
+
   );
 }
 
