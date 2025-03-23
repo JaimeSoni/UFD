@@ -39,8 +39,8 @@ const AlimentadorPublicaciones = () => {
   };
 
   const [expandedId, setExpandedId] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isPublicModalOpen, setIsPublicModalOpen] = useState(false);
+  const [isPrivateModalOpen, setIsPrivateModalOpen] = useState(false);
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
   const [currentPublication, setCurrentPublication] = useState(null);
   const [isPublic, setIsPublic] = useState(true);
@@ -53,7 +53,8 @@ const AlimentadorPublicaciones = () => {
     description: '',
     keywords: [],
     files: [],
-    urls: []
+    urls: [],
+    targetAudience: '' // Campo específico para artículos privados
   });
 
   const [keyword, setKeyword] = useState('');
@@ -66,14 +67,6 @@ const AlimentadorPublicaciones = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // Para el modal de nueva publicación
-  const [categoriaPublicacionNueva, setCategoriaPublicacionNueva] = useState('');
-  const [dropdownPublicacionNuevaAbierto, setDropdownPublicacionNuevaAbierto] = useState(false);
-
-  // Para el modal de editar publicación
-  const [categoriaPublicacionEditar, setCategoriaPublicacionEditar] = useState('');
-  const [dropdownPublicacionEditarAbierto, setDropdownPublicacionEditarAbierto] = useState(false);
 
   // Función para cargar las categorías desde el servidor
   const fetchCategories = async () => {
@@ -88,7 +81,6 @@ const AlimentadorPublicaciones = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Extraemos solo los nombres de las categorías para el dropdown
         const categoriasNombres = data.categorias.map(cat => cat.categoria);
         setCategories(categoriasNombres);
       } else {
@@ -142,7 +134,7 @@ const AlimentadorPublicaciones = () => {
   };
 
   // Funciones para Modal
-  const openModal = () => {
+  const openPublicModal = () => {
     setFormData({
       date: new Date().toISOString().slice(0, 10),
       category: '',
@@ -152,41 +144,42 @@ const AlimentadorPublicaciones = () => {
       files: [],
       urls: []
     });
-    setCategoriaPublicacionNueva('');
-    setIsModalOpen(true);
+    setIsPublicModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const closePublicModal = () => {
+    setIsPublicModalOpen(false);
   };
 
-  const openEditModal = (publicacion) => {
-    setCurrentPublication(publicacion);
+  const openPrivateModal = () => {
     setFormData({
-      date: publicacion.fecha,
-      category: publicacion.categoria,
-      topic: publicacion.tema,
-      description: publicacion.descripcion || '',
-      keywords: publicacion.palabrasClave ? publicacion.palabrasClave.split(',') : [],
+      date: new Date().toISOString().slice(0, 10),
+      category: '',
+      topic: '',
+      description: '',
+      keywords: [],
       files: [],
-      urls: publicacion.urls ? publicacion.urls.split(',') : []
+      urls: [],
+      targetAudience: '' // Campo específico para artículos privados
     });
-    setCategoriaPublicacionEditar(publicacion.categoria);
-    setIsEditModalOpen(true);
+    setIsPrivateModalOpen(true);
   };
 
-  const closeEditModal = () => {
-    setIsEditModalOpen(false);
-    setCurrentPublication(null);
+  const closePrivateModal = () => {
+    setIsPrivateModalOpen(false);
   };
 
-  const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
+  const handleOptionSelect = (option) => {
+    setIsDropdownVisible(false);
+    if (option === 'publico') {
+      openPublicModal();
+    } else {
+      openPrivateModal();
+    }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  const toggleDropdownVisibility = () => {
+    setIsDropdownVisible(!isDropdownVisible);
   };
 
   const handleAddKeyword = () => {
@@ -196,10 +189,11 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
-  const handleRemoveKeyword = (index) => {
-    const updatedKeywords = [...formData.keywords];
-    updatedKeywords.splice(index, 1);
-    setFormData({ ...formData, keywords: updatedKeywords });
+  const handleAddUrl = () => {
+    if (url.trim()) {
+      setFormData({ ...formData, urls: [...formData.urls, url.trim()] });
+      setUrl('');
+    }
   };
 
   const handleFileChange = (e) => {
@@ -219,67 +213,10 @@ const AlimentadorPublicaciones = () => {
     setFormData({ ...formData, files: [...formData.files, ...validFiles] });
   };
 
-  const handleRemoveFile = (index) => {
-    const updatedFiles = [...formData.files];
-    updatedFiles.splice(index, 1);
-    setFormData({ ...formData, files: updatedFiles });
-  };
-
-  const handleAddUrl = () => {
-    if (url.trim()) {
-      setFormData({ ...formData, urls: [...formData.urls, url.trim()] });
-      setUrl('');
-    }
-  };
-
-  const handleRemoveUrl = (index) => {
-    const updatedUrls = [...formData.urls];
-    updatedUrls.splice(index, 1);
-    setFormData({ ...formData, urls: updatedUrls });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
     closeModal();
-  };
-
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-    console.log('Edited publication:', formData);
-    closeEditModal();
-  };
-
-  const toggleDropdownVisibility = () => {
-    setIsDropdownVisible(!isDropdownVisible);
-  };
-
-  const handleOptionSelect = (option) => {
-    setIsDropdownVisible(false);
-    setIsPublic(option === 'publico');
-    openModal();
-  };
-
-  // Para el modal de nueva publicación
-  const toggleDropdownNuevo = () => {
-    setDropdownPublicacionNuevaAbierto(!dropdownPublicacionNuevaAbierto);
-  };
-
-  const seleccionarCategoriaNueva = (categoria) => {
-    setCategoriaPublicacionNueva(categoria);
-    setFormData({ ...formData, category: categoria });
-    setDropdownPublicacionNuevaAbierto(false);
-  };
-
-  // Para el modal de editar publicación
-  const toggleDropdownEditar = () => {
-    setDropdownPublicacionEditarAbierto(!dropdownPublicacionEditarAbierto);
-  };
-
-  const seleccionarCategoriaEditar = (categoria) => {
-    setCategoriaPublicacionEditar(categoria);
-    setFormData({ ...formData, category: categoria });
-    setDropdownPublicacionEditarAbierto(false);
   };
 
   return (
@@ -444,18 +381,18 @@ const AlimentadorPublicaciones = () => {
         </div>
       </div>
 
-      {/* Modal de Nueva Publicación */}
-      {isModalOpen && (
+      {/* Modal de Artículo Público */}
+      {isPublicModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
             <div className="px-4 py-3 flex justify-center items-center">
               <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
-                {isPublic ? "Artículos Públicos" : "Artículos Privados"}
+                Nuevo Artículo Público
               </h2>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form className="space-y-4">
                 <div className="flex gap-3">
                   <div className="w-[20%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
@@ -463,7 +400,7 @@ const AlimentadorPublicaciones = () => {
                       type="date"
                       name="date"
                       value={formData.date}
-                      onChange={handleChange}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       className="input-fecha"
                     />
                   </div>
@@ -473,7 +410,7 @@ const AlimentadorPublicaciones = () => {
                       type="text"
                       name="topic"
                       value={formData.topic}
-                      onChange={handleChange}
+                      onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
                       placeholder="Escribe el tema"
                       className="input-tema"
                     />
@@ -481,23 +418,23 @@ const AlimentadorPublicaciones = () => {
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
-                      <div className="main" onClick={toggleDropdownNuevo}>
-                        {categoriaPublicacionNueva || 'Selecciona la categoría'}
-                        <input type="checkbox" className="inp" checked={dropdownPublicacionNuevaAbierto} onChange={toggleDropdownNuevo} />
+                      <div className="main" onClick={toggleDropdown}>
+                        {selectedCategory || 'Selecciona la categoría'}
+                        <input type="checkbox" className="inp" checked={isDropdownOpen} onChange={toggleDropdown} />
                         <div className="bar">
                           <span className="top bar-list"></span>
                           <span className="middle bar-list"></span>
                           <span className="bottom bar-list"></span>
                         </div>
 
-                        {dropdownPublicacionNuevaAbierto && (
+                        {isDropdownOpen && (
                           <div className="menu-container">
                             <div className="menu-scroll">
                               {categories.map((categoria, index) => (
                                 <div
                                   key={index}
                                   className="menu-list"
-                                  onClick={() => seleccionarCategoriaNueva(categoria)}
+                                  onClick={() => selectCategory(categoria)}
                                 >
                                   {categoria}
                                 </div>
@@ -518,7 +455,7 @@ const AlimentadorPublicaciones = () => {
                     <textarea
                       name="description"
                       value={formData.description || ""}
-                      onChange={handleChange}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Describe el contenido..."
                       className="input-descripcion w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
                     />
@@ -596,6 +533,8 @@ const AlimentadorPublicaciones = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* File */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -643,7 +582,7 @@ const AlimentadorPublicaciones = () => {
             </div>
 
             <div className="px-4 py-3 flex justify-end gap-2">
-              <button className='cancelar' onClick={closeModal}>
+              <button className='cancelar' onClick={closePublicModal}>
                 Cancelar
               </button>
               <button className='guardar' onClick={handleSubmit}>
@@ -654,16 +593,18 @@ const AlimentadorPublicaciones = () => {
         </div>
       )}
 
-      {/* Modal de Editar Publicación */}
-      {isEditModalOpen && (
+      {/* Modal de Artículo Privado */}
+      {isPrivateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-editar rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
+          <div className="modal-privados rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden bg-baseblanco">
             <div className="px-4 py-3 flex justify-center items-center">
-              <h2 className="text-3xl text-baseazul font-semibold text-gray-800">Editar Publicación</h2>
+              <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
+                Nuevo Artículo Privado
+              </h2>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
-              <form onSubmit={handleEditSubmit} className="space-y-4">
+              <form className="space-y-4">
                 <div className="flex gap-3">
                   <div className="w-[20%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
@@ -671,8 +612,8 @@ const AlimentadorPublicaciones = () => {
                       type="date"
                       name="date"
                       value={formData.date}
-                      onChange={handleChange}
-                      className="editar-fecha"
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      className="input-fecha"
                     />
                   </div>
                   <div className="w-[50%]">
@@ -681,22 +622,17 @@ const AlimentadorPublicaciones = () => {
                       type="text"
                       name="topic"
                       value={formData.topic}
-                      onChange={handleChange}
+                      onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
                       placeholder="Escribe el tema"
-                      className="editar-tema"
+                      className="input-tema"
                     />
                   </div>
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
-                      <div className="main" onClick={toggleDropdownEditar}>
+                      <div className="main" onClick={toggleDropdown}>
                         {selectedCategory || 'Selecciona la categoría'}
-                        <input
-                          type="checkbox"
-                          className="inp"
-                          checked={isDropdownOpen}
-                          onChange={toggleDropdownEditar}
-                        />
+                        <input type="checkbox" className="inp" checked={isDropdownOpen} onChange={toggleDropdown} />
                         <div className="bar">
                           <span className="top bar-list"></span>
                           <span className="middle bar-list"></span>
@@ -705,27 +641,17 @@ const AlimentadorPublicaciones = () => {
 
                         {isDropdownOpen && (
                           <div className="menu-container">
-                            {isLoading ? (
-                              <div className="p-2 text-center">Cargando...</div>
-                            ) : error ? (
-                              <div className="p-2 text-center text-red-500">{error}</div>
-                            ) : (
-                              <div className="menu-scroll">
-                                {categories.length > 0 ? (
-                                  categories.map((categoria, index) => (
-                                    <div
-                                      key={index}
-                                      className="menu-list"
-                                      onClick={() => selectCategory(categoria)}
-                                    >
-                                      {categoria}
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div className="p-2 text-center">No hay categorías disponibles</div>
-                                )}
-                              </div>
-                            )}
+                            <div className="menu-scroll">
+                              {categories.map((categoria, index) => (
+                                <div
+                                  key={index}
+                                  className="menu-list"
+                                  onClick={() => selectCategory(categoria)}
+                                >
+                                  {categoria}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -741,7 +667,7 @@ const AlimentadorPublicaciones = () => {
                     <textarea
                       name="description"
                       value={formData.description || ""}
-                      onChange={handleChange}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Describe el contenido..."
                       className="input-descripcion w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
                     />
@@ -804,7 +730,7 @@ const AlimentadorPublicaciones = () => {
                     <div className="space-y-1">
                       {formData.urls.map((linkUrl, index) => (
                         <div key={index} className="flex items-center justify-between py-1 px-3 bg-gray-50 rounded text-sm">
-                          <a href={linkUrl} target="blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
+                          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
                             {linkUrl}
                           </a>
                           <button
@@ -819,34 +745,58 @@ const AlimentadorPublicaciones = () => {
                     </div>
                   </div>
                 </div>
+                {/* File */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
-                    <div className="files-editar pl-4">
-                      {formData.files.map((file, index) => (
-                        <div key={index} className="item-editar">
-                          <GrDocumentUpdate className="icon-documento text-xl" />
-                          <span className="name-documento">{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFile(index)}
-                            className="eliminar"
-                            aria-label="Eliminar archivo"
-                          >
-                            ×
-                          </button>
+                    <div className="container">
+                      <div className="folder">
+                        <div className="front-side">
+                          <div className="tip" />
+                          <div className="cover" />
                         </div>
-                      ))}
+                        <div className="back-side cover" />
+                      </div>
+                      <label className="custom-file-upload">
+                        <input
+                          className="title"
+                          type="file"
+                          onChange={handleFileChange}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          disabled={formData.files.length >= 2}
+                        />
+                        Seleccionar Archivos
+                      </label>
                     </div>
+                    <div className='documento'>
+                      <p>PDF/WORD/EXCEL</p>
+                      <p>Menos de 5MB</p>
+                    </div>
+                  </div>
+                  <div className="files-container pl-4">
+                    {formData.files.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <GrDocumentUpdate className="file-icon text-xl" />
+                        <span className="file-name">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveFile(index)}
+                          className="file-remove"
+                          aria-label="Eliminar archivo"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </form>
             </div>
 
             <div className="px-4 py-3 flex justify-end gap-2">
-              <button className='cancelar-editar' onClick={closeEditModal}>
+              <button className='cancelar' onClick={closePrivateModal}>
                 Cancelar
               </button>
-              <button className='guardar-editar' onClick={handleEditSubmit}>
+              <button className='guardar' onClick={handleSubmit}>
                 Guardar
               </button>
             </div>
@@ -854,8 +804,6 @@ const AlimentadorPublicaciones = () => {
         </div>
       )}
     </div>
-
-
   );
 }
 
