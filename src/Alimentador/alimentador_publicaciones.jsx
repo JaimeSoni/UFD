@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import '../StylesAlimentador/alimentador_publicaciones.css';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -219,6 +219,23 @@ const AlimentadorPublicaciones = () => {
     closeModal();
   };
 
+  // Añade esta referencia para el dropdown
+  const dropdownRef = useRef(null);
+  // Funcion para cerrar el modal al darle clic afuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && isDropdownVisible) {
+        setIsDropdownVisible(false);
+      }
+    };
+    if (isDropdownVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownVisible]);
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
@@ -267,13 +284,12 @@ const AlimentadorPublicaciones = () => {
               <span />
             </button>
             {isDropdownVisible && (
-              <div className="dropdown-options">
+              <div className="dropdown-options" ref={dropdownRef}>
                 <button className='bg-basenaranja' onClick={() => handleOptionSelect('publico')}>Art. Público</button>
                 <button className='bg-basenaranja' onClick={() => handleOptionSelect('privado')}>Art. Privado</button>
               </div>
             )}
           </div>
-
           {/* Filtro de búsqueda */}
           <div className='buscador w-[100%] h-[10%] flex items-center justify-center'>
             <div className="search-panels-filtro">
