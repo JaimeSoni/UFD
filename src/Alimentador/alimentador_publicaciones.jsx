@@ -22,6 +22,9 @@ import { PiSmileySad } from "react-icons/pi";
 import { CgAdd } from "react-icons/cg";
 import { GrDocumentUpdate } from "react-icons/gr";
 
+//Alerta 
+import Swal from 'sweetalert2';
+
 // Simulación de datos de publicaciones con `id` único
 const publicaciones = [
   { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "hola", documentos: "", urls: "" },
@@ -292,8 +295,13 @@ const AlimentadorPublicaciones = () => {
       const result = await response.json();
 
       if (result.status === 'success') {
-        // Show success message
-        alert('Artículo público guardado exitosamente');
+        Swal.fire({
+          title: "Publicación Guardada Correctamente",
+          icon: "success",
+          color: '#000',
+          confirmButtonColor: "#ED6B06",
+          draggable: true
+        });
 
         // Reset form and close modal
         setFormData({
@@ -490,17 +498,18 @@ const AlimentadorPublicaciones = () => {
             <div className="flex-1 overflow-y-auto p-4">
               <form className="space-y-4">
                 <div className='flex gap-3'>
-                  <div className='w-[100%]'>
+                  {/* Fecha */}
+                  <div className='w-[20%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
-                      type="text"
-                      value={formData.date} // Mostrar la fecha automáticamente
-                      readOnly // Hacer que el campo sea de solo lectura
+                      type="text" 
+                      value={formData.date} 
+                      readOnly 
                       className="input-fecha"
                     />
                   </div>
-                </div>
-                <div className="flex gap-3">
+
+                  {/* Tema */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
                     <input
@@ -512,6 +521,8 @@ const AlimentadorPublicaciones = () => {
                       className="input-tema"
                     />
                   </div>
+
+                  {/* Categoria */}
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
@@ -543,6 +554,9 @@ const AlimentadorPublicaciones = () => {
                     </div>
                   </div>
                 </div>
+
+
+
 
                 <div className='flex gap-3'>
                   <div className='w-[100%]'>
@@ -758,7 +772,7 @@ const AlimentadorPublicaciones = () => {
                 </div>
 
                 <div className='flex gap-3'>
-                <div className='w-[100%]'>
+                  <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
                       Descripción
                     </label>

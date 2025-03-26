@@ -515,6 +515,8 @@ body{
     width: 100%;
     -webkit-appearance: none;
     appearance: none; 
+    justify-items: center;
+    
   }
   
   /*Tema*/
