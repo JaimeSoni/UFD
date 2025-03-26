@@ -47,7 +47,7 @@ const AlimentadorPublicaciones = () => {
 
   // Estados para el Modal
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().slice(0, 10), // Asegúrate de que esté en formato YYYY-MM-DD
+    date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
     category: '',
     topic: '',
     description: '',
@@ -136,7 +136,7 @@ const AlimentadorPublicaciones = () => {
   // Funciones para Modal
   const openPublicModal = () => {
     setFormData({
-      date: formatDate(),
+      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
       category: '',
       topic: '',
       description: '',
@@ -153,7 +153,7 @@ const AlimentadorPublicaciones = () => {
 
   const openPrivateModal = () => {
     setFormData({
-      date: new Date().toISOString().slice(0, 10),
+      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
       category: '',
       topic: '',
       description: '',
@@ -163,14 +163,6 @@ const AlimentadorPublicaciones = () => {
       targetAudience: '' // Campo específico para artículos privados
     });
     setIsPrivateModalOpen(true);
-  };
-
-  const formatDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   };
 
   const closePrivateModal = () => {
@@ -262,16 +254,15 @@ const AlimentadorPublicaciones = () => {
   // Funciones para guardar articulos publicos
 
   const handleSubmit = async () => {
-    console.log('Fecha a enviar:', formData.date);
     // Validate required fields
-    if (!formData.date || !formData.topic || !selectedCategory) {
+    if (!formData.topic || !selectedCategory) {
       alert('Por favor, complete los campos obligatorios');
       return;
     }
 
     // Prepare form data for submission
     const submissionData = {
-      date: formData.date, // Asegúrate de que esto esté en formato YYYY-MM-DD
+      date: formData.date, // La fecha se establece automáticamente
       topic: formData.topic,
       category: selectedCategory,
       description: formData.description || null,
@@ -306,7 +297,7 @@ const AlimentadorPublicaciones = () => {
 
         // Reset form and close modal
         setFormData({
-          date: '',
+          date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
           topic: '',
           description: '',
           keywords: [],
@@ -419,7 +410,7 @@ const AlimentadorPublicaciones = () => {
                   <div className="text-8xl mb-4 pt-60">
                     <TbCategoryPlus className='text-baseblanco' />
                   </div>
-                  <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener tu búsqueda.</p>
+                  <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener su búsqueda.</p>
                 </div>
               </div>
             ) : filtroResultados.length === 0 ? (
@@ -498,17 +489,18 @@ const AlimentadorPublicaciones = () => {
 
             <div className="flex-1 overflow-y-auto p-4">
               <form className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="w-[20%]">
+                <div className='flex gap-3'>
+                  <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      type="text"
+                      value={formData.date} // Mostrar la fecha automáticamente
+                      readOnly // Hacer que el campo sea de solo lectura
                       className="input-fecha"
                     />
                   </div>
+                </div>
+                <div className="flex gap-3">
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
                     <input
@@ -710,18 +702,18 @@ const AlimentadorPublicaciones = () => {
 
             <div className="flex-1 overflow-y-auto p-4">
               <form className="space-y-4">
-                <div className="flex gap-3">
-                  {/* Fecha */}
-                  <div className="w-[20%]">
+                <div className='flex gap-3'>
+                  <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
-                      type="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      type="text"
+                      value={formData.date} // Mostrar la fecha automáticamente
+                      readOnly // Hacer que el campo sea de solo lectura
                       className="input-fecha"
                     />
                   </div>
+                </div>
+                <div className="flex gap-3">
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
                     <input
@@ -766,7 +758,7 @@ const AlimentadorPublicaciones = () => {
                 </div>
 
                 <div className='flex gap-3'>
-                  <div className='w-[100%]'>
+                <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
                       Descripción
                     </label>
