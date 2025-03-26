@@ -47,7 +47,7 @@ const AlimentadorPublicaciones = () => {
 
   // Estados para el Modal
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().slice(0, 10),
+    date: new Date().toISOString().slice(0, 10), // Asegúrate de que esté en formato YYYY-MM-DD
     category: '',
     topic: '',
     description: '',
@@ -136,7 +136,7 @@ const AlimentadorPublicaciones = () => {
   // Funciones para Modal
   const openPublicModal = () => {
     setFormData({
-      date: new Date().toISOString().slice(0, 10),
+      date: formatDate(),
       category: '',
       topic: '',
       description: '',
@@ -163,6 +163,14 @@ const AlimentadorPublicaciones = () => {
       targetAudience: '' // Campo específico para artículos privados
     });
     setIsPrivateModalOpen(true);
+  };
+
+  const formatDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const closePrivateModal = () => {
@@ -196,6 +204,27 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
+  const handleRemoveKeyword = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      keywords: formData.keywords.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleRemoveUrl = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      urls: formData.urls.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleRemoveFile = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      files: formData.files.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
     const acceptedFileTypes = [
@@ -211,12 +240,6 @@ const AlimentadorPublicaciones = () => {
     );
 
     setFormData({ ...formData, files: [...formData.files, ...validFiles] });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    closeModal();
   };
 
   // Añade esta referencia para el dropdown
@@ -235,6 +258,72 @@ const AlimentadorPublicaciones = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isDropdownVisible]);
+
+  // Funciones para guardar articulos publicos
+
+  const handleSubmit = async () => {
+    console.log('Fecha a enviar:', formData.date);
+    // Validate required fields
+    if (!formData.date || !formData.topic || !selectedCategory) {
+      alert('Por favor, complete los campos obligatorios');
+      return;
+    }
+
+    // Prepare form data for submission
+    const submissionData = {
+      date: formData.date, // Asegúrate de que esto esté en formato YYYY-MM-DD
+      topic: formData.topic,
+      category: selectedCategory,
+      description: formData.description || null,
+      keywords: formData.keywords,
+      urls: formData.urls
+    };
+
+    // Create FormData for file upload
+    const formDataUpload = new FormData();
+    Object.keys(submissionData).forEach(key => {
+      if (submissionData[key] !== null) {
+        formDataUpload.append(key, JSON.stringify(submissionData[key]));
+      }
+    });
+
+    // Append files
+    formData.files.forEach((file, index) => {
+      formDataUpload.append(`files[]`, file);
+    });
+
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/articulos_publicos.php', {
+        method: 'POST',
+        body: formDataUpload
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        // Show success message
+        alert('Artículo público guardado exitosamente');
+
+        // Reset form and close modal
+        setFormData({
+          date: '',
+          topic: '',
+          description: '',
+          keywords: [],
+          urls: [],
+          files: []
+        });
+        setSelectedCategory('');
+        closePublicModal();
+      } else {
+        // Show error message
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Ocurrió un error al guardar el artículo');
+    }
+  };
 
   return (
     <div>
@@ -622,6 +711,7 @@ const AlimentadorPublicaciones = () => {
             <div className="flex-1 overflow-y-auto p-4">
               <form className="space-y-4">
                 <div className="flex gap-3">
+                  {/* Fecha */}
                   <div className="w-[20%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
@@ -761,6 +851,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
                   </div>
                 </div>
+
                 {/* File */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
