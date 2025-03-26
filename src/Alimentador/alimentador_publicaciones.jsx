@@ -137,6 +137,8 @@ const AlimentadorPublicaciones = () => {
   };
 
   // Funciones para Modal
+
+  // Articulos publicos
   const openPublicModal = () => {
     setFormData({
       date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
@@ -153,6 +155,8 @@ const AlimentadorPublicaciones = () => {
   const closePublicModal = () => {
     setIsPublicModalOpen(false);
   };
+
+  // Articulos Privados
 
   const openPrivateModal = () => {
     setFormData({
@@ -256,73 +260,79 @@ const AlimentadorPublicaciones = () => {
 
   // Funciones para guardar articulos publicos
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isPublic) => {
     // Validate required fields
-    if (!formData.topic || !selectedCategory) {
-      alert('Por favor, complete los campos obligatorios');
-      return;
+    if (!formData.topic || !selectedCategory || !formData.description) {
+        alert('Por favor, complete los campos obligatorios');
+        return;
     }
 
     // Prepare form data for submission
     const submissionData = {
-      date: formData.date, // La fecha se establece automáticamente
-      topic: formData.topic,
-      category: selectedCategory,
-      description: formData.description || null,
-      keywords: formData.keywords,
-      urls: formData.urls
+        date: formData.date, // La fecha se establece automáticamente
+        topic: formData.topic,
+        category: selectedCategory,
+        description: formData.description || null,
+        keywords: formData.keywords,
+        urls: formData.urls
     };
 
     // Create FormData for file upload
     const formDataUpload = new FormData();
     Object.keys(submissionData).forEach(key => {
-      if (submissionData[key] !== null) {
-        formDataUpload.append(key, JSON.stringify(submissionData[key]));
-      }
+        if (submissionData[key] !== null) {
+            formDataUpload.append(key, JSON.stringify(submissionData[key]));
+        }
     });
 
     // Append files
     formData.files.forEach((file, index) => {
-      formDataUpload.append(`files[]`, file);
+        formDataUpload.append(`files[]`, file);
     });
 
+    // Determinar la URL según el tipo de artículo
+    const url = isPublic 
+        ? 'http://localhost/UFD/src/BackEnd/articulos_publicos.php' 
+        : 'http://localhost/UFD/src/BackEnd/articulos_privados.php';
+
+    // Guardar artículo
     try {
-      const response = await fetch('http://localhost/UFD/src/BackEnd/articulos_publicos.php', {
-        method: 'POST',
-        body: formDataUpload
-      });
-
-      const result = await response.json();
-
-      if (result.status === 'success') {
-        Swal.fire({
-          title: "Publicación Guardada Correctamente",
-          icon: "success",
-          color: '#000',
-          confirmButtonColor: "#ED6B06",
-          draggable: true
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formDataUpload
         });
 
-        // Reset form and close modal
-        setFormData({
-          date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
-          topic: '',
-          description: '',
-          keywords: [],
-          urls: [],
-          files: []
-        });
-        setSelectedCategory('');
-        closePublicModal();
-      } else {
-        // Show error message
-        alert(`Error: ${result.message}`);
-      }
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            Swal.fire({
+                title: "Publicación Guardada Correctamente",
+                icon: "success",
+                color: '#000',
+                confirmButtonColor: "#ED6B06",
+                draggable: true
+            });
+
+            // Reset form and close modal
+            setFormData({
+                date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
+                topic: '',
+                description: '',
+                keywords: [],
+                urls: [],
+                files: []
+            });
+            setSelectedCategory('');
+            closePublicModal(); // O closePrivateModal() dependiendo del caso
+        } else {
+            // Show error message
+            alert(`Error: ${result.message}`);
+        }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Ocurrió un error al guardar el artículo');
+        console.error('Error:', error);
+        alert('Ocurrió un error al guardar el artículo');
     }
-  };
+};
 
   return (
     <div>
@@ -696,7 +706,7 @@ const AlimentadorPublicaciones = () => {
               <button className='cancelar' onClick={closePublicModal}>
                 Cancelar
               </button>
-              <button className='guardar' onClick={handleSubmit}>
+              <button className='guardar' onClick={() => handleSubmit(true)}>
                 Guardar
               </button>
             </div>
@@ -909,7 +919,7 @@ const AlimentadorPublicaciones = () => {
               <button className='cancelar' onClick={closePrivateModal}>
                 Cancelar
               </button>
-              <button className='guardar' onClick={handleSubmit}>
+              <button className='guardar' onClick={() => handleSubmit(false)}>
                 Guardar
               </button>
             </div>
