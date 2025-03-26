@@ -508,6 +508,7 @@ const AlimentadorPublicaciones = () => {
             <div className="flex-1 overflow-y-auto p-4">
               <form className="space-y-4">
                 <div className='flex gap-3'>
+
                   {/* Fecha */}
                   <div className='w-[20%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
@@ -565,9 +566,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-
-
-
+                {/* Descripcion */}
                 <div className='flex gap-3'>
                   <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
@@ -584,6 +583,8 @@ const AlimentadorPublicaciones = () => {
                 </div>
 
                 <div className="flex gap-3">
+
+                  {/* Palabras claves */}
                   <div className='w-[50%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
                     <div className="flex gap-2 mb-2">
@@ -617,6 +618,8 @@ const AlimentadorPublicaciones = () => {
                       ))}
                     </div>
                   </div>
+
+                  {/* URL */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">URLs</label>
                     <div className="flex gap-2 mb-2">
@@ -655,7 +658,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* File */}
+                {/* Docuementos */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -702,6 +705,7 @@ const AlimentadorPublicaciones = () => {
               </form>
             </div>
 
+            {/* Botones */}
             <div className="px-4 py-3 flex justify-end gap-2">
               <button className='cancelar' onClick={closePublicModal}>
                 Cancelar
@@ -727,7 +731,9 @@ const AlimentadorPublicaciones = () => {
             <div className="flex-1 overflow-y-auto p-4">
               <form className="space-y-4">
                 <div className='flex gap-3'>
-                  <div className='w-[100%]'>
+
+                  {/* Fecha */}
+                  <div className='w-[20%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
                       type="text"
@@ -736,8 +742,8 @@ const AlimentadorPublicaciones = () => {
                       className="input-fecha"
                     />
                   </div>
-                </div>
-                <div className="flex gap-3">
+
+                  {/* Tema */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
                     <input
@@ -749,6 +755,8 @@ const AlimentadorPublicaciones = () => {
                       className="input-tema"
                     />
                   </div>
+
+                  {/* Categoria */}
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
@@ -781,6 +789,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
+                {/* Descripción */}
                 <div className='flex gap-3'>
                   <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
@@ -796,6 +805,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
+                {/* Palabras claves */}
                 <div className="flex gap-3">
                   <div className='w-[50%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
@@ -830,6 +840,8 @@ const AlimentadorPublicaciones = () => {
                       ))}
                     </div>
                   </div>
+
+                  {/* URL */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">URLs</label>
                     <div className="flex gap-2 mb-2">
@@ -868,7 +880,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* File */}
+                {/* Docuementos */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -915,6 +927,7 @@ const AlimentadorPublicaciones = () => {
               </form>
             </div>
 
+            {/* Botones */}
             <div className="px-4 py-3 flex justify-end gap-2">
               <button className='cancelar' onClick={closePrivateModal}>
                 Cancelar
