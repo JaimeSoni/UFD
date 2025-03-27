@@ -683,7 +683,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
                     <div className='documento'>
                       <p>PDF/WORD/EXCEL</p>
-                      <p>Menos de 5MB</p>
+                      <p>Menos de 5MB y solo 2 Archivos</p>
                     </div>
                   </div>
                   <div className="files-container pl-4">
@@ -881,7 +881,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Docuementos */}
+                {/* Documentos */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -905,7 +905,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
                     <div className='documento'>
                       <p>PDF/WORD/EXCEL</p>
-                      <p>Menos de 5MB</p>
+                      <p>Menos de 5MB y solo 2 Archivos</p> 
                     </div>
                   </div>
                   <div className="files-container pl-4">
