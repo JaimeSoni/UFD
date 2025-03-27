@@ -25,13 +25,6 @@ import { GrDocumentUpdate } from "react-icons/gr";
 //Alerta 
 import Swal from 'sweetalert2';
 
-// Simulación de datos de publicaciones con `id` único
-const publicaciones = [
-  { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "hola", documentos: "", urls: "" },
-  { id: "pub2", fecha: "22/02/2025", categoria: "Becas", tema: "Becas disponibles para el semestre siguiente." },
-  { id: "pub3", fecha: "23/02/2025", categoria: "Cursos", tema: "Cursos extracurriculares para mejorar habilidades." },
-];
-
 const AlimentadorPublicaciones = () => {
   const navigate = useNavigate();
 
@@ -71,6 +64,9 @@ const AlimentadorPublicaciones = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Estado para las publicaciones
+  const [publicaciones, setPublicaciones] = useState([]);
+
   // Función para cargar las categorías desde el servidor
   const fetchCategories = async () => {
     try {
@@ -97,9 +93,34 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
-  // Cargar categorías cuando el componente se monta
+  // Función para cargar las publicaciones desde el servidor
+  const fetchPublicaciones = async () => {
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php'); // Cambia la URL según tu API
+      if (!response.ok) {
+        throw new Error('No se pudieron cargar las publicaciones');
+      }
+      const data = await response.json();
+      if (data.success) {
+        // Asumiendo que data.publicaciones es un array de publicaciones
+        const publicacionesConIdentificador = data.publicaciones.map(pub => ({
+          ...pub,
+          id: pub.id, // Asegúrate de que tu API devuelva un id único
+          tipo: pub.tipo // Asegúrate de que tu API devuelva un campo que indique si es pública o privada
+        }));
+        setPublicaciones(publicacionesConIdentificador);
+      } else {
+        throw new Error(data.message || 'Error al cargar las publicaciones');
+      }
+    } catch (err) {
+      console.error('Error al cargar publicaciones:', err);
+    }
+  };
+
+  // Llamar a las funciones cuando el componente se monta
   useEffect(() => {
-    fetchCategories();
+    fetchPublicaciones();
+    fetchCategories(); // Asegúrate de que las categorías también se carguen
   }, []);
 
   const toggleDropdown = () => {
@@ -121,7 +142,7 @@ const AlimentadorPublicaciones = () => {
         (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda)
       );
     })
-    : [];
+    : publicaciones; // Cambiar para mostrar todas las publicaciones si no hay filtro
 
   // Funciones para artículos
   const toggleExpand = (id) => {
@@ -135,8 +156,6 @@ const AlimentadorPublicaciones = () => {
   const clearInput = () => {
     setfiltroPublicacion('');
   };
-
-
 
   // Articulos publicos
   const openPublicModal = () => {
@@ -157,7 +176,6 @@ const AlimentadorPublicaciones = () => {
   };
 
   // Articulos Privados
-
   const openPrivateModal = () => {
     setFormData({
       date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
@@ -259,81 +277,80 @@ const AlimentadorPublicaciones = () => {
   }, [isDropdownVisible]);
 
   // Funciones para guardar articulos publicos
-
   const handleSubmit = async (isPublic) => {
     // Validate required fields
     if (!formData.topic || !selectedCategory || !formData.description) {
-        alert('Por favor, complete los campos obligatorios');
-        return;
+      alert('Por favor, complete los campos obligatorios');
+      return;
     }
 
     // Prepare form data for submission
     const submissionData = {
-        date: formData.date, // La fecha se establece automáticamente
-        topic: formData.topic,
-        category: selectedCategory,
-        description: formData.description || null,
-        keywords: formData.keywords,
-        urls: formData.urls
+      date: formData.date, // La fecha se establece automáticamente
+      topic: formData.topic,
+      category: selectedCategory,
+      description: formData.description || null,
+      keywords: formData.keywords,
+      urls: formData.urls
     };
 
     // Create FormData for file upload
     const formDataUpload = new FormData();
     Object.keys(submissionData).forEach(key => {
-        if (submissionData[key] !== null) {
-            formDataUpload.append(key, JSON.stringify(submissionData[key]));
-        }
+      if (submissionData[key] !== null) {
+        formDataUpload.append(key, JSON.stringify(submissionData[key]));
+      }
     });
 
     // Append files
-    formData.files.forEach((file, index) => {
-        formDataUpload.append(`files[]`, file);
+    formData.files.forEach((file) => {
+      formDataUpload.append(`files[]`, file);
     });
 
     // Determinar la URL según el tipo de artículo
-    const url = isPublic 
-        ? 'http://localhost/UFD/src/BackEnd/articulos_publicos.php' 
-        : 'http://localhost/UFD/src/BackEnd/articulos_privados.php';
+    const url = isPublic
+      ? 'http://localhost/UFD/src/BackEnd/articulos_publicos.php'
+      : 'http://localhost/UFD/src/BackEnd/articulos_privados.php';
 
     // Guardar artículo
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            body: formDataUpload
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formDataUpload
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        Swal.fire({
+          title: "Publicación Guardada Correctamente",
+          icon: "success",
+          color: '#000',
+          confirmButtonColor: "#ED6B06",
+          draggable: true
         });
 
-        const result = await response.json();
-
-        if (result.status === 'success') {
-            Swal.fire({
-                title: "Publicación Guardada Correctamente",
-                icon: "success",
-                color: '#000',
-                confirmButtonColor: "#ED6B06",
-                draggable: true
-            });
-
-            // Reset form and close modal
-            setFormData({
-                date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
-                topic: '',
-                description: '',
-                keywords: [],
-                urls: [],
-                files: []
-            });
-            setSelectedCategory('');
-            closePublicModal();
-            closePrivateModal();
-        } else {
-            // Show error message
-            alert(`Error: ${result.message}`);
-        }
+        // Reset form and close modal
+        setFormData({
+          date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
+          topic: '',
+          description: '',
+          keywords: [],
+          urls: [],
+          files: []
+        });
+        setSelectedCategory('');
+        closePublicModal();
+        closePrivateModal();
+      } else {
+        // Show error message
+        alert(`Error: ${result.message}`);
+      }
     } catch (error) {
-        console.error('Error:', error);
-        alert('Ocurrió un error al guardar el artículo');
+      console.error('Error:', error);
+      alert('Ocurrió un error al guardar el artículo');
     }
-};
+  };
 
   return (
     <div>
@@ -370,7 +387,6 @@ const AlimentadorPublicaciones = () => {
               <RiLogoutCircleLine className="action-icon" color="#353866" />
               <span className="action-content" data-content="Salir" />
             </Link>
-
           </div>
         </div>
 
@@ -432,33 +448,34 @@ const AlimentadorPublicaciones = () => {
                   <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener su búsqueda.</p>
                 </div>
               </div>
-            ) : filtroResultados.length === 0 ? (
+            ) : filtroResultados.length === 0 ? ( // Aquí se corrigió la sintaxis
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <div className="text-8xl mb-4">
                   <PiSmileySad className='text-baseblanco' />
                 </div>
-                <p className="text-xl font-bold text-baseblanco">No se encontraron los resultados "{filtroPublicacion}".</p>
+                <p className="text-xl font-bold text-baseblanco">
+                  No se encontraron los resultados "{filtroPublicacion}".
+                </p>
               </div>
             ) : (
               filtroResultados.map((publicacion) => (
-                <div key={publicacion.id} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
-
+                <div key={publicacion.id_publico} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id_publico ? "expanded" : ""}`}>
                   {/* Contenedor principal */}
                   <div className="flex h-[50px] items-center justify-center">
                     <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
-                      <h1>{publicacion.fecha}</h1>
+                      <h1>{publicacion.fecha_publicacion}</h1>
                     </div>
 
                     <div className='categoria-articulo w-[15%] flex items-center justify-center text-xl'>
-                      <h1 className='bg-basenaranja p-2 rounded-lg text-baseblanco'>{publicacion.categoria}</h1>
+                      <h1 className='bg-basenaranja p-2 rounded-lg text-baseblanco'>{publicacion.categoria_publica}</h1>
                     </div>
 
                     <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
-                      <h1>{publicacion.tema}</h1>
+                      <h1>{publicacion.tema_publico} ({publicacion.tipo})</h1> {/* Mostrar el tipo de publicación */}
                     </div>
 
                     <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
-                      <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id)}>
+                      <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id_publico)}>
                         <BiChevronDownCircle className='text-basenaranja' />
                       </button>
                     </div>
@@ -471,10 +488,10 @@ const AlimentadorPublicaciones = () => {
                   </div>
 
                   <div
-                    className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"}`}
+                    className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id_publico ? "max-h-[300px]" : "max-h-0"}`}
                   >
                     <div className="descripcion p-2 h-[120px]">
-                      <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion || 'Sin descripción'}</span></p>
+                      <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion || 'Sin descripción'}</span></p>
                     </div>
                     <div className="palabras-clave p-2 h-[100px]">
                       <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabrasClave || 'Sin palabras clave'}</span></p>
@@ -499,7 +516,7 @@ const AlimentadorPublicaciones = () => {
       {/* Modal de Artículo Público */}
       {isPublicModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
+          <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex           flex-col overflow-hidden">
             <div className="px-4 py-3 flex justify-center items-center">
               <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
                 Nuevo Artículo Público
@@ -514,9 +531,9 @@ const AlimentadorPublicaciones = () => {
                   <div className='w-[20%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
-                      type="text" 
-                      value={formData.date} 
-                      readOnly 
+                      type="text"
+                      value={formData.date}
+                      readOnly
                       className="input-fecha"
                     />
                   </div>
@@ -567,7 +584,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Descripcion */}
+                {/* Descripción */}
                 <div className='flex gap-3'>
                   <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
@@ -659,7 +676,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Docuementos */}
+                {/* Documentos */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -806,8 +823,9 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Palabras claves */}
                 <div className="flex gap-3">
+
+                  {/* Palabras claves */}
                   <div className='w-[50%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
                     <div className="flex gap-2 mb-2">
@@ -905,7 +923,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
                     <div className='documento'>
                       <p>PDF/WORD/EXCEL</p>
-                      <p>Menos de 5MB y solo 2 Archivos</p> 
+                      <p>Menos de 5MB y solo 2 Archivos</p>
                     </div>
                   </div>
                   <div className="files-container pl-4">
