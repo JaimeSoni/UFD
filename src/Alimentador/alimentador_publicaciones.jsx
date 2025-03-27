@@ -136,7 +136,7 @@ const AlimentadorPublicaciones = () => {
     setfiltroPublicacion('');
   };
 
-  // Funciones para Modal
+
 
   // Articulos publicos
   const openPublicModal = () => {
@@ -323,7 +323,8 @@ const AlimentadorPublicaciones = () => {
                 files: []
             });
             setSelectedCategory('');
-            closePublicModal(); // O closePrivateModal() dependiendo del caso
+            closePublicModal();
+            closePrivateModal();
         } else {
             // Show error message
             alert(`Error: ${result.message}`);
