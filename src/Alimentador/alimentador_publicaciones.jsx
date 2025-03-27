@@ -25,6 +25,19 @@ import { GrDocumentUpdate } from "react-icons/gr";
 //Alerta 
 import Swal from 'sweetalert2';
 
+const toggleDropdown = () => {
+  const dropdown = document.querySelector('.dropdown-content');
+  dropdown.classList.toggle('show');
+};
+
+const toggleDropdownVisibility = () => {
+  setIsDropdownVisible(!isDropdownVisible);
+};
+
+const toggleExpand = (id_publico) => {
+  setExpandedId(expandedId === id_publico ? null : id); 
+};
+
 const AlimentadorPublicaciones = () => {
   const navigate = useNavigate();
 
@@ -39,7 +52,7 @@ const AlimentadorPublicaciones = () => {
   const [isPrivateModalOpen, setIsPrivateModalOpen] = useState(false);
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
   const [currentPublication, setCurrentPublication] = useState(null);
-  const [isPublic, setIsPublic] = useState(true);
+  const [tipoBusqueda, setTipoBusqueda] = useState('publico'); // 'publico' o 'privado'
 
   // Estados para el Modal
   const [formData, setFormData] = useState({
@@ -66,6 +79,7 @@ const AlimentadorPublicaciones = () => {
 
   // Estado para las publicaciones
   const [publicaciones, setPublicaciones] = useState([]);
+  const [publicacionesPrivadas, setPublicacionesPrivadas] = useState([]);
 
   // Función para cargar las categorías desde el servidor
   const fetchCategories = async () => {
@@ -93,20 +107,19 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
-  // Función para cargar las publicaciones desde el servidor
+  // Función para cargar las publicaciones públicas desde el servidor
   const fetchPublicaciones = async () => {
     try {
-      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php'); // Cambia la URL según tu API
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php');
       if (!response.ok) {
         throw new Error('No se pudieron cargar las publicaciones');
       }
       const data = await response.json();
       if (data.success) {
-        // Asumiendo que data.publicaciones es un array de publicaciones
         const publicacionesConIdentificador = data.publicaciones.map(pub => ({
           ...pub,
-          id: pub.id, // Asegúrate de que tu API devuelva un id único
-          tipo: pub.tipo // Asegúrate de que tu API devuelva un campo que indique si es pública o privada
+          id_publico:
+            pub.id_publico, // Asegúrate de que tu API devuelva un id único
         }));
         setPublicaciones(publicacionesConIdentificador);
       } else {
@@ -117,24 +130,38 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
+  // Función para cargar las publicaciones privadas desde el servidor
+  const fetchPublicacionesPrivadas = async () => {
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones_privadas.php');
+      if (!response.ok) {
+        throw new Error('No se pudieron cargar las publicaciones privadas');
+      }
+      const data = await response.json();
+      if (data.success) {
+        const publicacionesPrivadasConIdentificador = data.publicaciones.map(pub => ({
+          ...pub,
+          id_privado: pub.id_privado, // Asegúrate de que tu API devuelva un id único
+        }));
+        setPublicacionesPrivadas(publicacionesPrivadasConIdentificador);
+      } else {
+        throw new Error(data.message || 'Error al cargar las publicaciones privadas');
+      }
+    } catch (err) {
+      console.error('Error al cargar publicaciones privadas:', err);
+    }
+  };
+
   // Llamar a las funciones cuando el componente se monta
   useEffect(() => {
     fetchPublicaciones();
+    fetchPublicacionesPrivadas(); // Cargar publicaciones privadas
     fetchCategories(); // Asegúrate de que las categorías también se carguen
   }, []);
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const selectCategory = (categoria) => {
-    setSelectedCategory(categoria);
-    setIsDropdownOpen(false);
-  };
-
   // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
   const filtroResultados = filtroPublicacion.trim()
-  ? publicaciones.filter(publicacion => {
+    ? (tipoBusqueda === 'publico' ? publicaciones : publicacionesPrivadas).filter(publicacion => {
       const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
       return (
         (publicacion.categoria_publica?.toLowerCase() || '').includes(terminoBusqueda) ||
@@ -144,12 +171,7 @@ const AlimentadorPublicaciones = () => {
         (publicacion.tema_privado?.toLowerCase() || '').includes(terminoBusqueda) // Campo para publicaciones privadas
       );
     })
-  : publicaciones;
-
-  // Funciones para artículos
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
-  };
+    : (tipoBusqueda === 'publico' ? publicaciones : publicacionesPrivadas); // Mostrar todas las publicaciones según el tipo seleccionado
 
   const handleInputChange = (e) => {
     setfiltroPublicacion(e.target.value);
@@ -159,199 +181,10 @@ const AlimentadorPublicaciones = () => {
     setfiltroPublicacion('');
   };
 
-  // Articulos publicos
-  const openPublicModal = () => {
-    setFormData({
-      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
-      category: '',
-      topic: '',
-      description: '',
-      keywords: [],
-      files: [],
-      urls: []
-    });
-    setIsPublicModalOpen(true);
-  };
-
-  const closePublicModal = () => {
-    setIsPublicModalOpen(false);
-  };
-
-  // Articulos Privados
-  const openPrivateModal = () => {
-    setFormData({
-      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
-      category: '',
-      topic: '',
-      description: '',
-      keywords: [],
-      files: [],
-      urls: [],
-      targetAudience: '' // Campo específico para artículos privados
-    });
-    setIsPrivateModalOpen(true);
-  };
-
-  const closePrivateModal = () => {
-    setIsPrivateModalOpen(false);
-  };
-
-  const handleOptionSelect = (option) => {
-    setIsDropdownVisible(false);
-    if (option === 'publico') {
-      openPublicModal();
-    } else {
-      openPrivateModal();
-    }
-  };
-
-  const toggleDropdownVisibility = () => {
-    setIsDropdownVisible(!isDropdownVisible);
-  };
-
-  const handleAddKeyword = () => {
-    if (keyword.trim()) {
-      setFormData({ ...formData, keywords: [...formData.keywords, keyword.trim()] });
-      setKeyword('');
-    }
-  };
-
-  const handleAddUrl = () => {
-    if (url.trim()) {
-      setFormData({ ...formData, urls: [...formData.urls, url.trim()] });
-      setUrl('');
-    }
-  };
-
-  const handleRemoveKeyword = (indexToRemove) => {
-    setFormData({
-      ...formData,
-      keywords: formData.keywords.filter((_, index) => index !== indexToRemove)
-    });
-  };
-
-  const handleRemoveUrl = (indexToRemove) => {
-    setFormData({
-      ...formData,
-      urls: formData.urls.filter((_, index) => index !== indexToRemove)
-    });
-  };
-
-  const handleRemoveFile = (indexToRemove) => {
-    setFormData({
-      ...formData,
-      files: formData.files.filter((_, index) => index !== indexToRemove)
-    });
-  };
-
-  const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files);
-    const acceptedFileTypes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel'
-    ];
-
-    const validFiles = newFiles.filter(file =>
-      acceptedFileTypes.includes(file.type) && file.size <= 5 * 1024 * 1024
-    );
-
-    setFormData({ ...formData, files: [...formData.files, ...validFiles] });
-  };
-
-  // Añade esta referencia para el dropdown
-  const dropdownRef = useRef(null);
-  // Funcion para cerrar el modal al darle clic afuera
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && isDropdownVisible) {
-        setIsDropdownVisible(false);
-      }
-    };
-    if (isDropdownVisible) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDropdownVisible]);
-
-  // Funciones para guardar articulos publicos
-  const handleSubmit = async (isPublic) => {
-    // Validate required fields
-    if (!formData.topic || !selectedCategory || !formData.description) {
-      alert('Por favor, complete los campos obligatorios');
-      return;
-    }
-
-    // Prepare form data for submission
-    const submissionData = {
-      date: formData.date, // La fecha se establece automáticamente
-      topic: formData.topic,
-      category: selectedCategory,
-      description: formData.description || null,
-      keywords: formData.keywords,
-      urls: formData.urls
-    };
-
-    // Create FormData for file upload
-    const formDataUpload = new FormData();
-    Object.keys(submissionData).forEach(key => {
-      if (submissionData[key] !== null) {
-        formDataUpload.append(key, JSON.stringify(submissionData[key]));
-      }
-    });
-
-    // Append files
-    formData.files.forEach((file) => {
-      formDataUpload.append(`files[]`, file);
-    });
-
-    // Determinar la URL según el tipo de artículo
-    const url = isPublic
-      ? 'http://localhost/UFD/src/BackEnd/articulos_publicos.php'
-      : 'http://localhost/UFD/src/BackEnd/articulos_privados.php';
-
-    // Guardar artículo
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        body: formDataUpload
-      });
-
-      const result = await response.json();
-
-      if (result.status === 'success') {
-        Swal.fire({
-          title: "Publicación Guardada Correctamente",
-          icon: "success",
-          color: '#000',
-          confirmButtonColor: "#ED6B06",
-          draggable: true
-        });
-
-        // Reset form and close modal
-        setFormData({
-          date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
-          topic: '',
-          description: '',
-          keywords: [],
-          urls: [],
-          files: []
-        });
-        setSelectedCategory('');
-        closePublicModal();
-        closePrivateModal();
-      } else {
-        // Show error message
-        alert(`Error: ${result.message}`);
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Ocurrió un error al guardar el artículo');
-    }
+  // Función para cambiar el tipo de búsqueda
+  const handleTipoBusquedaChange = (tipo) => {
+    setTipoBusqueda(tipo);
+    setfiltroPublicacion(''); // Limpiar el filtro al cambiar el tipo de búsqueda
   };
 
   return (
@@ -382,6 +215,7 @@ const AlimentadorPublicaciones = () => {
 
             <Link to={'/alimentador_interno'} className="action" type="button">
               <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
+              <span className="action-content" data-content="" />             <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
@@ -400,13 +234,8 @@ const AlimentadorPublicaciones = () => {
               Nueva Publicación
               <span />
             </button>
-            {isDropdownVisible && (
-              <div className="dropdown-options" ref={dropdownRef}>
-                <button className='bg-basenaranja' onClick={() => handleOptionSelect('publico')}>Art. Público</button>
-                <button className='bg-basenaranja' onClick={() => handleOptionSelect('privado')}>Art. Privado</button>
-              </div>
-            )}
           </div>
+
           {/* Filtro de búsqueda */}
           <div className='buscador w-[100%] h-[10%] flex items-center justify-center'>
             <div className="search-panels-filtro">
@@ -424,7 +253,7 @@ const AlimentadorPublicaciones = () => {
                 <div className="btn-box">
                   <button className="btn-search">
                     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
-                      <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
+                      <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0s208 93.1 208 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
                     </svg>
                   </button>
                 </div>
@@ -435,6 +264,19 @@ const AlimentadorPublicaciones = () => {
                     </svg>
                   </button>
                 </div>
+              </div>
+
+              {/* Selector de tipo de búsqueda */}
+              <div className="tipo-busqueda">
+                <label className="block text-sm font-bold text-gray-700 mb-1">Tipo de Búsqueda</label>
+                <select
+                  value={tipoBusqueda}
+                  onChange={(e) => handleTipoBusquedaChange(e.target.value)}
+                  className="select-busqueda"
+                >
+                  <option value="publico">Públicos</option>
+                  <option value="privado">Privados</option>
+                </select>
               </div>
             </div>
           </div>
@@ -450,7 +292,7 @@ const AlimentadorPublicaciones = () => {
                   <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener su búsqueda.</p>
                 </div>
               </div>
-            ) : filtroResultados.length === 0 ? ( // Aquí se corrigió la sintaxis
+            ) : filtroResultados.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">
                 <div className="text-8xl mb-4">
                   <PiSmileySad className='text-baseblanco' />
@@ -461,23 +303,23 @@ const AlimentadorPublicaciones = () => {
               </div>
             ) : (
               filtroResultados.map((publicacion) => (
-                <div key={publicacion.id_publico} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id_publico ? "expanded" : ""}`}>
+                <div key={publicacion.id_publico || publicacion.id_privado} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "expanded" : ""}`}>
                   {/* Contenedor principal */}
                   <div className="flex h-[50px] items-center justify-center">
                     <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
-                      <h1>{publicacion.fecha_publicacion}</h1>
+                      <h1>{publicacion.fecha_publicacion || publicacion.fecha_privada}</h1>
                     </div>
 
                     <div className='categoria-articulo w-[15%] flex items-center justify-center text-xl'>
-                      <h1 className='bg-basenaranja p-2 rounded-lg text-baseblanco'>{publicacion.categoria_publica}</h1>
+                      <h1 className='bg-basenaranja p-2 rounded-lg text-baseblanco'>{publicacion.categoria_publica || publicacion.categoria_privada}</h1>
                     </div>
 
                     <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
-                      <h1>{publicacion.tema_publico} ({publicacion.tipo})</h1> {/* Mostrar el tipo de publicación */}
+                      <h1>{publicacion.tema_publico || publicacion.tema_privado} ({tipoBusqueda})</h1> {/* Mostrar el tipo de publicación */}
                     </div>
 
                     <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
-                      <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id_publico)}>
+                      <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id_publico || publicacion.id_privado)}>
                         <BiChevronDownCircle className='text-basenaranja' />
                       </button>
                     </div>
@@ -490,7 +332,7 @@ const AlimentadorPublicaciones = () => {
                   </div>
 
                   <div
-                    className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id_publico ? "max-h-[300px]" : "max-h-0"}`}
+                    className={`transition-all duration-300 overflow-hidden ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "max-h-[300px]" : "max-h-0"}`}
                   >
                     <div className="descripcion p-2 h-[120px]">
                       <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion || 'Sin descripción'}</span></p>
@@ -518,7 +360,7 @@ const AlimentadorPublicaciones = () => {
       {/* Modal de Artículo Público */}
       {isPublicModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex           flex-col overflow-hidden">
+          <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
             <div className="px-4 py-3 flex justify-center items-center">
               <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
                 Nuevo Artículo Público
@@ -740,7 +582,7 @@ const AlimentadorPublicaciones = () => {
 
       {/* Modal de Artículo Privado */}
       {isPrivateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center         justify-center z-50">
           <div className="modal-privados rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden bg-baseblanco">
             <div className="px-4 py-3 flex justify-center items-center">
               <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
@@ -848,7 +690,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {formData.keywords.map((kw, index) => (
-                        <span key={index} className="bg-baseazul inline-flex items-center text-xs px-3 py-1 bg-gray-100 rounded-[20px] text-baseblanco">
+                        <span key={index} className="bg-baseazul inline-flex items-center text-xs px-3 py-1 bg-gray-100 rounded-[20px] text-baseblanco                        ">
                           {kw}
                           <button
                             type="button"

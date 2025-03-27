@@ -15,12 +15,12 @@ if ($conn->connect_error) {
 }
 
 $sql = "SELECT 
-            id AS id_publico, 
-            fecha_publicacion AS fecha_publico, 
-            tema AS tema_publico, 
-            categoria AS categoria_publica,
+            id AS id_privado, 
+            fecha_publicacion AS fecha_privado, 
+            tema AS tema_privado, 
+            categoria AS categoria_privada,
             palabras_clave
-        FROM articulos_publicos";
+        FROM articulos_privados";
 
 $result = $conn->query($sql);
 $publicaciones = [];
