@@ -134,15 +134,17 @@ const AlimentadorPublicaciones = () => {
 
   // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
   const filtroResultados = filtroPublicacion.trim()
-    ? publicaciones.filter(publicacion => {
+  ? publicaciones.filter(publicacion => {
       const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
       return (
-        (publicacion.categoria?.toLowerCase() || '').includes(terminoBusqueda) ||
-        (publicacion.tema?.toLowerCase() || '').includes(terminoBusqueda) ||
-        (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda)
+        (publicacion.categoria_publica?.toLowerCase() || '').includes(terminoBusqueda) ||
+        (publicacion.tema_publico?.toLowerCase() || '').includes(terminoBusqueda) ||
+        (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda) ||
+        (publicacion.categoria_privada?.toLowerCase() || '').includes(terminoBusqueda) || // Campo para publicaciones privadas
+        (publicacion.tema_privado?.toLowerCase() || '').includes(terminoBusqueda) // Campo para publicaciones privadas
       );
     })
-    : publicaciones; // Cambiar para mostrar todas las publicaciones si no hay filtro
+  : publicaciones;
 
   // Funciones para artículos
   const toggleExpand = (id) => {
