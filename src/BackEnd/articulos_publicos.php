@@ -25,12 +25,53 @@ if ($conn->connect_error) {
     ]));
 }
 
-// Ensure the script only responds to POST requests
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die(json_encode([
-        'status' => 'error', 
-        'message' => 'Invalid request method'
-    ]));
+// Function to clean input
+function cleanInput($input) {
+    // Remove surrounding quotes
+    $input = trim($input, '"\'');
+    
+    // Remove escaped quotes
+    $input = str_replace(['\"', "\'"], '', $input);
+    
+    // Remove backslashes
+    $input = stripslashes($input);
+    
+    return $input;
+}
+
+// File upload handling function
+function handleFileUpload($files) {
+    $uploadDir = 'uploads/'; // Directory to store uploaded files
+    
+    // Create uploads directory if it doesn't exist
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+    
+    $uploadedFiles = [];
+    
+    foreach ($files as $file) {
+        // Generate unique filename
+        $filename = uniqid() . '_' . basename($file['name']);
+        $targetFilePath = $uploadDir . $filename;
+        
+        // Check file size (5MB limit)
+        if ($file['size'] > 5 * 1024 * 1024) {
+            continue; // Skip files larger than 5MB
+        }
+        
+        // Allowed file types
+        $allowedTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+        $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        
+        if (in_array($fileExtension, $allowedTypes)) {
+            if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
+                $uploadedFiles[] = $targetFilePath;
+            }
+        }
+    }
+    
+    return json_encode($uploadedFiles);
 }
 
 // Validate and extract form data
@@ -48,36 +89,66 @@ if (!$tema || !$categoria) {
     ]));
 }
 
+// Clean inputs
+$tema = cleanInput($tema);
+$categoria = cleanInput($categoria);
+$descripcion = $descripcion ? cleanInput($descripcion) : null;
+
 // Sanitize inputs
 $tema = $conn->real_escape_string($tema);
 $categoria = $conn->real_escape_string($categoria);
 $descripcion = $descripcion ? $conn->real_escape_string($descripcion) : null;
 
-// Handle keywords and URLs (they might be passed as JSON strings)
-$palabras_clave = $palabras_clave ? json_encode(json_decode($palabras_clave, true)) : null;
-$urls = $urls ? json_encode(json_decode($urls, true)) : null;
+// Handle keywords and URLs
+$palabras_clave = $palabras_clave ? 
+    (is_string($palabras_clave) ? json_encode(json_decode($palabras_clave, true)) : json_encode($palabras_clave)) 
+    : '[]';
+$urls = $urls ? 
+    (is_string($urls) ? json_encode(json_decode($urls, true)) : json_encode($urls)) 
+    : '[]';
+
+// Handle file uploads
+$archivos = '[]';
+if (!empty($_FILES['files'])) {
+    $uploadedFiles = [];
+    $fileCount = count($_FILES['files']['name']);
+    
+    for ($i = 0; $i < $fileCount; $i++) {
+        $uploadedFiles[] = [
+            'name' => $_FILES['files']['name'][$i],
+            'type' => $_FILES['files']['type'][$i],
+            'tmp_name' => $_FILES['files']['tmp_name'][$i],
+            'error' => $_FILES['files']['error'][$i],
+            'size' => $_FILES['files']['size'][$i]
+        ];
+    }
+    
+    $archivos = handleFileUpload($uploadedFiles);
+}
 
 // Prepare SQL statement
 $sql = "INSERT INTO articulos_publicos (
-    fecha_publicacion, 
-    tema, 
-    categoria, 
-    descripcion, 
-    palabras_clave, 
-    urls
+    fecha_publicacion,
+    tema,
+    categoria,
+    descripcion,
+    palabras_clave,
+    urls,
+    archivos
 ) VALUES (
-    NOW(), ?, ?, ?, ?, ?
+    NOW(), ?, ?, ?, ?, ?, ?
 )";
 
 // Prepare and bind
 $stmt = $conn->prepare($sql);
 $stmt->bind_param(
-    "sssss", 
-    $tema, 
-    $categoria, 
-    $descripcion, 
-    $palabras_clave, 
-    $urls
+    "ssssss",
+    $tema,
+    $categoria,
+    $descripcion,
+    $palabras_clave,
+    $urls,
+    $archivos
 );
 
 // Execute the statement

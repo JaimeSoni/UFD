@@ -25,12 +25,18 @@ if ($conn->connect_error) {
     ]));
 }
 
-// Ensure the script only responds to POST requests
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die(json_encode([
-        'status' => 'error', 
-        'message' => 'Invalid request method'
-    ]));
+// Function to clean input
+function cleanInput($input) {
+    // Remove surrounding quotes
+    $input = trim($input, '"\'');
+    
+    // Remove escaped quotes
+    $input = str_replace(['\"', "\'"], '', $input);
+    
+    // Remove backslashes
+    $input = stripslashes($input);
+    
+    return $input;
 }
 
 // Validate and extract form data
@@ -48,22 +54,31 @@ if (!$tema || !$categoria) {
     ]));
 }
 
+// Clean inputs
+$tema = cleanInput($tema);
+$categoria = cleanInput($categoria);
+$descripcion = $descripcion ? cleanInput($descripcion) : null;
+
 // Sanitize inputs
 $tema = $conn->real_escape_string($tema);
 $categoria = $conn->real_escape_string($categoria);
 $descripcion = $descripcion ? $conn->real_escape_string($descripcion) : null;
 
-// Handle keywords and URLs (they might be passed as JSON strings)
-$palabras_clave = $palabras_clave ? json_encode(json_decode($palabras_clave, true)) : null;
-$urls = $urls ? json_encode(json_decode($urls, true)) : null;
+// Handle keywords and URLs
+$palabras_clave = $palabras_clave ? 
+    (is_string($palabras_clave) ? json_encode(json_decode($palabras_clave, true)) : json_encode($palabras_clave)) 
+    : '[]';
+$urls = $urls ? 
+    (is_string($urls) ? json_encode(json_decode($urls, true)) : json_encode($urls)) 
+    : '[]';
 
 // Prepare SQL statement
 $sql = "INSERT INTO articulos_privados (
-    fecha_publicacion, 
-    tema, 
-    categoria, 
-    descripcion, 
-    palabras_clave, 
+    fecha_publicacion,
+    tema,
+    categoria,
+    descripcion,
+    palabras_clave,
     urls
 ) VALUES (
     NOW(), ?, ?, ?, ?, ?
@@ -72,11 +87,11 @@ $sql = "INSERT INTO articulos_privados (
 // Prepare and bind
 $stmt = $conn->prepare($sql);
 $stmt->bind_param(
-    "sssss", 
-    $tema, 
-    $categoria, 
-    $descripcion, 
-    $palabras_clave, 
+    "sssss",
+    $tema,
+    $categoria,
+    $descripcion,
+    $palabras_clave,
     $urls
 );
 

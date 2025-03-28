@@ -166,47 +166,59 @@ const AlimentadorPublicaciones = () => {
   // Función para cargar las publicaciones públicas desde el servidor
   const fetchPublicaciones = async () => {
     try {
-      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php');
-      if (!response.ok) {
-        throw new Error('No se pudieron cargar las publicaciones');
-      }
-      const data = await response.json();
-      if (data.success) {
-        const publicacionesConIdentificador = data.publicaciones.map(pub => ({
-          ...pub,
-          id_publico:
-            pub.id_publico, // Asegúrate de que tu API devuelva un id único
-        }));
-        setPublicaciones(publicacionesConIdentificador);
-      } else {
-        throw new Error(data.message || 'Error al cargar las publicaciones');
-      }
-    } catch (err) {
-      console.error('Error al cargar publicaciones:', err);
+        const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin' 
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+            setPublicaciones(data.publicaciones);
+        } else {
+            console.error('Error fetching publications:', data.message);
+            setPublicaciones([]);
+        }
+    } catch (error) {
+        console.error('Error al cargar publicaciones:', error);
+        setPublicaciones([]);
     }
-  };
+};
+
 
   // Función para cargar las publicaciones privadas desde el servidor
   const fetchPublicacionesPrivadas = async () => {
     try {
-      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones_privadas.php');
-      if (!response.ok) {
-        throw new Error('No se pudieron cargar las publicaciones privadas');
-      }
-      const data = await response.json();
-      if (data.success) {
-        const publicacionesPrivadasConIdentificador = data.publicaciones.map(pub => ({
-          ...pub,
-          id_privado: pub.id_privado, // Asegúrate de que tu API devuelva un id único
-        }));
-        setPublicacionesPrivadas(publicacionesPrivadasConIdentificador);
-      } else {
-        throw new Error(data.message || 'Error al cargar las publicaciones privadas');
-      }
-    } catch (err) {
-      console.error('Error al cargar publicaciones privadas:', err);
+        const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones_privadas.php', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include' // or 'same-origin' depending on your setup
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+            setPublicacionesPrivadas(data.publicaciones);
+        } else {
+            console.error('Error fetching private publications:', data.message);
+        }
+    } catch (error) {
+        console.error('Error al cargar publicaciones privadas:', error);
     }
-  };
+};
 
   // Llamar a las funciones cuando el componente se monta
   useEffect(() => {
@@ -313,8 +325,74 @@ const AlimentadorPublicaciones = () => {
       alert('Por favor, complete los campos obligatorios');
       return;
     }
-  }
 
+    // Prepare form data for submission
+    const submissionData = {
+      date: formData.date, // La fecha se establece automáticamente
+      topic: formData.topic,
+      category: selectedCategory,
+      description: formData.description || null,
+      keywords: formData.keywords,
+      urls: formData.urls
+    };
+
+    // Create FormData for file upload
+    const formDataUpload = new FormData();
+    Object.keys(submissionData).forEach(key => {
+      if (submissionData[key] !== null) {
+        formDataUpload.append(key, JSON.stringify(submissionData[key]));
+      }
+    });
+
+    // Append files
+    formData.files.forEach((file) => {
+      formDataUpload.append(`files[]`, file);
+    });
+
+    // Determinar la URL según el tipo de artículo
+    const url = isPublic
+      ? 'http://localhost/UFD/src/BackEnd/articulos_publicos.php'
+      : 'http://localhost/UFD/src/BackEnd/articulos_privados.php';
+
+    // Guardar artículo
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        body: formDataUpload
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        Swal.fire({
+          title: "Publicación Guardada Correctamente",
+          icon: "success",
+          color: '#000',
+          confirmButtonColor: "#ED6B06",
+          draggable: true
+        });
+
+        // Reset form and close modal
+        setFormData({
+          date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
+          topic: '',
+          description: '',
+          keywords: [],
+          urls: [],
+          files: []
+        });
+        setSelectedCategory('');
+        closePublicModal();
+        closePrivateModal();
+      } else {
+        // Show error message
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Ocurrió un error al guardar el artículo');
+    }
+  };
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
