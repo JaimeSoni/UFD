@@ -57,7 +57,7 @@ try {
     // Prepare SQL query
     $sql = "SELECT 
                 id AS id_publico, 
-                fecha_publicacion AS fecha_publico, 
+                fecha_publicacion, 
                 tema AS tema_publico, 
                 categoria AS categoria_publica,
                 descripcion AS descripcion_publico,

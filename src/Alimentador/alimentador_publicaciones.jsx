@@ -237,8 +237,11 @@ const AlimentadorPublicaciones = () => {
         (publicacion.categoria_publica?.toLowerCase() || '').includes(terminoBusqueda) ||
         (publicacion.tema_publico?.toLowerCase() || '').includes(terminoBusqueda) ||
         (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda) ||
-        (publicacion.categoria_privada?.toLowerCase() || '').includes(terminoBusqueda) || // Campo para publicaciones privadas
-        (publicacion.tema_privado?.toLowerCase() || '').includes(terminoBusqueda) // Campo para publicaciones privadas
+
+        // Publicas
+
+        (publicacion.categoria_privada?.toLowerCase() || '').includes(terminoBusqueda) || 
+        (publicacion.tema_privado?.toLowerCase() || '').includes(terminoBusqueda) 
       );
     })
     : (tipoBusqueda === 'publico' ? publicaciones : publicacionesPrivadas); // Mostrar todas las publicaciones según el tipo seleccionado
@@ -565,15 +568,15 @@ const AlimentadorPublicaciones = () => {
                     className={`transition-all duration-300 overflow-hidden ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "max-h-[300px]" : "max-h-0"}`}
                   >
                     <div className="descripcion p-2 h-[120px]">
-                      <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion || 'Sin descripción'}</span></p>
+                      <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion_publico || publicacion.descripcion_privado || 'Sin palabras clave'}</span></p>
                     </div>
                     <div className="palabras-clave p-2 h-[100px]">
-                      <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabrasClave || 'Sin palabras clave'}</span></p>
+                      <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabras_clave || 'Sin palabras clave'}</span></p>
                     </div>
 
                     <div className='flex'>
                       <div className="documentos p-2 w-1/2 h-[80px]">
-                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'>{publicacion.documentos || 'Sin documentos'}</span></p>
+                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'>{publicacion.archivos || 'Sin documentos'}</span></p>
                       </div>
                       <div className="urls p-2 w-1/2 h-[80px]">
                         <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls || 'Sin URLs'}</span></p>
