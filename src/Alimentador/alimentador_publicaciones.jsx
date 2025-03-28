@@ -25,19 +25,6 @@ import { GrDocumentUpdate } from "react-icons/gr";
 //Alerta 
 import Swal from 'sweetalert2';
 
-const toggleDropdown = () => {
-  const dropdown = document.querySelector('.dropdown-content');
-  dropdown.classList.toggle('show');
-};
-
-const toggleDropdownVisibility = () => {
-  setIsDropdownVisible(!isDropdownVisible);
-};
-
-const toggleExpand = (id_publico) => {
-  setExpandedId(expandedId === id_publico ? null : id); 
-};
-
 const AlimentadorPublicaciones = () => {
   const navigate = useNavigate();
 
@@ -53,6 +40,10 @@ const AlimentadorPublicaciones = () => {
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
   const [currentPublication, setCurrentPublication] = useState(null);
   const [tipoBusqueda, setTipoBusqueda] = useState('publico'); // 'publico' o 'privado'
+
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
 
   // Estados para el Modal
   const [formData, setFormData] = useState({
@@ -70,12 +61,77 @@ const AlimentadorPublicaciones = () => {
   const [url, setUrl] = useState('');
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
+  const toggleDropdownVisibility = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleAddKeyword = () => {
+    if (keyword.trim()) {
+      setFormData({ ...formData, keywords: [...formData.keywords, keyword.trim()] })
+      setKeyword('');
+    };
+  }
+
+  const handleAddUrl = () => {
+    if (url.trim()) {
+      setFormData({ ...formData, urls: [...formData.urls, url.trim()] })
+      setUrl('');
+    };
+  }
+
+  const handleRemoveKeyword = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      keywords: formData.keywords.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleRemoveUrl = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      urls: formData.urls.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleRemoveFile = (indexToRemove) => {
+    setFormData({
+      ...formData,
+      files: formData.files.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleFileChange = (e) => {
+    const newFiles = Array.from(e.target.files);
+    const acceptedFileTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel'
+    ];
+
+    const validFiles = newFiles.filter(file =>
+      acceptedFileTypes.includes(file.type) && file.size <= 5 * 1024 * 1024
+    );
+
+    setFormData({ ...formData, files: [...formData.files, ...validFiles] });
+  };
+
   // Mandar a llamar las categorias
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const selectCategory = (categoria) => {
+    setSelectedCategory(categoria);
+    setIsDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+    };
 
   // Estado para las publicaciones
   const [publicaciones, setPublicaciones] = useState([]);
@@ -187,6 +243,78 @@ const AlimentadorPublicaciones = () => {
     setfiltroPublicacion(''); // Limpiar el filtro al cambiar el tipo de búsqueda
   };
 
+  // Articulos publicos
+  const openPublicModal = () => {
+    setFormData({
+      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
+      category: '',
+      topic: '',
+      description: '',
+      keywords: [],
+      files: [],
+      urls: []
+    });
+    setIsPublicModalOpen(true);
+  };
+
+  const closePublicModal = () => {
+    setIsPublicModalOpen(false);
+  };
+
+  // Articulos Privados
+  const openPrivateModal = () => {
+    setFormData({
+      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
+      category: '',
+      topic: '',
+      description: '',
+      keywords: [],
+      files: [],
+      urls: [],
+      targetAudience: '' // Campo específico para artículos privados
+    });
+    setIsPrivateModalOpen(true);
+  };
+
+  const closePrivateModal = () => {
+    setIsPrivateModalOpen(false);
+  };
+
+  const handleOptionSelect = (option) => {
+    setIsDropdownVisible(false);
+    if (option === 'publico') {
+      openPublicModal();
+    } else {
+      openPrivateModal();
+    }
+  };
+
+  // Añade esta referencia para el dropdown
+  const dropdownRef = useRef(null);
+  // Funcion para cerrar el modal al darle clic afuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && isDropdownVisible) {
+        setIsDropdownVisible(false);
+      }
+    };
+    if (isDropdownVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownVisible]);
+
+  // Funciones para guardar articulos publicos
+  const handleSubmit = async (isPublic) => {
+    // Validate required fields
+    if (!formData.topic || !selectedCategory || !formData.description) {
+      alert('Por favor, complete los campos obligatorios');
+      return;
+    }
+  }
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
@@ -215,7 +343,6 @@ const AlimentadorPublicaciones = () => {
 
             <Link to={'/alimentador_interno'} className="action" type="button">
               <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
-              <span className="action-content" data-content="" />             <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
@@ -228,16 +355,24 @@ const AlimentadorPublicaciones = () => {
 
         <div className='w-[94%] h-screen'>
           {/* Titulo */}
-          <div className='titulo w-[100%] h-[15%] flex items-center justify-center'>
+          <div className='titulo w-[100%] h-[13%] flex items-center justify-center mb-1'>
             <h1 className='titulo-publicaciones'>Registro de Publicaciones</h1>
             <button className='button-publicaciones' onClick={toggleDropdownVisibility}>
               Nueva Publicación
               <span />
             </button>
+
+            {isDropdownVisible && (
+              <div className='dropdown-options' ref={dropdownRef}>
+                <button className='bg-basenaranja' onClick={() => handleOptionSelect('publico')}> Art. Público</button>
+
+                <button className='bg-basenaranja' onClick={() => handleOptionSelect('privado')}> Art. Privado</button>
+              </div>
+            )}
           </div>
 
           {/* Filtro de búsqueda */}
-          <div className='buscador w-[100%] h-[10%] flex items-center justify-center'>
+          <div className='buscador w-[100%] h-[10%] flex items-center justify-center pt-12'>
             <div className="search-panels-filtro">
               <div className="search-group">
                 <input
@@ -267,22 +402,37 @@ const AlimentadorPublicaciones = () => {
               </div>
 
               {/* Selector de tipo de búsqueda */}
-              <div className="tipo-busqueda">
-                <label className="block text-sm font-bold text-gray-700 mb-1">Tipo de Búsqueda</label>
-                <select
-                  value={tipoBusqueda}
-                  onChange={(e) => handleTipoBusquedaChange(e.target.value)}
-                  className="select-busqueda"
-                >
-                  <option value="publico">Públicos</option>
-                  <option value="privado">Privados</option>
-                </select>
+              <div className='flex items-center justify-center'>
+                <div id="firstFilter" className="filter-switch w-full h-[10%] mt-2 pt-8">
+                  <input
+                    defaultChecked={tipoBusqueda === "publico"}
+                    id="publico"
+                    name="options"
+                    type="radio"
+                    value="publico"
+                    onChange={(e) => handleTipoBusquedaChange(e.target.value)}
+                  />
+                  <label htmlFor="publico" className="option">Público</label>
+
+                  <input
+                    id="privado"
+                    name="options"
+                    type="radio"
+                    value="privado"
+                    checked={tipoBusqueda === "privado"}
+                    onChange={(e) => handleTipoBusquedaChange(e.target.value)}
+                  />
+                  <label htmlFor="privado" className="option">Privado</label>
+
+                  <span className="background" />
+                </div>
               </div>
+
             </div>
           </div>
 
           {/* Articulos */}
-          <div className='resultados w-full h-[70%] mt-3 overflow-y-auto'>
+          <div className='resultados w-full h-[65%] mt-12 overflow-y-auto'>
             {filtroPublicacion.trim() === '' ? (
               <div className="flex justify-center items-center h-32 text-gray-500">
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">

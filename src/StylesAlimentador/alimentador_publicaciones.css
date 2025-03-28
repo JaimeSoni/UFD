@@ -1262,3 +1262,57 @@ body{
 .dropdown-options button:hover {
   color: #353866;
 }
+
+/* Diseño option */
+
+.filter-switch {
+  border-radius: 30px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 250px;
+  overflow: hidden;
+}
+.filter-switch input {
+  display: none;
+}
+.filter-switch label {
+  flex: 1;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.5s;
+  font-weight: 500;
+  font-size: 18px;
+}
+.filter-switch .background {
+  position: absolute;
+  width: 50%;
+  height: 25px;
+  background-color: #353866;
+  top: 4px;
+  left: 4px;
+  border-radius: 30px;
+  transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#privado:checked ~ .background {
+  left: 50%;
+}
+#publico:checked + label[for="publico"] {
+  color: black;
+  font-weight: bold;
+}
+#privado:checked + label[for="privado"] {
+  color: black;
+  font-weight: bold;
+}
+#publico:not(:checked) + label[for="publico"],
+#privado:not(:checked) + label[for="privado"] {
+  color: white;
+  background: #353866;
+}
