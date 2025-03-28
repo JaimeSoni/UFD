@@ -62,7 +62,8 @@ try {
                 categoria AS categoria_privada,
                 descripcion AS descripcion_privada,
                 palabras_clave,
-                urls
+                urls,
+                archivos
             FROM articulos_privados";
 
     // Execute query
@@ -82,6 +83,7 @@ try {
             // Ensure JSON fields are properly parsed
             $row['palabras_clave'] = json_decode($row['palabras_clave'], true) ?? [];
             $row['urls'] = json_decode($row['urls'], true) ?? [];
+            $row['archivos'] = json_decode($row['archivos'], true) ?? [];
             
             $publicaciones[] = $row;
         }

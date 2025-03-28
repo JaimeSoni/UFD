@@ -39,6 +39,41 @@ function cleanInput($input) {
     return $input;
 }
 
+// File upload handling function
+function handleFileUpload($files) {
+    $uploadDir = 'uploads/'; // Directory to store uploaded files
+    
+    // Create uploads directory if it doesn't exist
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+    
+    $uploadedFiles = [];
+    
+    foreach ($files as $file) {
+        // Generate unique filename
+        $filename = uniqid() . '_' . basename($file['name']);
+        $targetFilePath = $uploadDir . $filename;
+        
+        // Check file size (5MB limit)
+        if ($file['size'] > 5 * 1024 * 1024) {
+            continue; // Skip files larger than 5MB
+        }
+        
+        // Allowed file types
+        $allowedTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+        $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        
+        if (in_array($fileExtension, $allowedTypes)) {
+            if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
+                $uploadedFiles[] = $targetFilePath;
+            }
+        }
+    }
+    
+    return json_encode($uploadedFiles);
+}
+
 // Validate and extract form data
 $tema = $_POST['topic'] ?? null;
 $categoria = $_POST['category'] ?? null;
@@ -72,6 +107,25 @@ $urls = $urls ?
     (is_string($urls) ? json_encode(json_decode($urls, true)) : json_encode($urls)) 
     : '[]';
 
+// Handle file uploads
+$archivos = '[]';
+if (!empty($_FILES['files'])) {
+    $uploadedFiles = [];
+    $fileCount = count($_FILES['files']['name']);
+    
+    for ($i = 0; $i < $fileCount; $i++) {
+        $uploadedFiles[] = [
+            'name' => $_FILES['files']['name'][$i],
+            'type' => $_FILES['files']['type'][$i],
+            'tmp_name' => $_FILES['files']['tmp_name'][$i],
+            'error' => $_FILES['files']['error'][$i],
+            'size' => $_FILES['files']['size'][$i]
+        ];
+    }
+    
+    $archivos = handleFileUpload($uploadedFiles);
+}
+
 // Prepare SQL statement
 $sql = "INSERT INTO articulos_privados (
     fecha_publicacion,
@@ -79,27 +133,29 @@ $sql = "INSERT INTO articulos_privados (
     categoria,
     descripcion,
     palabras_clave,
-    urls
+    urls,
+    archivos
 ) VALUES (
-    NOW(), ?, ?, ?, ?, ?
+    NOW(), ?, ?, ?, ?, ?, ?
 )";
 
 // Prepare and bind
 $stmt = $conn->prepare($sql);
 $stmt->bind_param(
-    "sssss",
+    "ssssss",
     $tema,
     $categoria,
     $descripcion,
     $palabras_clave,
-    $urls
+    $urls,
+    $archivos
 );
 
 // Execute the statement
 if ($stmt->execute()) {
     echo json_encode([
         'status' => 'success', 
-        'message' => 'Artículo privado guardado exitosamente',
+        'message' => 'Artículo público guardado exitosamente',
         'id' => $stmt->insert_id
     ]);
 } else {

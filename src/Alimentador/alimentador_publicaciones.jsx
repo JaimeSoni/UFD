@@ -201,7 +201,7 @@ const AlimentadorPublicaciones = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'include' // or 'same-origin' depending on your setup
+            credentials: 'same-origin' 
         });
 
         if (!response.ok) {
@@ -213,10 +213,12 @@ const AlimentadorPublicaciones = () => {
         if (data.success) {
             setPublicacionesPrivadas(data.publicaciones);
         } else {
-            console.error('Error fetching private publications:', data.message);
+            console.error('Error fetching publications:', data.message);
+            setPublicacionesPrivadas([]);
         }
     } catch (error) {
         console.error('Error al cargar publicaciones privadas:', error);
+        setPublicacionesPrivadas([]);
     }
 };
 
