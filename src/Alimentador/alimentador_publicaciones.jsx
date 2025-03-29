@@ -39,22 +39,21 @@ const AlimentadorPublicaciones = () => {
   const [isPrivateModalOpen, setIsPrivateModalOpen] = useState(false);
   const [filtroPublicacion, setfiltroPublicacion] = useState('');
   const [currentPublication, setCurrentPublication] = useState(null);
-  const [tipoBusqueda, setTipoBusqueda] = useState('publico'); // 'publico' o 'privado'
+  const [tipoBusqueda, setTipoBusqueda] = useState('publico');
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  // Estados para el Modal
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
+    date: new Date().toISOString().slice(0, 10),
     category: '',
     topic: '',
     description: '',
     keywords: [],
     files: [],
     urls: [],
-    targetAudience: '' // Campo específico para artículos privados
+    targetAudience: ''
   });
 
   const [keyword, setKeyword] = useState('');
@@ -117,7 +116,6 @@ const AlimentadorPublicaciones = () => {
     setFormData({ ...formData, files: [...formData.files, ...validFiles] });
   };
 
-  // Mandar a llamar las categorias
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -131,13 +129,11 @@ const AlimentadorPublicaciones = () => {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
-    };
+  };
 
-  // Estado para las publicaciones
   const [publicaciones, setPublicaciones] = useState([]);
   const [publicacionesPrivadas, setPublicacionesPrivadas] = useState([]);
 
-  // Función para cargar las categorías desde el servidor
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
@@ -163,73 +159,68 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
-  // Función para cargar las publicaciones públicas desde el servidor
   const fetchPublicaciones = async () => {
     try {
-        const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin' 
-        });
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+      });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        const data = await response.json();
-        
-        if (data.success) {
-            setPublicaciones(data.publicaciones);
-        } else {
-            console.error('Error fetching publications:', data.message);
-            setPublicaciones([]);
-        }
-    } catch (error) {
-        console.error('Error al cargar publicaciones:', error);
+      const data = await response.json();
+
+      if (data.success) {
+        setPublicaciones(data.publicaciones);
+      } else {
+        console.error('Error fetching publications:', data.message);
         setPublicaciones([]);
+      }
+    } catch (error) {
+      console.error('Error al cargar publicaciones:', error);
+      setPublicaciones([]);
     }
-};
+  };
 
-
-  // Función para cargar las publicaciones privadas desde el servidor
   const fetchPublicacionesPrivadas = async () => {
     try {
-        const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones_privadas.php', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'same-origin' 
-        });
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones_privadas.php', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+      });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        const data = await response.json();
-        
-        if (data.success) {
-            setPublicacionesPrivadas(data.publicaciones);
-        } else {
-            console.error('Error fetching publications:', data.message);
-            setPublicacionesPrivadas([]);
-        }
-    } catch (error) {
-        console.error('Error al cargar publicaciones privadas:', error);
+      const data = await response.json();
+
+      if (data.success) {
+        setPublicacionesPrivadas(data.publicaciones);
+      } else {
+        console.error('Error fetching publications:', data.message);
         setPublicacionesPrivadas([]);
+      }
+    } catch (error) {
+      console.error('Error al cargar publicaciones privadas:', error);
+      setPublicacionesPrivadas([]);
     }
-};
+  };
 
-  // Llamar a las funciones cuando el componente se monta
   useEffect(() => {
     fetchPublicaciones();
-    fetchPublicacionesPrivadas(); // Cargar publicaciones privadas
-    fetchCategories(); // Asegúrate de que las categorías también se carguen
+    fetchPublicacionesPrivadas();
+    fetchCategories();
   }, []);
 
-  // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
   const filtroResultados = filtroPublicacion.trim()
     ? (tipoBusqueda === 'publico' ? publicaciones : publicacionesPrivadas).filter(publicacion => {
       const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
@@ -238,13 +229,11 @@ const AlimentadorPublicaciones = () => {
         (publicacion.tema_publico?.toLowerCase() || '').includes(terminoBusqueda) ||
         (publicacion.palabrasClave?.toLowerCase() || '').includes(terminoBusqueda) ||
 
-        // Publicas
-
-        (publicacion.categoria_privada?.toLowerCase() || '').includes(terminoBusqueda) || 
-        (publicacion.tema_privado?.toLowerCase() || '').includes(terminoBusqueda) 
+        (publicacion.categoria_privada?.toLowerCase() || '').includes(terminoBusqueda) ||
+        (publicacion.tema_privado?.toLowerCase() || '').includes(terminoBusqueda)
       );
     })
-    : (tipoBusqueda === 'publico' ? publicaciones : publicacionesPrivadas); // Mostrar todas las publicaciones según el tipo seleccionado
+    : (tipoBusqueda === 'publico' ? publicaciones : publicacionesPrivadas);
 
   const handleInputChange = (e) => {
     setfiltroPublicacion(e.target.value);
@@ -254,16 +243,14 @@ const AlimentadorPublicaciones = () => {
     setfiltroPublicacion('');
   };
 
-  // Función para cambiar el tipo de búsqueda
   const handleTipoBusquedaChange = (tipo) => {
     setTipoBusqueda(tipo);
-    setfiltroPublicacion(''); // Limpiar el filtro al cambiar el tipo de búsqueda
+    setfiltroPublicacion('');
   };
 
-  // Articulos publicos
   const openPublicModal = () => {
     setFormData({
-      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
+      date: new Date().toISOString().slice(0, 10),
       category: '',
       topic: '',
       description: '',
@@ -278,17 +265,16 @@ const AlimentadorPublicaciones = () => {
     setIsPublicModalOpen(false);
   };
 
-  // Articulos Privados
   const openPrivateModal = () => {
     setFormData({
-      date: new Date().toISOString().slice(0, 10), // Establecer la fecha automáticamente
+      date: new Date().toISOString().slice(0, 10),
       category: '',
       topic: '',
       description: '',
       keywords: [],
       files: [],
       urls: [],
-      targetAudience: '' // Campo específico para artículos privados
+      targetAudience: ''
     });
     setIsPrivateModalOpen(true);
   };
@@ -306,9 +292,7 @@ const AlimentadorPublicaciones = () => {
     }
   };
 
-  // Añade esta referencia para el dropdown
   const dropdownRef = useRef(null);
-  // Funcion para cerrar el modal al darle clic afuera
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && isDropdownVisible) {
@@ -323,17 +307,14 @@ const AlimentadorPublicaciones = () => {
     };
   }, [isDropdownVisible]);
 
-  // Funciones para guardar articulos publicos
   const handleSubmit = async (isPublic) => {
-    // Validate required fields
     if (!formData.topic || !selectedCategory || !formData.description) {
       alert('Por favor, complete los campos obligatorios');
       return;
     }
 
-    // Prepare form data for submission
     const submissionData = {
-      date: formData.date, // La fecha se establece automáticamente
+      date: formData.date,
       topic: formData.topic,
       category: selectedCategory,
       description: formData.description || null,
@@ -341,7 +322,6 @@ const AlimentadorPublicaciones = () => {
       urls: formData.urls
     };
 
-    // Create FormData for file upload
     const formDataUpload = new FormData();
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
@@ -349,17 +329,14 @@ const AlimentadorPublicaciones = () => {
       }
     });
 
-    // Append files
     formData.files.forEach((file) => {
       formDataUpload.append(`files[]`, file);
     });
 
-    // Determinar la URL según el tipo de artículo
     const url = isPublic
       ? 'http://localhost/UFD/src/BackEnd/articulos_publicos.php'
       : 'http://localhost/UFD/src/BackEnd/articulos_privados.php';
 
-    // Guardar artículo
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -377,9 +354,8 @@ const AlimentadorPublicaciones = () => {
           draggable: true
         });
 
-        // Reset form and close modal
         setFormData({
-          date: new Date().toISOString().slice(0, 10), // Reiniciar la fecha automáticamente
+          date: new Date().toISOString().slice(0, 10),
           topic: '',
           description: '',
           keywords: [],
@@ -390,7 +366,6 @@ const AlimentadorPublicaciones = () => {
         closePublicModal();
         closePrivateModal();
       } else {
-        // Show error message
         alert(`Error: ${result.message}`);
       }
     } catch (error) {
@@ -402,7 +377,6 @@ const AlimentadorPublicaciones = () => {
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
         <div className="w-[6%] h-screen bg-baseazul flex items-center justify-center relative">
-          {/* Menú izquierdo */}
           <div className="action-wrap bg-basenaranja z-10 flex flex-col items-start absolute left-3">
             <Link to={'/alimentador_inicio'} className="action" type="button">
               <FaHome className="action-icon" color="#353866" />
@@ -437,7 +411,6 @@ const AlimentadorPublicaciones = () => {
         </div>
 
         <div className='w-[94%] h-screen'>
-          {/* Titulo */}
           <div className='titulo w-[100%] h-[13%] flex items-center justify-center mb-1'>
             <h1 className='titulo-publicaciones'>Registro de Publicaciones</h1>
             <button className='button-publicaciones' onClick={toggleDropdownVisibility}>
@@ -454,7 +427,6 @@ const AlimentadorPublicaciones = () => {
             )}
           </div>
 
-          {/* Filtro de búsqueda */}
           <div className='buscador w-[100%] h-[10%] flex items-center justify-center pt-12'>
             <div className="search-panels-filtro">
               <div className="search-group">
@@ -484,7 +456,6 @@ const AlimentadorPublicaciones = () => {
                 </div>
               </div>
 
-              {/* Selector de tipo de búsqueda */}
               <div className='flex items-center justify-center'>
                 <div id="firstFilter" className="filter-switch w-full h-[10%] mt-2 pt-8">
                   <input
@@ -514,7 +485,6 @@ const AlimentadorPublicaciones = () => {
             </div>
           </div>
 
-          {/* Articulos */}
           <div className='resultados w-full h-[65%] mt-12 overflow-y-auto'>
             {filtroPublicacion.trim() === '' ? (
               <div className="flex justify-center items-center h-32 text-gray-500">
@@ -537,7 +507,6 @@ const AlimentadorPublicaciones = () => {
             ) : (
               filtroResultados.map((publicacion) => (
                 <div key={publicacion.id_publico || publicacion.id_privado} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "expanded" : ""}`}>
-                  {/* Contenedor principal */}
                   <div className="flex h-[50px] items-center justify-center">
                     <div className='fecha-articulo w-[15%] flex items-center justify-center text-xl'>
                       <h1>{publicacion.fecha_publicacion || publicacion.fecha_privada}</h1>
@@ -548,7 +517,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
 
                     <div className='tema-articulo w-[50%] flex items-center justify-center text-xl'>
-                      <h1>{publicacion.tema_publico || publicacion.tema_privado} ({tipoBusqueda})</h1> {/* Mostrar el tipo de publicación */}
+                      <h1>{publicacion.tema_publico || publicacion.tema_privado}</h1>
                     </div>
 
                     <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
@@ -590,7 +559,6 @@ const AlimentadorPublicaciones = () => {
         </div>
       </div>
 
-      {/* Modal de Artículo Público */}
       {isPublicModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
@@ -604,7 +572,6 @@ const AlimentadorPublicaciones = () => {
               <form className="space-y-4">
                 <div className='flex gap-3'>
 
-                  {/* Fecha */}
                   <div className='w-[20%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
@@ -615,7 +582,6 @@ const AlimentadorPublicaciones = () => {
                     />
                   </div>
 
-                  {/* Tema */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
                     <input
@@ -628,7 +594,6 @@ const AlimentadorPublicaciones = () => {
                     />
                   </div>
 
-                  {/* Categoria */}
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
@@ -661,7 +626,6 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Descripción */}
                 <div className='flex gap-3'>
                   <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
@@ -679,7 +643,6 @@ const AlimentadorPublicaciones = () => {
 
                 <div className="flex gap-3">
 
-                  {/* Palabras claves */}
                   <div className='w-[50%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
                     <div className="flex gap-2 mb-2">
@@ -714,7 +677,6 @@ const AlimentadorPublicaciones = () => {
                     </div>
                   </div>
 
-                  {/* URL */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">URLs</label>
                     <div className="flex gap-2 mb-2">
@@ -753,7 +715,6 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Documentos */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -800,7 +761,6 @@ const AlimentadorPublicaciones = () => {
               </form>
             </div>
 
-            {/* Botones */}
             <div className="px-4 py-3 flex justify-end gap-2">
               <button className='cancelar' onClick={closePublicModal}>
                 Cancelar
@@ -813,9 +773,8 @@ const AlimentadorPublicaciones = () => {
         </div>
       )}
 
-      {/* Modal de Artículo Privado */}
       {isPrivateModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center         justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="modal-privados rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden bg-baseblanco">
             <div className="px-4 py-3 flex justify-center items-center">
               <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
@@ -827,18 +786,16 @@ const AlimentadorPublicaciones = () => {
               <form className="space-y-4">
                 <div className='flex gap-3'>
 
-                  {/* Fecha */}
                   <div className='w-[20%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
                     <input
                       type="text"
-                      value={formData.date} // Mostrar la fecha automáticamente
-                      readOnly // Hacer que el campo sea de solo lectura
+                      value={formData.date}
+                      readOnly
                       className="input-fecha"
                     />
                   </div>
 
-                  {/* Tema */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
                     <input
@@ -851,7 +808,6 @@ const AlimentadorPublicaciones = () => {
                     />
                   </div>
 
-                  {/* Categoria */}
                   <div className="w-[30%]">
                     <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
                     <div className="relative">
@@ -884,7 +840,6 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Descripción */}
                 <div className='flex gap-3'>
                   <div className='w-[100%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">
@@ -902,7 +857,6 @@ const AlimentadorPublicaciones = () => {
 
                 <div className="flex gap-3">
 
-                  {/* Palabras claves */}
                   <div className='w-[50%]'>
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
                     <div className="flex gap-2 mb-2">
@@ -923,7 +877,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {formData.keywords.map((kw, index) => (
-                        <span key={index} className="bg-baseazul inline-flex items-center text-xs px-3 py-1 bg-gray-100 rounded-[20px] text-baseblanco                        ">
+                        <span key={index} className="bg-baseazul inline-flex items-center text-xs px-3 py-1 bg-gray-100 rounded-[20px] text-baseblanco">
                           {kw}
                           <button
                             type="button"
@@ -937,7 +891,6 @@ const AlimentadorPublicaciones = () => {
                     </div>
                   </div>
 
-                  {/* URL */}
                   <div className="w-[50%]">
                     <label className="block text-[14px] font-bold text-gray-700 mb-1">URLs</label>
                     <div className="flex gap-2 mb-2">
@@ -976,7 +929,6 @@ const AlimentadorPublicaciones = () => {
                   </div>
                 </div>
 
-                {/* Documentos */}
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-[37%]">
                     <div className="container">
@@ -1023,7 +975,6 @@ const AlimentadorPublicaciones = () => {
               </form>
             </div>
 
-            {/* Botones */}
             <div className="px-4 py-3 flex justify-end gap-2">
               <button className='cancelar' onClick={closePrivateModal}>
                 Cancelar
