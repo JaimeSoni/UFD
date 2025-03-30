@@ -534,21 +534,65 @@ const AlimentadorPublicaciones = () => {
                   </div>
 
                   <div
-                    className={`transition-all duration-300 overflow-hidden ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "max-h-[300px]" : "max-h-0"}`}
+                    className={`transition-all duration-300 overflow-hidden overflow-y-auto ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "max-h-[300px]" : "max-h-0"}`}
                   >
                     <div className="descripcion p-2 h-[120px]">
                       <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion_publico || publicacion.descripcion_privado || 'Sin palabras clave'}</span></p>
                     </div>
+
                     <div className="palabras-clave p-2 h-[100px]">
-                      <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>{publicacion.palabras_clave || 'Sin palabras clave'}</span></p>
+                      <p className='titulos-resultados text-xl'>Palabras Clave:</p>
+                      <div className='flex flex-wrap gap-2'>
+                        {(() => {
+                          // Verifica si existe palabras_clave
+                          if (!publicacion.palabras_clave) {
+                            return <span className='text-baseblanco'>Sin palabras clave</span>;
+                          }
+                          if (Array.isArray(publicacion.palabras_clave)) {
+                            return publicacion.palabras_clave.map((kw, index) => (
+                              <span key={index} className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>
+                                {typeof kw === 'string' ? kw.trim() : kw}
+                              </span>
+                            ));
+                          }
+                          if (typeof publicacion.palabras_clave === 'string' && publicacion.palabras_clave.trim().length > 0) {
+                            return publicacion.palabras_clave.split(',').map((kw, index) => (
+                              <span key={index} className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>
+                                {kw.trim()}
+                              </span>
+                            ));
+                          }
+                          return <span className='text-baseblanco'>Sin palabras clave</span>;
+                        })()}
+                      </div>
                     </div>
 
                     <div className='flex'>
                       <div className="documentos p-2 w-1/2 h-[80px]">
-                        <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'>{publicacion.archivos || 'Sin documentos'}</span></p>
+                        <p className='titulos-resultados text-xl'>Documentos:</p>
+                        <div className='flex flex-col'>
+                          {Array.isArray(publicacion.archivos) && publicacion.archivos.length > 0 ? (
+                            publicacion.archivos.map((archivo, index) => (
+                              <span key={index} className='text-blank'>{archivo.trim()}</span>
+                            ))
+                          ) : (
+                            <span className='text-baseblanco'>Sin documentos</span>
+                          )}
+                        </div>
                       </div>
                       <div className="urls p-2 w-1/2 h-[80px]">
-                        <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls || 'Sin URLs'}</span></p>
+                        <p className='titulos-resultados text-xl'>Links:</p>
+                        <div className='flex flex-col'>
+                          {Array.isArray(publicacion.urls) && publicacion.urls.length > 0 ? (
+                            publicacion.urls.map((linkUrl, index) => (
+                              <a key={index} href={linkUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
+                                {linkUrl.trim()}
+                              </a>
+                            ))
+                          ) : (
+                            <span className='text-baseblanco'>Sin URLs</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
