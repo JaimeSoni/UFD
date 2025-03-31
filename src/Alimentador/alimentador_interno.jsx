@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import '../StylesAlimentador/alimentador_interno.css'
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 {/* Iconos */ }
 import { FaHome } from "react-icons/fa";
@@ -11,26 +12,9 @@ import { TbCategoryPlus } from "react-icons/tb";
 import { RiLogoutCircleLine } from "react-icons/ri";
 import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
-import { FaCreativeCommonsShare } from "react-icons/fa";
 import { MdBlock } from "react-icons/md";
 import { IoIosCloseCircleOutline } from "react-icons/io";
-
-// Simulación de datos de publicaciones con `id` único
-const publicaciones = [
-    { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "pago, mensualidad, costo", documentos: "", urls: "" },
-    { id: "pub2", fecha: "15/02/2025", categoria: "Trámites", tema: "Proceso para solicitar constancia de estudios", descripcion: "Información sobre el proceso para solicitar constancias oficiales y los documentos necesarios.", palabrasClave: "constancia, documentos, trámite", documentos: "", urls: "" },
-    { id: "pub3", fecha: "10/02/2025", categoria: "Becas", tema: "Convocatoria para becas académicas", descripcion: "Detalles sobre las becas disponibles para estudiantes de alto rendimiento.", palabrasClave: "beca, apoyo, financiamiento", documentos: "", urls: "" }
-];
-
-// Datos de ejemplo para preguntas frecuentes
-const preguntasFrecuentes = [
-    { id: 1, pregunta: "¿Cómo solicito una constancia de estudios?", categoria: "Trámites" },
-    { id: 2, pregunta: "¿Cuándo es el último día para pagar la colegiatura?", categoria: "Colegiaturas" },
-    { id: 3, pregunta: "¿Qué documentos necesito para inscribirme a la preparatoria?", categoria: "Trámites" },
-    { id: 4, pregunta: "¿Cuáles son los requisitos para obtener una beca?", categoria: "Becas" },
-    { id: 5, pregunta: "¿Cuál es el horario de la biblioteca?", categoria: "Biblioteca" },
-    { id: 6, pregunta: "Convocatoria para becas académicas", categoria: "Becas" }
-];
+import { IoDocumentOutline } from "react-icons/io5";
 
 // Datos de ejemplo para las áreas y sus categorías
 const areasData = {
@@ -56,10 +40,12 @@ const areasData = {
 };
 
 function AlimentadorInterno() {
-
+    const [publicaciones, setPublicaciones] = useState([]);
     const [expandedId, setExpandedId] = useState(null);
     const [filtroPublicacion, setFiltroPublicacion] = useState('');
     const [activeArea, setActiveArea] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     // Ref para el contenedor de scroll horizontal
     const scrollContainerRef = useRef(null);
@@ -71,6 +57,57 @@ function AlimentadorInterno() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAsistenciaModalOpen, setIsAsistenciaModalOpen] = useState(false);
 
+    // Fetch publicaciones desde la base de datos
+    useEffect(() => {
+        const fetchPublicaciones = async () => {
+            setIsLoading(true);
+            try {
+                const response = await axios.get('http://localhost/UFD/src/BackEnd/obtener_publicaciones_privadas.php');
+
+                // Verificar si la respuesta tiene la estructura esperada
+                const publicacionesArray = response.data.publicaciones || [];
+
+                // Ahora mapea sobre el array de publicaciones
+                const data = publicacionesArray.map(articulo => ({
+                    id: articulo.id_privado.toString(),
+                    fecha: formatDate(articulo.fecha_publicacion),
+                    categoria: articulo.categoria_privada,
+                    tema: articulo.tema_privado,
+                    descripcion: articulo.descripcion_privada,
+                    palabrasClave: Array.isArray(articulo.palabras_clave) ?
+                        articulo.palabras_clave.join(', ') :
+                        articulo.palabras_clave || '',
+                    documentos: Array.isArray(articulo.archivos) ?
+                        articulo.archivos.join(', ') :
+                        articulo.archivos || '',
+                    urls: Array.isArray(articulo.urls) ?
+                        articulo.urls.join(', ') :
+                        articulo.urls || ''
+                }));
+
+                setPublicaciones(data);
+            } catch (err) {
+                console.error("Error al obtener publicaciones privadas:", err);
+                setError("Error al cargar las publicaciones. Por favor, intente de nuevo más tarde.");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPublicaciones();
+    }, []);
+
+    // Helper function to format date from YYYY-MM-DD to DD/MM/YYYY
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        }).replace(/-/g, '/');
+    };
+
     // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
     const resultadosFiltrados = filtroPublicacion.trim()
         ? publicaciones.filter(publicacion => {
@@ -78,7 +115,7 @@ function AlimentadorInterno() {
             return (
                 publicacion.categoria.toLowerCase().includes(terminoBusqueda) ||
                 publicacion.tema.toLowerCase().includes(terminoBusqueda) ||
-                publicacion.palabrasClave.toLowerCase().includes(terminoBusqueda)
+                (publicacion.palabrasClave && publicacion.palabrasClave.toLowerCase().includes(terminoBusqueda))
             );
         })
         : [];
@@ -107,11 +144,7 @@ function AlimentadorInterno() {
         setIsModalOpen(false);
     };
 
-    // Funciones para el modal de asistencia rápida
-    const openAsistenciaModal = () => {
-        setIsAsistenciaModalOpen(true);
-    };
-
+    // Función para cerrar el modal de asistencia
     const closeAsistenciaModal = () => {
         setIsAsistenciaModalOpen(false);
     };
@@ -204,7 +237,6 @@ function AlimentadorInterno() {
         navigate('/alimentador_login');
     };
 
-
     return (
         <div className="w-screen h-screen bg-baseazul flex">
             <div className="w-[6%] h-screen bg-baseazul flex items-center justify-center relative">
@@ -290,17 +322,18 @@ function AlimentadorInterno() {
                     </div>
                 </div>
 
-                {/* Preguntas frecuentes */}
-                <div className='w-[100%] h-[10%] flex items-center justify-center'>
-                    <button className='pf-uf' onClick={openAsistenciaModal}>
-                        Asistencia Rápida
-                    </button>
-                </div>
-
                 {/* Resultados */}
                 <div className='flex items-center justify-center'>
                     <div className='resultados-final w-[95%] h-[50%] mt-3 overflow-y-auto'>
-                        {filtroPublicacion.trim() === '' ? (
+                        {isLoading ? (
+                            <div className="flex justify-center items-center h-32 text-coloralternodos">
+                                Cargando publicaciones...
+                            </div>
+                        ) : error ? (
+                            <div className="flex justify-center items-center h-32 text-red-500">
+                                {error}
+                            </div>
+                        ) : filtroPublicacion.trim() === '' ? (
                             <div className="flex justify-center items-center h-32 text-gray-500">
                             </div>
                         ) : resultadosFiltrados.length === 0 ? (
@@ -330,42 +363,54 @@ function AlimentadorInterno() {
                                                 <BiChevronDownCircle className='text-basenaranja' />
                                             </button>
                                         </div>
-
-                                        <div className='copiar-articulo w-[10%] flex items-center justify-center text-4xl'>
-                                            <button>
-                                                <FaCreativeCommonsShare className='text-baseazul' title='Copiar Enlace' />
-                                            </button>
-                                        </div>
                                     </div>
 
                                     <div
-                                        className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
+                                        className={`transition-all duration-300 overflow-hidden overflow-y-auto ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
                                             }`}
                                     >
                                         <div className="descripcion p-2 h-[120px]">
-                                            <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
+                                            <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion || "No hay descripción disponible"}</span></p>
                                         </div>
                                         <div className="palabras-clave p-2 h-[100px]">
-                                            <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-[20px]'>{publicacion.palabrasClave}</span></p>
-                                        </div>
-                                        <div className='flex'>
-                                            <div className="documentos p-2 w-[40%] h-[80px]">
-                                                <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
+                                            <p className='titulos-resultados text-xl'>Palabras Clave:</p>
+                                            <div className='flex flex-wrap gap-2'>
+                                                {publicacion.palabrasClave ? (
+                                                    publicacion.palabrasClave.split(',').map((kw, index) => (
+                                                        <span key={index} className='text-baseblanco text-sm bg-baseazul px-2 py-1 rounded-lg'>
+                                                            {kw.trim()}
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span className='text-basenaranja'>Sin palabras clave</span>
+                                                )}
                                             </div>
-                                            <div className="urls p-2 w-[40%] h-[80px]">
-                                                <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
+                                        </div>
+
+
+                                        <div className='flex'>
+                                            <div className="documentos p-2 w-1/2 h-[80px]">
+                                                <p className='titulos-resultados text-xl'>Documentos:</p>
+                                                <div className='flex flex-col'>
+                                                    <span className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                                        <IoDocumentOutline className='text-baseazul mr-2' />
+                                                        {publicacion.documentos || <span className='text-basenaranja'>Sin documentos</span>}
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            <div className='calificar p-2 w-[20%]'>
-                                                <p className='calificar-resultados text-xl text-baseazul'>Calificar:</p>
-                                                <div className="like-button">
-                                                    <input className="on" id={`heart-${publicacion.id}`} type="checkbox" />
-                                                    <label className="like" htmlFor={`heart-${publicacion.id}`}>
-                                                        <svg className="like-icon" fillRule="nonzero" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
-                                                        </svg>
-                                                        <span className="like-text">Likes</span>
-                                                    </label>
+                                            <div className="urls p-2 w-1/2 h-[80px]">
+                                                <p className='titulos-resultados text-xl'>Links:</p>
+                                                <div className='flex flex-col'>
+                                                    {publicacion.urls ? (
+                                                        publicacion.urls.split(/\s+/).map((linkUrl, index) => (
+                                                            <a key={index} href={linkUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline hover:text-baseazul">
+                                                                {linkUrl.trim()}
+                                                            </a>
+                                                        ))
+                                                    ) : (
+                                                        <span className='text-basenaranja'>No hay links</span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -477,46 +522,6 @@ function AlimentadorInterno() {
                                 )}
                             </div>
 
-                        </div>
-                    </div>
-                )}
-
-                {/* Modal de Asistencia Rápida */}
-                {isAsistenciaModalOpen && (
-                    <div className='modal-overlay-uf'>
-                        <div className='modal-content-uf'>
-                            {/* Botón de cerrar */}
-                            <div className='w-[100%] h-[8%] flex items-center justify-end'>
-                                <button className="BotonCerrar" onClick={closeAsistenciaModal}>
-                                    <IoIosCloseCircleOutline className='text-2xl' />
-                                </button>
-                            </div>
-
-                            {/* Título */}
-                            <div className='titulo-filtro-uf w-[100%] h-[15%] flex items-center justify-center text-3xl'>
-                                <h1>Asistencia Rápida</h1>
-                            </div>
-
-                            {/* Subtítulo */}
-                            <div className='w-[100%] h-[10%] flex items-center justify-center'>
-                                <h2 className='text-xl text-baseazul'>Preguntas más buscadas</h2>
-                            </div>
-
-                            {/* Lista de preguntas frecuentes */}
-                            <div className='w-[90%] mx-auto h-[65%] overflow-y-auto'>
-                                {preguntasFrecuentes.map((pregunta) => (
-                                    <div
-                                        key={pregunta.id}
-                                        className='p-4 my-3 bg-white border-l-4 border-basenaranja rounded-lg shadow-md cursor-pointer hover:bg-gray-50 transition-all'
-                                        onClick={() => handlePreguntaClick(pregunta.pregunta)}
-                                    >
-                                        <div className='flex items-center justify-between'>
-                                            <h3 className='text-lg font-medium'>{pregunta.pregunta}</h3>
-                                            <span className='bg-baseazul text-baseblanco px-2 py-1 rounded-full text-sm'>{pregunta.categoria}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
                         </div>
                     </div>
                 )}
