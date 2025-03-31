@@ -374,6 +374,290 @@ const AlimentadorPublicaciones = () => {
       alert('Ocurrió un error al guardar el artículo');
     }
   };
+
+  // Funciones de editar publicaciones
+
+  // Estados adicionales para edición
+  const [isEditPublicModalOpen, setIsEditPublicModalOpen] = useState(false);
+  const [isEditPrivateModalOpen, setIsEditPrivateModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    date: '',
+    topic: '',
+    description: '',
+    keywords: [],
+    files: [],
+    urls: []
+  });
+  const [editKeyword, setEditKeyword] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [isEditDropdownOpen, setIsEditDropdownOpen] = useState(false);
+  const [editSelectedCategory, setEditSelectedCategory] = useState('');
+
+  // Función para preparar la edición
+  const openEditModal = (publicacion) => {
+    setCurrentPublication(publicacion);
+
+    // Determinar si es público o privado
+    const isPublic = publicacion.hasOwnProperty('id_publico');
+
+    let keywords = [];
+    if (publicacion.palabras_clave) {
+      if (Array.isArray(publicacion.palabras_clave)) {
+        keywords = publicacion.palabras_clave;
+      } else if (typeof publicacion.palabras_clave === 'string') {
+        keywords = publicacion.palabras_clave.split(',').map(kw => kw.trim());
+      }
+    }
+
+    let urls = [];
+    if (publicacion.urls) {
+      if (Array.isArray(publicacion.urls)) {
+        urls = publicacion.urls;
+      } else if (typeof publicacion.urls === 'string') {
+        urls = publicacion.urls.split(',').map(url => url.trim());
+      }
+    }
+
+    setEditFormData({
+      date: publicacion.fecha_publicacion || publicacion.fecha_privada || new Date().toISOString().slice(0, 10),
+      topic: publicacion.tema_publico || publicacion.tema_privado || '',
+      description: publicacion.descripcion_publico || publicacion.descripcion_privada || '',
+      keywords: keywords,
+      files: publicacion.archivos || [],
+      urls: urls
+    });
+
+    setEditSelectedCategory(publicacion.categoria_publica || publicacion.categoria_privada || '');
+
+    if (isPublic) {
+      setIsEditPublicModalOpen(true);
+    } else {
+      setIsEditPrivateModalOpen(true);
+    }
+  };
+
+  // Funciones para manejar el dropdown de categorías en la edición
+  const toggleEditDropdown = () => {
+    setIsEditDropdownOpen(!isEditDropdownOpen);
+  };
+
+  const selectEditCategory = (categoria) => {
+    setEditSelectedCategory(categoria);
+    setIsEditDropdownOpen(false);
+  };
+
+  // Funciones para manejar palabras clave en la edición
+  const handleAddEditKeyword = () => {
+    if (editKeyword.trim()) {
+      setEditFormData({ ...editFormData, keywords: [...editFormData.keywords, editKeyword.trim()] });
+      setEditKeyword('');
+    }
+  };
+
+  const handleRemoveEditKeyword = (indexToRemove) => {
+    setEditFormData({
+      ...editFormData,
+      keywords: editFormData.keywords.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  // Funciones para manejar URLs en la edición
+  const handleAddEditUrl = () => {
+    if (editUrl.trim()) {
+      setEditFormData({ ...editFormData, urls: [...editFormData.urls, editUrl.trim()] });
+      setEditUrl('');
+    }
+  };
+
+  const handleRemoveEditUrl = (indexToRemove) => {
+    setEditFormData({
+      ...editFormData,
+      urls: editFormData.urls.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  // Funciones para manejar archivos en la edición
+  const handleEditFileChange = (e) => {
+    const newFiles = Array.from(e.target.files);
+    const acceptedFileTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel'
+    ];
+
+    const validFiles = newFiles.filter(file =>
+      acceptedFileTypes.includes(file.type) && file.size <= 5 * 1024 * 1024
+    );
+
+    setEditFormData({ ...editFormData, files: [...editFormData.files, ...validFiles] });
+  };
+
+  const handleRemoveEditFile = (indexToRemove) => {
+    setEditFormData({
+      ...editFormData,
+      files: editFormData.files.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  // Funciones para cerrar modales de edición
+  const closeEditPublicModal = () => {
+    setIsEditPublicModalOpen(false);
+    setCurrentPublication(null);
+  };
+
+  const closeEditPrivateModal = () => {
+    setIsEditPrivateModalOpen(false);
+    setCurrentPublication(null);
+  };
+
+  // Enviar datos
+
+  const handleUpdatePublic = async (id) => {
+    if (!editFormData.topic || !editSelectedCategory || !editFormData.description) {
+      alert('Por favor, complete los campos obligatorios');
+      return;
+    }
+  
+    const submissionData = {
+      id: id,
+      topic: editFormData.topic,
+      category: editSelectedCategory,
+      description: editFormData.description || null,
+      keywords: editFormData.keywords,
+      urls: editFormData.urls
+    };
+  
+    console.log('Datos a enviar:', submissionData);
+  
+    const formDataUpload = new FormData();
+    Object.keys(submissionData).forEach(key => {
+      if (submissionData[key] !== null) {
+        if (Array.isArray(submissionData[key])) {
+          submissionData[key].forEach(item => {
+            formDataUpload.append(key + '[]', item);
+          });
+        } else {
+          formDataUpload.append(key, submissionData[key]);
+        }
+      }
+    });
+  
+    // Agregar archivos nuevos
+    const newFiles = editFormData.files.filter(file => !(typeof file === 'string'));
+    newFiles.forEach((file) => {
+      formDataUpload.append('files[]', file);
+    });
+  
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/actualizar_articulos_publicos.php', {
+        method: 'POST',
+        body: formDataUpload
+      });
+      
+      const responseText = await response.text(); // Obtener la respuesta como texto
+      console.log('Respuesta del servidor:', responseText); // Verificar el contenido
+      
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta del servidor: ${responseText}`);
+      }
+      
+      const result = JSON.parse(responseText); // Parseo solo si es JSON
+  
+      if (result.status === 'success') {
+        Swal.fire({
+          title: "Publicación Actualizada Correctamente",
+          icon: "success",
+          color: '#000',
+          confirmButtonColor: "#ED6B06",
+          draggable: true
+        });
+  
+        closeEditPublicModal();
+        fetchPublicaciones(); // Actualizar la lista de publicaciones
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Ocurrió un error al actualizar el artículo');
+    }
+  };
+
+  // Privado
+
+  const handleUpdatePrivate = async (id) => {
+    if (!editFormData.topic || !editSelectedCategory || !editFormData.description) {
+      alert('Por favor, complete los campos obligatorios');
+      return;
+    }
+  
+    const submissionData = {
+      id: id,
+      topic: editFormData.topic,
+      category: editSelectedCategory,
+      description: editFormData.description || null,
+      keywords: editFormData.keywords,
+      urls: editFormData.urls
+    };
+  
+    console.log('Datos a enviar:', submissionData);
+  
+    const formDataUpload = new FormData();
+    Object.keys(submissionData).forEach(key => {
+      if (submissionData[key] !== null) {
+        if (Array.isArray(submissionData[key])) {
+          submissionData[key].forEach(item => {
+            formDataUpload.append(key + '[]', item);
+          });
+        } else {
+          formDataUpload.append(key, submissionData[key]);
+        }
+      }
+    });
+  
+    // Agregar archivos nuevos
+    const newFiles = editFormData.files.filter(file => !(typeof file === 'string'));
+    newFiles.forEach((file) => {
+      formDataUpload.append('files[]', file);
+    });
+  
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/actualizar_articulos_privados.php', {
+        method: 'POST',
+        body: formDataUpload
+      });
+      
+      const responseText = await response.text(); // Obtener la respuesta como texto
+      console.log('Respuesta del servidor:', responseText); // Verificar el contenido
+      
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta del servidor: ${responseText}`);
+      }
+      
+      const result = JSON.parse(responseText); // Parseo solo si es JSON
+  
+      if (result.status === 'success') {
+        Swal.fire({
+          title: "Publicación Actualizada Correctamente",
+          icon: "success",
+          color: '#000',
+          confirmButtonColor: "#ED6B06",
+          draggable: true
+        });
+  
+        closeEditPrivateModal();
+        fetchPublicaciones(); // Actualizar la lista de publicaciones
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Ocurrió un error al actualizar el artículo');
+    }
+  };
+
   return (
     <div>
       <div className='w-screen h-screen bg-baseazul flex'>
@@ -1041,6 +1325,436 @@ const AlimentadorPublicaciones = () => {
           </div>
         </div>
       )}
+
+{/* Modales para editar las publicaciones */}
+
+      {isEditPublicModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-publicaciones rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden">
+            <div className="px-4 py-3 flex justify-center items-center">
+              <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
+                Editar Artículo Público
+              </h2>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <form className="space-y-4">
+                <div className='flex gap-3'>
+                  <div className='w-[20%]'>
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
+                    <input
+                      type="text"
+                      value={editFormData.date}
+                      readOnly
+                      className="input-fecha"
+                    />
+                  </div>
+
+                  <div className="w-[50%]">
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
+                    <input
+                      type="text"
+                      name="topic"
+                      value={editFormData.topic}
+                      onChange={(e) => setEditFormData({ ...editFormData, topic: e.target.value })}
+                      placeholder="Escribe el tema"
+                      className="input-tema"
+                    />
+                  </div>
+
+                  <div className="w-[30%]">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
+                    <div className="relative">
+                      <div className="main" onClick={toggleEditDropdown}>
+                        {editSelectedCategory || 'Selecciona la categoría'}
+                        <input type="checkbox" className="inp" checked={isEditDropdownOpen} onChange={toggleEditDropdown} />
+                        <div className="bar">
+                          <span className="top bar-list"></span>
+                          <span className="middle bar-list"></span>
+                          <span className="bottom bar-list"></span>
+                        </div>
+
+                        {isEditDropdownOpen && (
+                          <div className="menu-container">
+                            <div className="menu-scroll">
+                              {categories.map((categoria, index) => (
+                                <div
+                                  key={index}
+                                  className="menu-list"
+                                  onClick={() => selectEditCategory(categoria)}
+                                >
+                                  {categoria}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='flex gap-3'>
+                  <div className='w-[100%]'>
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">
+                      Descripción
+                    </label>
+                    <textarea
+                      name="description"
+                      value={editFormData.description || ""}
+                      onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                      placeholder="Describe el contenido..."
+                      className="input-descripcion w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className='w-[50%]'>
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={editKeyword}
+                        onChange={(e) => setEditKeyword(e.target.value)}
+                        placeholder="Añadir palabra clave"
+                        className="input-palabra"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddEditKeyword())}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddEditKeyword}
+                        className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        <CgAdd className='text-xl' />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {editFormData.keywords.map((kw, index) => (
+                        <span key={index} className="bg-baseazul inline-flex items-center text-xs px-3 py-1 bg-gray-100 rounded-[20px] text-baseblanco">
+                          {kw}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEditKeyword(index)}
+                            className="ml-1 text-coloralternodos hover:text-baseblanco font-bold text-[15px]"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="w-[50%]">
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">URLs</label>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                        placeholder="Ingresa una URL"
+                        className="input-url"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddEditUrl())}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddEditUrl}
+                        className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                      >
+                        <CgAdd className='text-xl' />
+                      </button>
+                    </div>
+                    <div className="space-y-1">
+                      {editFormData.urls.map((linkUrl, index) => (
+                        <div key={index} className="flex items-center justify-between py-1 px-3 bg-gray-50 rounded text-sm">
+                          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
+                            {linkUrl}
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEditUrl(index)}
+                            className="text-baseazul hover:text-basenaranja font-bold text-[15px]"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-[37%]">
+                    <div className="container">
+                      <div className="folder">
+                        <div className="front-side">
+                          <div className="tip" />
+                          <div className="cover" />
+                        </div>
+                        <div className="back-side cover" />
+                      </div>
+                      <label className="custom-file-upload">
+                        <input
+                          className="title"
+                          type="file"
+                          onChange={handleEditFileChange}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          disabled={editFormData.files.length >= 2}
+                        />
+                        Seleccionar Archivos
+                      </label>
+                    </div>
+                    <div className='documento'>
+                      <p>PDF/WORD/EXCEL</p>
+                      <p>Menos de 5MB y solo 2 Archivos</p>
+                    </div>
+                  </div>
+                  <div className="files-container pl-4">
+                    {editFormData.files.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <GrDocumentUpdate className="file-icon text-xl" />
+                        <span className="file-name">{typeof file === 'string' ? file : file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditFile(index)}
+                          className="file-remove"
+                          aria-label="Eliminar archivo"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div className="px-4 py-3 flex justify-end gap-2">
+              <button className='cancelar' onClick={closeEditPublicModal}>
+                Cancelar
+              </button>
+              <button className='guardar' onClick={() => handleUpdatePublic(currentPublication.id_publico)}>
+                Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Privado */}
+
+
+      {isEditPrivateModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-privados rounded-lg shadow-xl w-[700px] h-[500px] flex flex-col overflow-hidden bg-baseblanco">
+            <div className="px-4 py-3 flex justify-center items-center">
+              <h2 className="text-3xl text-baseazul font-semibold text-gray-800">
+                Editar Artículo Privado
+              </h2>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <form className="space-y-4">
+                <div className='flex gap-3'>
+                  <div className='w-[20%]'>
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">Fecha publicada</label>
+                    <input
+                      type="text"
+                      value={editFormData.date}
+                      readOnly
+                      className="input-fecha"
+                    />
+                  </div>
+
+                  <div className="w-[50%]">
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">Tema</label>
+                    <input
+                      type="text"
+                      name="topic"
+                      value={editFormData.topic}
+                      onChange={(e) => setEditFormData({ ...editFormData, topic: e.target.value })}
+                      placeholder="Escribe el tema"
+                      className="input-tema"
+                    />
+                  </div>
+
+                  <div className="w-[30%]">
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
+                    <div className="relative">
+                      <div className="main" onClick={toggleEditDropdown}>
+                        {editSelectedCategory || 'Selecciona la categoría'}
+                        <input type="checkbox" className="inp" checked={isEditDropdownOpen} onChange={toggleEditDropdown} />
+                        <div className="bar">
+                          <span className="top bar-list"></span>
+                          <span className="middle bar-list"></span>
+                          <span className="bottom bar-list"></span>
+                        </div>
+
+                        {isEditDropdownOpen && (
+                          <div className="menu-container">
+                            <div className="menu-scroll">
+                              {categories.map((categoria, index) => (
+                                <div
+                                  key={index}
+                                  className="menu-list"
+                                  onClick={() => selectEditCategory(categoria)}
+                                >
+                                  {categoria}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className='flex gap-3'>
+                  <div className='w-[100%]'>
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">
+                      Descripción
+                    </label>
+                    <textarea
+                      name="description"
+                      value={editFormData.description || ""}
+                      onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                      placeholder="Describe el contenido..."
+                      className="input-descripcion w-full h-16 flex items-start justify-start px-2 py-1 text-sm rounded resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className='w-[50%]'>
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">Palabras clave</label>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={editKeyword}
+                        onChange={(e) => setEditKeyword(e.target.value)}
+                        placeholder="Añadir palabra clave"
+                        className="editar-palabra"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddEditKeyword())}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddEditKeyword}
+                        className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                        <CgAdd className='text-xl' />
+                      </button>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {editFormData.keywords.map((kw, index) => (
+                        <span key={index} className="bg-baseazul inline-flex items-center text-xs px-3 py-1 bg-gray-100 rounded-[20px] text-baseblanco">
+                          {kw}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEditKeyword(index)}
+                            className="ml-1 text-coloralternodos hover:text-baseblanco font-bold text-[15px]"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="w-[50%]">
+                    <label className="block text-[14px] font-bold text-gray-700 mb-1">URLs</label>
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={editUrl}
+                        onChange={(e) => setEditUrl(e.target.value)}
+                        placeholder="Ingresa una URL"
+                        className="editar-url"
+                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddEditUrl())}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddEditUrl}
+                        className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                      >
+                        <CgAdd className='text-xl' />
+                      </button>
+                    </div>
+                    <div className="space-y-1">
+                      {editFormData.urls.map((linkUrl, index) => (
+                        <div key={index} className="flex items-center justify-between py-1 px-3 bg-gray-50 rounded text-sm">
+                          <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
+                            {linkUrl}
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveEditUrl(index)}
+                            className="text-baseazul hover:text-basenaranja font-bold text-[15px]"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-[37%]">
+                    <div className="container">
+                      <div className="folder">
+                        <div className="front-side">
+                          <div className="tip" />
+                          <div className="cover" />
+                        </div>
+                        <div className="back-side cover" />
+                      </div>
+                      <label className="custom-file-upload">
+                        <input
+                          className="title"
+                          type="file"
+                          onChange={handleEditFileChange}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                          disabled={editFormData.files.length >= 2}
+                        />
+                        Seleccionar Archivos
+                      </label>
+                    </div>
+                    <div className='documento'>
+                      <p>PDF/WORD/EXCEL</p>
+                      <p>Menos de 5MB y solo 2 Archivos</p>
+                    </div>
+                  </div>
+                  <div className="files-container pl-4">
+                    {editFormData.files.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <GrDocumentUpdate className="file-icon text-xl" />
+                        <span className="file-name">{typeof file === 'string' ? file : file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEditFile(index)}
+                          className="file-remove"
+                          aria-label="Eliminar archivo"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div className="px-4 py-3 flex justify-end gap-2">
+              <button className='cancelar' onClick={closeEditPrivateModal}>
+                Cancelar
+              </button>
+              <button className='guardar' onClick={() => handleUpdatePrivate(currentPublication.id_privado)}>
+                Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
