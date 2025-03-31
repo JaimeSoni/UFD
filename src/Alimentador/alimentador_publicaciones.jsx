@@ -14,6 +14,7 @@ import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 // Iconos de los articulos
 import { BiChevronDownCircle } from "react-icons/bi";
 import { BiSolidEditAlt } from "react-icons/bi";
+import { IoDocumentOutline } from "react-icons/io5";
 
 //Icono de la busqueda no encontrada
 import { PiSmileySad } from "react-icons/pi";
@@ -537,7 +538,7 @@ const AlimentadorPublicaciones = () => {
                     className={`transition-all duration-300 overflow-hidden overflow-y-auto ${expandedId === (publicacion.id_publico || publicacion.id_privado) ? "max-h-[300px]" : "max-h-0"}`}
                   >
                     <div className="descripcion p-2 h-[120px]">
-                      <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion_publico || publicacion.descripcion_privado || 'Sin palabras clave'}</span></p>
+                      <p className='titulos-resultados text-xl'>Descripción: <br /> <span className='textos-resultados'>{publicacion.descripcion_publico || publicacion.descripcion_privada || 'Sin descripcion almacenada'}</span></p>
                     </div>
 
                     <div className="palabras-clave p-2 h-[100px]">
@@ -546,23 +547,33 @@ const AlimentadorPublicaciones = () => {
                         {(() => {
                           // Verifica si existe palabras_clave
                           if (!publicacion.palabras_clave) {
-                            return <span className='text-baseblanco'>Sin palabras clave</span>;
+                            return <span className='text-basenaranja'>Sin palabras clave</span>;
                           }
+
+                          let keywords = [];
+
                           if (Array.isArray(publicacion.palabras_clave)) {
-                            return publicacion.palabras_clave.map((kw, index) => (
-                              <span key={index} className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>
-                                {typeof kw === 'string' ? kw.trim() : kw}
-                              </span>
-                            ));
+                            keywords = publicacion.palabras_clave.map(kw =>
+                              typeof kw === 'string' ? kw.trim() : kw
+                            );
+                          } else if (typeof publicacion.palabras_clave === 'string' &&
+                            publicacion.palabras_clave.trim().length > 0) {
+                            keywords = publicacion.palabras_clave.split(',').map(kw => kw.trim());
                           }
-                          if (typeof publicacion.palabras_clave === 'string' && publicacion.palabras_clave.trim().length > 0) {
-                            return publicacion.palabras_clave.split(',').map((kw, index) => (
-                              <span key={index} className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-lg'>
-                                {kw.trim()}
-                              </span>
-                            ));
+
+                          if (keywords.length === 0) {
+                            return <span className='text-basenaranja'>Sin palabras clave</span>;
                           }
-                          return <span className='text-baseblanco'>Sin palabras clave</span>;
+
+                          return (
+                            <div className='flex flex-wrap gap-2'>
+                              {keywords.map((kw, index) => (
+                                <span key={index} className='text-baseblanco text-sm bg-baseazul px-2 py-1 rounded-lg'>
+                                  {kw}
+                                </span>
+                              ))}
+                            </div>
+                          );
                         })()}
                       </div>
                     </div>
@@ -573,10 +584,10 @@ const AlimentadorPublicaciones = () => {
                         <div className='flex flex-col'>
                           {Array.isArray(publicacion.archivos) && publicacion.archivos.length > 0 ? (
                             publicacion.archivos.map((archivo, index) => (
-                              <span key={index} className='text-blank'>{archivo.trim()}</span>
+                              <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'><IoDocumentOutline className='text-baseazul mr-2' />{archivo.trim()}</span>
                             ))
                           ) : (
-                            <span className='text-baseblanco'>Sin documentos</span>
+                            <span className='text-basenaranja'>Sin documentos</span>
                           )}
                         </div>
                       </div>
@@ -585,12 +596,12 @@ const AlimentadorPublicaciones = () => {
                         <div className='flex flex-col'>
                           {Array.isArray(publicacion.urls) && publicacion.urls.length > 0 ? (
                             publicacion.urls.map((linkUrl, index) => (
-                              <a key={index} href={linkUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline">
+                              <a key={index} href={linkUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline hover:text-baseazul">
                                 {linkUrl.trim()}
                               </a>
                             ))
                           ) : (
-                            <span className='text-baseblanco'>Sin URLs</span>
+                            <span className='text-basenaranja'>Sin URLs</span>
                           )}
                         </div>
                       </div>
