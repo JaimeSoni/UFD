@@ -400,39 +400,39 @@ const AlimentadorPublicaciones = () => {
     // Determinar si es público o privado
     const isPublic = publicacion.hasOwnProperty('id_publico');
 
-    let keywords = [];
-    if (publicacion.palabras_clave) {
-      if (Array.isArray(publicacion.palabras_clave)) {
-        keywords = publicacion.palabras_clave;
-      } else if (typeof publicacion.palabras_clave === 'string') {
-        keywords = publicacion.palabras_clave.split(',').map(kw => kw.trim());
-      }
-    }
+    // Extraer palabras clave y URLs
+    const keywords = Array.isArray(publicacion.palabras_clave) ? publicacion.palabras_clave : publicacion.palabras_clave.split(',').map(kw => kw.trim());
+    const urls = Array.isArray(publicacion.urls) ? publicacion.urls : publicacion.urls.split(',').map(url => url.trim());
 
-    let urls = [];
-    if (publicacion.urls) {
-      if (Array.isArray(publicacion.urls)) {
-        urls = publicacion.urls;
-      } else if (typeof publicacion.urls === 'string') {
-        urls = publicacion.urls.split(',').map(url => url.trim());
-      }
+    // Inicializar correctamente los archivos existentes
+    let existingFiles = [];
+    if (publicacion.archivos) {
+        if (Array.isArray(publicacion.archivos)) {
+            existingFiles = publicacion.archivos;
+        } else if (typeof publicacion.archivos === 'string' && publicacion.archivos.trim() !== '') {
+            try {
+                existingFiles = JSON.parse(publicacion.archivos);
+            } catch (e) {
+                existingFiles = publicacion.archivos.split(',').map(file => file.trim());
+            }
+        }
     }
 
     setEditFormData({
-      date: publicacion.fecha_publicacion || publicacion.fecha_privada || new Date().toISOString().slice(0, 10),
-      topic: publicacion.tema_publico || publicacion.tema_privado || '',
-      description: publicacion.descripcion_publico || publicacion.descripcion_privada || '',
-      keywords: keywords,
-      files: publicacion.archivos || [],
-      urls: urls
+        date: publicacion.fecha_publicacion || publicacion.fecha_privada || new Date().toISOString().slice(0, 10),
+        topic: publicacion.tema_publico || publicacion.tema_privado || '',
+        description: publicacion.descripcion_publico || publicacion.descripcion_privada || '',
+        keywords: keywords,
+        files: existingFiles, // Usar los archivos existentes correctamente formateados
+        urls: urls
     });
 
     setEditSelectedCategory(publicacion.categoria_publica || publicacion.categoria_privada || '');
 
     if (isPublic) {
-      setIsEditPublicModalOpen(true);
+        setIsEditPublicModalOpen(true);
     } else {
-      setIsEditPrivateModalOpen(true);
+        setIsEditPrivateModalOpen(true);
     }
   };
 
@@ -455,10 +455,10 @@ const AlimentadorPublicaciones = () => {
   };
 
   const handleRemoveEditKeyword = (indexToRemove) => {
-    setEditFormData({
-      ...editFormData,
-      keywords: editFormData.keywords.filter((_, index) => index !== indexToRemove)
-    });
+    setEditFormData(prevState => ({
+        ...prevState,
+        keywords: prevState.keywords.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   // Funciones para manejar URLs en la edición
@@ -491,14 +491,18 @@ const AlimentadorPublicaciones = () => {
       acceptedFileTypes.includes(file.type) && file.size <= 5 * 1024 * 1024
     );
 
-    setEditFormData({ ...editFormData, files: [...editFormData.files, ...validFiles] });
+    // Añadir nuevos archivos a los existentes
+    setEditFormData(prevState => ({
+      ...prevState,
+      files: [...prevState.files, ...validFiles]
+    }));
   };
 
   const handleRemoveEditFile = (indexToRemove) => {
-    setEditFormData({
-      ...editFormData,
-      files: editFormData.files.filter((_, index) => index !== indexToRemove)
-    });
+    setEditFormData(prevState => ({
+      ...prevState,
+      files: prevState.files.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   // Funciones para cerrar modales de edición
@@ -513,7 +517,6 @@ const AlimentadorPublicaciones = () => {
   };
 
   // Enviar datos
-
   const handleUpdatePublic = async (id) => {
     if (!editFormData.topic || !editSelectedCategory || !editFormData.description) {
       alert('Por favor, complete los campos obligatorios');
@@ -535,19 +538,22 @@ const AlimentadorPublicaciones = () => {
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
         if (Array.isArray(submissionData[key])) {
-          submissionData[key].forEach(item => {
-            formDataUpload.append(key + '[]', item);
-          });
+          formDataUpload.append(key, JSON.stringify(submissionData[key]));
         } else {
           formDataUpload.append(key, submissionData[key]);
         }
       }
     });
   
-    // Agregar archivos nuevos
-    const newFiles = editFormData.files.filter(file => !(typeof file === 'string'));
-    newFiles.forEach((file) => {
-      formDataUpload.append('files[]', file);
+    // Manejar todos los archivos - tanto nuevos como existentes
+    editFormData.files.forEach((file, index) => {
+      if (file instanceof File) {
+        // Nuevo archivo
+        formDataUpload.append('files[]', file);
+      } else {
+        // Archivo existente - enviar el identificador del archivo
+        formDataUpload.append('existing_files[]', typeof file === 'string' ? file : file.filename || file.name || JSON.stringify(file));
+      }
     });
   
     try {
@@ -563,7 +569,12 @@ const AlimentadorPublicaciones = () => {
         throw new Error(`Error en la respuesta del servidor: ${responseText}`);
       }
       
-      const result = JSON.parse(responseText); // Parseo solo si es JSON
+      let result;
+      try {
+        result = JSON.parse(responseText); // Parseo solo si es JSON
+      } catch (e) {
+        throw new Error(`Error al parsear la respuesta: ${responseText}`);
+      }
   
       if (result.status === 'success') {
         Swal.fire({
@@ -575,7 +586,9 @@ const AlimentadorPublicaciones = () => {
         });
   
         closeEditPublicModal();
-        fetchPublicaciones(); // Actualizar la lista de publicaciones
+        // Actualizar la lista de publicaciones
+        await fetchPublicaciones();
+        await fetchPublicacionesPrivadas();
       } else {
         alert(`Error: ${result.message}`);
       }
@@ -586,7 +599,6 @@ const AlimentadorPublicaciones = () => {
   };
 
   // Privado
-
   const handleUpdatePrivate = async (id) => {
     if (!editFormData.topic || !editSelectedCategory || !editFormData.description) {
       alert('Por favor, complete los campos obligatorios');
@@ -608,19 +620,22 @@ const AlimentadorPublicaciones = () => {
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
         if (Array.isArray(submissionData[key])) {
-          submissionData[key].forEach(item => {
-            formDataUpload.append(key + '[]', item);
-          });
+          formDataUpload.append(key, JSON.stringify(submissionData[key]));
         } else {
           formDataUpload.append(key, submissionData[key]);
         }
       }
     });
   
-    // Agregar archivos nuevos
-    const newFiles = editFormData.files.filter(file => !(typeof file === 'string'));
-    newFiles.forEach((file) => {
-      formDataUpload.append('files[]', file);
+    // Manejar todos los archivos - tanto nuevos como existentes
+    editFormData.files.forEach((file, index) => {
+      if (file instanceof File) {
+        // Nuevo archivo
+        formDataUpload.append('files[]', file);
+      } else {
+        // Archivo existente - enviar el identificador del archivo
+        formDataUpload.append('existing_files[]', typeof file === 'string' ? file : file.filename || file.name || JSON.stringify(file));
+      }
     });
   
     try {
@@ -636,7 +651,12 @@ const AlimentadorPublicaciones = () => {
         throw new Error(`Error en la respuesta del servidor: ${responseText}`);
       }
       
-      const result = JSON.parse(responseText); // Parseo solo si es JSON
+      let result;
+      try {
+        result = JSON.parse(responseText); // Parseo solo si es JSON
+      } catch (e) {
+        throw new Error(`Error al parsear la respuesta: ${responseText}`);
+      }
   
       if (result.status === 'success') {
         Swal.fire({
@@ -648,7 +668,9 @@ const AlimentadorPublicaciones = () => {
         });
   
         closeEditPrivateModal();
-        fetchPublicaciones(); // Actualizar la lista de publicaciones
+        // Actualizar la lista de publicaciones
+        await fetchPublicacionesPrivadas();
+        await fetchPublicaciones();
       } else {
         alert(`Error: ${result.message}`);
       }
@@ -657,6 +679,7 @@ const AlimentadorPublicaciones = () => {
       alert('Ocurrió un error al actualizar el artículo');
     }
   };
+
 
   return (
     <div>
@@ -806,7 +829,7 @@ const AlimentadorPublicaciones = () => {
                     </div>
 
                     <div className='expandir-contraer w-[10%] flex items-center justify-center text-4xl'>
-                      <button className='icono-expandir-articulo' onClick={() => toggleExpand(publicacion.id_publico || publicacion.id_privado)}>
+                      <button className='icono-final' onClick={() => toggleExpand(publicacion.id_publico || publicacion.id_privado)}>
                         <BiChevronDownCircle className='text-basenaranja' />
                       </button>
                     </div>
