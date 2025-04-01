@@ -407,32 +407,32 @@ const AlimentadorPublicaciones = () => {
     // Inicializar correctamente los archivos existentes
     let existingFiles = [];
     if (publicacion.archivos) {
-        if (Array.isArray(publicacion.archivos)) {
-            existingFiles = publicacion.archivos;
-        } else if (typeof publicacion.archivos === 'string' && publicacion.archivos.trim() !== '') {
-            try {
-                existingFiles = JSON.parse(publicacion.archivos);
-            } catch (e) {
-                existingFiles = publicacion.archivos.split(',').map(file => file.trim());
-            }
+      if (Array.isArray(publicacion.archivos)) {
+        existingFiles = publicacion.archivos;
+      } else if (typeof publicacion.archivos === 'string' && publicacion.archivos.trim() !== '') {
+        try {
+          existingFiles = JSON.parse(publicacion.archivos);
+        } catch (e) {
+          existingFiles = publicacion.archivos.split(',').map(file => file.trim());
         }
+      }
     }
 
     setEditFormData({
-        date: publicacion.fecha_publicacion || publicacion.fecha_privada || new Date().toISOString().slice(0, 10),
-        topic: publicacion.tema_publico || publicacion.tema_privado || '',
-        description: publicacion.descripcion_publico || publicacion.descripcion_privada || '',
-        keywords: keywords,
-        files: existingFiles, // Usar los archivos existentes correctamente formateados
-        urls: urls
+      date: publicacion.fecha_publicacion || publicacion.fecha_privada || new Date().toISOString().slice(0, 10),
+      topic: publicacion.tema_publico || publicacion.tema_privado || '',
+      description: publicacion.descripcion_publico || publicacion.descripcion_privada || '',
+      keywords: keywords,
+      files: existingFiles, // Usar los archivos existentes correctamente formateados
+      urls: urls
     });
 
     setEditSelectedCategory(publicacion.categoria_publica || publicacion.categoria_privada || '');
 
     if (isPublic) {
-        setIsEditPublicModalOpen(true);
+      setIsEditPublicModalOpen(true);
     } else {
-        setIsEditPrivateModalOpen(true);
+      setIsEditPrivateModalOpen(true);
     }
   };
 
@@ -456,8 +456,8 @@ const AlimentadorPublicaciones = () => {
 
   const handleRemoveEditKeyword = (indexToRemove) => {
     setEditFormData(prevState => ({
-        ...prevState,
-        keywords: prevState.keywords.filter((_, index) => index !== indexToRemove)
+      ...prevState,
+      keywords: prevState.keywords.filter((_, index) => index !== indexToRemove)
     }));
   };
 
@@ -522,19 +522,18 @@ const AlimentadorPublicaciones = () => {
       alert('Por favor, complete los campos obligatorios');
       return;
     }
-  
+
     const submissionData = {
       id: id,
       topic: editFormData.topic,
       category: editSelectedCategory,
       description: editFormData.description || null,
       keywords: editFormData.keywords,
-      urls: editFormData.urls,
-      files: editFormData.files
+      urls: editFormData.urls
     };
-  
+
     console.log('Datos a enviar:', submissionData);
-  
+
     const formDataUpload = new FormData();
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
@@ -545,38 +544,43 @@ const AlimentadorPublicaciones = () => {
         }
       }
     });
-  
-    // Manejar todos los archivos - tanto nuevos como existentes
-    editFormData.files.forEach((file, index) => {
-      if (file instanceof File) {
-        // Nuevo archivo
-        formDataUpload.append('files[]', file);
-      } else {
-        // Archivo existente - enviar el identificador del archivo
-        formDataUpload.append('existing_files[]', typeof file === 'string' ? file : file.filename || file.name || JSON.stringify(file));
-      }
+
+    const existingFiles = editFormData.files.filter(file => !(file instanceof File));
+    formDataUpload.append('existing_files', JSON.stringify(existingFiles));
+
+    // Handle new files
+    const newFiles = editFormData.files.filter(file => file instanceof File);
+    newFiles.forEach(file => {
+      formDataUpload.append('files[]', file);
     });
-  
+
+    try {
+      // Rest of your code...
+    } catch (error) {
+      // Error handling...
+    }
+
+
     try {
       const response = await fetch('http://localhost/UFD/src/BackEnd/actualizar_articulos_publicos.php', {
         method: 'POST',
         body: formDataUpload
       });
-      
+
       const responseText = await response.text(); // Obtener la respuesta como texto
       console.log('Respuesta del servidor:', responseText); // Verificar el contenido
-      
+
       if (!response.ok) {
         throw new Error(`Error en la respuesta del servidor: ${responseText}`);
       }
-      
+
       let result;
       try {
         result = JSON.parse(responseText); // Parseo solo si es JSON
       } catch (e) {
         throw new Error(`Error al parsear la respuesta: ${responseText}`);
       }
-  
+
       if (result.status === 'success') {
         Swal.fire({
           title: "Publicación Actualizada Correctamente",
@@ -585,7 +589,7 @@ const AlimentadorPublicaciones = () => {
           confirmButtonColor: "#ED6B06",
           draggable: true
         });
-  
+
         closeEditPublicModal();
         // Actualizar la lista de publicaciones
         await fetchPublicaciones();
@@ -605,7 +609,7 @@ const AlimentadorPublicaciones = () => {
       alert('Por favor, complete los campos obligatorios');
       return;
     }
-  
+
     const submissionData = {
       id: id,
       topic: editFormData.topic,
@@ -615,9 +619,9 @@ const AlimentadorPublicaciones = () => {
       urls: editFormData.urls,
       files: editFormData.files
     };
-  
+
     console.log('Datos a enviar:', submissionData);
-  
+
     const formDataUpload = new FormData();
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
@@ -628,7 +632,7 @@ const AlimentadorPublicaciones = () => {
         }
       }
     });
-  
+
     // Manejar todos los archivos - tanto nuevos como existentes
     editFormData.files.forEach((file, index) => {
       if (file instanceof File) {
@@ -639,27 +643,27 @@ const AlimentadorPublicaciones = () => {
         formDataUpload.append('existing_files[]', typeof file === 'string' ? file : file.filename || file.name || JSON.stringify(file));
       }
     });
-  
+
     try {
       const response = await fetch('http://localhost/UFD/src/BackEnd/actualizar_articulos_privados.php', {
         method: 'POST',
         body: formDataUpload
       });
-      
+
       const responseText = await response.text(); // Obtener la respuesta como texto
       console.log('Respuesta del servidor:', responseText); // Verificar el contenido
-      
+
       if (!response.ok) {
         throw new Error(`Error en la respuesta del servidor: ${responseText}`);
       }
-      
+
       let result;
       try {
         result = JSON.parse(responseText); // Parseo solo si es JSON
       } catch (e) {
         throw new Error(`Error al parsear la respuesta: ${responseText}`);
       }
-  
+
       if (result.status === 'success') {
         Swal.fire({
           title: "Publicación Actualizada Correctamente",
@@ -668,7 +672,7 @@ const AlimentadorPublicaciones = () => {
           confirmButtonColor: "#ED6B06",
           draggable: true
         });
-  
+
         closeEditPrivateModal();
         // Actualizar la lista de publicaciones
         await fetchPublicacionesPrivadas();
@@ -1351,7 +1355,7 @@ const AlimentadorPublicaciones = () => {
         </div>
       )}
 
-{/* Modales para editar las publicaciones */}
+      {/* Modales para editar las publicaciones */}
 
       {isEditPublicModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

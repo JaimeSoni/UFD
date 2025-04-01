@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Combine existing and new files, with a maximum of 2 files total
-            $archivos = !empty($archivos) ? explode(',', $archivos) : [];
+            $archivos = !empty($archivos) ? (is_string($archivos) ? explode(',', $archivos) : $archivos) : [];
             $allFiles = array_merge($archivos, $newFiles);
             if (count($allFiles) > 2) {
                 $allFiles = array_slice($allFiles, -2); // Keep the two most recent files
