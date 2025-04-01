@@ -616,13 +616,12 @@ const AlimentadorPublicaciones = () => {
       category: editSelectedCategory,
       description: editFormData.description || null,
       keywords: editFormData.keywords,
-      urls: editFormData.urls,
-      files: editFormData.files
+      urls: editFormData.urls
     };
 
-    console.log('Datos a enviar:', submissionData);
-
     const formDataUpload = new FormData();
+
+    // Agregar datos simples
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
         if (Array.isArray(submissionData[key])) {
@@ -633,15 +632,16 @@ const AlimentadorPublicaciones = () => {
       }
     });
 
-    // Manejar todos los archivos - tanto nuevos como existentes
-    editFormData.files.forEach((file, index) => {
-      if (file instanceof File) {
-        // Nuevo archivo
-        formDataUpload.append('files[]', file);
-      } else {
-        // Archivo existente - enviar el identificador del archivo
-        formDataUpload.append('existing_files[]', typeof file === 'string' ? file : file.filename || file.name || JSON.stringify(file));
-      }
+    // Separar archivos existentes de nuevos
+    const existingFiles = editFormData.files.filter(file => !(file instanceof File));
+    const newFiles = editFormData.files.filter(file => file instanceof File);
+
+    // Agregar archivos existentes como JSON
+    formDataUpload.append('existing_files', JSON.stringify(existingFiles));
+
+    // Agregar nuevos archivos
+    newFiles.forEach(file => {
+      formDataUpload.append('files[]', file);
     });
 
     try {
@@ -650,19 +650,7 @@ const AlimentadorPublicaciones = () => {
         body: formDataUpload
       });
 
-      const responseText = await response.text(); // Obtener la respuesta como texto
-      console.log('Respuesta del servidor:', responseText); // Verificar el contenido
-
-      if (!response.ok) {
-        throw new Error(`Error en la respuesta del servidor: ${responseText}`);
-      }
-
-      let result;
-      try {
-        result = JSON.parse(responseText); // Parseo solo si es JSON
-      } catch (e) {
-        throw new Error(`Error al parsear la respuesta: ${responseText}`);
-      }
+      const result = await response.json();
 
       if (result.status === 'success') {
         Swal.fire({
@@ -672,6 +660,14 @@ const AlimentadorPublicaciones = () => {
           confirmButtonColor: "#ED6B06",
           draggable: true
         });
+
+        // Actualizar el estado con los archivos devueltos por el servidor
+        if (result.archivos) {
+          setEditFormData(prev => ({
+            ...prev,
+            files: result.archivos
+          }));
+        }
 
         closeEditPrivateModal();
         // Actualizar la lista de publicaciones
@@ -895,11 +891,41 @@ const AlimentadorPublicaciones = () => {
                       <div className="documentos p-2 w-1/2 h-[80px]">
                         <p className='titulos-resultados text-xl'>Documentos:</p>
                         <div className='flex flex-col'>
-                          {Array.isArray(publicacion.archivos) && publicacion.archivos.length > 0 ? (
-                            publicacion.archivos.map((archivo, index) => (
-                              <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'><IoDocumentOutline className='text-baseazul mr-2' />{archivo.trim()}</span>
-                            ))
-                          ) : (
+                          {publicacion.archivos && publicacion.archivos.length > 0 ? (
+                            // Manejar tanto arrays como strings JSON
+                            (Array.isArray(publicacion.archivos) ?
+                              publicacion.archivos.map((archivo, index) => (
+                                <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                  <IoDocumentOutline className='text-baseazul mr-2' />
+                                  {typeof archivo === 'object' ? archivo.name || archivo.filename : archivo}
+                                </span>
+                              ))
+                              : (
+                                // Si es un string, intentar parsear como JSON
+                                (() => {
+                                  try {
+                                    const parsedFiles = JSON.parse(publicacion.archivos);
+                                    return Array.isArray(parsedFiles) ?
+                                      parsedFiles.map((archivo, index) => (
+                                        <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                          <IoDocumentOutline className='text-baseazul mr-2' />
+                                          {typeof archivo === 'object' ? archivo.name || archivo.filename : archivo}
+                                        </span>
+                                      ))
+                                      : <span className='text-basenaranja'>Formato de archivos inválido</span>;
+                                  } catch (e) {
+                                    // Si no es JSON válido, mostrar como string simple
+                                    return (
+                                      <span className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                        <IoDocumentOutline className='text-baseazul mr-2' />
+                                        {publicacion.archivos}
+                                      </span>
+                                    );
+                                  }
+                                })()
+                              )
+                            )
+                            ) : (
                             <span className='text-basenaranja'>Sin documentos</span>
                           )}
                         </div>

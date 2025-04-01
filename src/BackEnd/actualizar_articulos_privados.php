@@ -1,29 +1,18 @@
 <?php
-
-ob_clean(); // Limpia cualquier salida previa
-header('Content-Type: application/json');
-
-// Enable CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit(0);
-}
+header('Content-Type: application/json');
 
 // Database connection
 $servername = "localhost";
-$username = "root"; // Replace with your DB username
-$password = ""; // Replace with your DB password
-$dbname = "ufd"; // Replace with your DB name
+$username = "root";
+$password = "";
+$dbname = "ufd";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 $conn->set_charset("utf8");
 
-// Check connection
 if ($conn->connect_error) {
     die(json_encode([
         "status" => "error",
@@ -31,145 +20,99 @@ if ($conn->connect_error) {
     ]));
 }
 
-// Process the request
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Retrieve data with the correct field names
-    $postId = isset($_POST['id']) ? $_POST['id'] : null;
-    $tema = isset($_POST['topic']) ? $_POST['topic'] : null;
-    $categoria = isset($_POST['category']) ? $_POST['category'] : null;
-    $descripcion = isset($_POST['description']) ? $_POST['description'] : null;
-
-    // Handle arrays (standard format and array format)
-    $palabras_clave = isset($_POST['keywords']) ? (array)$_POST['keywords'] : [];
-    $urls = isset($_POST['urls']) ? (array)$_POST['urls'] : [];
-    $archivos = isset($_POST['files']) ? (array)$_POST['files'] : [];
+    // Obtener datos del formulario
+    $postId = $_POST['id'] ?? null;
+    $tema = $_POST['topic'] ?? null;
+    $categoria = $_POST['category'] ?? null;
+    $descripcion = $_POST['description'] ?? null;
     
-
-    // Set date to current if not provided
-    $date = isset($_POST['fecha_publicacion']) ? $_POST['fecha_publicacion'] : date('Y-m-d');
-
-    // Check required fields
-    if (!$postId || !$tema || !$categoria) {
-        echo json_encode([
-            "status" => "error",
-            "message" => "Missing required fields"
-        ]);
-        exit;
+    // Procesar palabras clave y URLs
+    $palabras_clave = isset($_POST['keywords']) ? 
+        (is_string($_POST['keywords']) ? json_decode($_POST['keywords'], true) : $_POST['keywords']) : [];
+    $urls = isset($_POST['urls']) ? 
+        (is_string($_POST['urls']) ? json_decode($_POST['urls'], true) : $_POST['urls']) : [];
+    
+    // Procesar archivos existentes
+    $existingFiles = isset($_POST['existing_files']) ? 
+        (is_string($_POST['existing_files']) ? json_decode($_POST['existing_files'], true) : $_POST['existing_files']) : [];
+    
+    // Directorio para subir archivos
+    $uploadDir = 'uploads/';
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
     }
-
-    // Convert arrays to strings for storage
-    $palabras_clave_str = implode(',', $palabras_clave);
-    $urls_str = implode(',', $urls);
-    $archivos_str = implode(',', $archivos);
-
-    // Start transaction
-    $conn->begin_transaction();
-
-    try {
-        $stmt = $conn->prepare("UPDATE articulos_privados SET 
-        fecha_publicacion = ?, 
-        tema = ?, 
-        categoria = ?, 
-        descripcion = ?, 
-        palabras_clave = ?, 
-        urls = ?, 
-        archivos = ?, 
-        fecha_actualizacion = CURRENT_TIMESTAMP 
-        WHERE id = ?");
     
-    $stmt->bind_param(
-        "sssssssi",
-        $date,
-        $tema,
-        $categoria,
-        $descripcion,
-        $palabras_clave_str,
-        $urls_str,
-        $archivos_str,
-        $postId
-    );
-    
-    if (!$stmt->execute()) {
-        throw new Exception("Error updating article: " . $stmt->error);
-    }
-
-        // Process files if there are new ones
-        if (!empty($_FILES['files']['name'][0])) {
-            $uploadDir = '../uploads/';
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            $newFiles = [];
-
-            // Upload new files
-            $fileCount = count($_FILES['files']['name']);
-            for ($i = 0; $i < $fileCount; $i++) {
-                $fileName = $_FILES['files']['name'][$i];
-                $tmpName = $_FILES['files']['tmp_name'][$i];
-                $fileType = $_FILES['files']['type'][$i];
-                $fileSize = $_FILES['files']['size'][$i];
-
-                // Check file type and size
-                $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-                $maxSize = 5 * 1024 * 1024; // 5MB
-
-                if (!in_array($fileType, $allowedTypes) || $fileSize > $maxSize) {
-                    continue;
-                }
-
+    // Procesar nuevos archivos
+    $newFiles = [];
+    if (!empty($_FILES['files']['name'][0])) {
+        foreach ($_FILES['files']['tmp_name'] as $key => $tmpName) {
+            $fileName = $_FILES['files']['name'][$key];
+            $fileType = $_FILES['files']['type'][$key];
+            $fileSize = $_FILES['files']['size'][$key];
+            
+            // Validar tipo y tamaño
+            $allowedTypes = ['application/pdf', 'application/msword', 
+                           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                           'application/vnd.ms-excel', 
+                           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+            
+            if (in_array($fileType, $allowedTypes) && $fileSize <= 5 * 1024 * 1024) {
                 $newFileName = uniqid() . '_' . $fileName;
                 if (move_uploaded_file($tmpName, $uploadDir . $newFileName)) {
                     $newFiles[] = $newFileName;
                 }
             }
-
-            // Combine existing and new files, with a maximum of 2 files total
-            $archivos = !empty($archivos) ? (is_string($archivos) ? explode(',', $archivos) : $archivos) : [];
-            $allFiles = array_merge($archivos, $newFiles);
-            if (count($allFiles) > 2) {
-                $allFiles = array_slice($allFiles, -2); // Keep the two most recent files
-            }
-
-            $filesStr = implode(',', $allFiles);
-
-            // Update files in database
-            $stmtUpdateFiles = $conn->prepare("UPDATE articulos_privados SET archivos = ? WHERE id = ?");
-            $stmtUpdateFiles->bind_param("si", $filesStr, $postId);
-
-            if (!$stmtUpdateFiles->execute()) {
-                throw new Exception("Error updating files: " . $stmtUpdateFiles->error);
-            }
         }
-
-        // Commit transaction
-        $conn->commit();
-
+    }
+    
+    // Combinar archivos existentes y nuevos (máximo 2)
+    $allFiles = array_merge($existingFiles, $newFiles);
+    if (count($allFiles) > 2) {
+        $allFiles = array_slice($allFiles, 0, 2);
+    }
+    
+    // Convertir a JSON para almacenar
+    $palabras_clave_json = json_encode($palabras_clave);
+    $urls_json = json_encode($urls);
+    $archivos_json = json_encode($allFiles);
+    
+    // Actualizar en la base de datos
+    $stmt = $conn->prepare("UPDATE articulos_privados SET 
+        tema = ?, 
+        categoria = ?, 
+        descripcion = ?, 
+        palabras_clave = ?, 
+        urls = ?, 
+        archivos = ?,
+        fecha_actualizacion = NOW()
+        WHERE id = ?");
+    
+    $stmt->bind_param("ssssssi", 
+        $tema, $categoria, $descripcion, 
+        $palabras_clave_json, $urls_json, $archivos_json, 
+        $postId);
+    
+    if ($stmt->execute()) {
         echo json_encode([
             "status" => "success",
-            "message" => "Article updated successfully",
-            "id" => $postId
+            "message" => "Artículo actualizado correctamente",
+            "archivos" => $allFiles // Devolver la lista actualizada de archivos
         ]);
-
-    } catch (Exception $e) {
-        // Rollback on error
-        $conn->rollback();
+    } else {
         echo json_encode([
             "status" => "error",
-            "message" => $e->getMessage()
+            "message" => "Error al actualizar: " . $stmt->error
         ]);
     }
-
-    // Close the connection
+    
     $stmt->close();
-    $conn->close();
-
 } else {
     echo json_encode([
         "status" => "error",
-        "message" => "Invalid request method"
+        "message" => "Método no permitido"
     ]);
 }
 
-exit;
+$conn->close();
 ?>
