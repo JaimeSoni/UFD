@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle arrays (standard format and array format)
     $palabras_clave = isset($_POST['keywords']) ? (array)$_POST['keywords'] : [];
     $urls = isset($_POST['urls']) ? (array)$_POST['urls'] : [];
-    $archivos = isset($_POST['archivos']) ? (array)$_POST['archivos'] : [];
+    $archivos = isset($_POST['files']) ? (array)$_POST['files'] : [];
 
     // Set date to current if not provided
     $date = isset($_POST['fecha_publicacion']) ? $_POST['fecha_publicacion'] : date('Y-m-d');

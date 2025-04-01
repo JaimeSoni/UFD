@@ -529,7 +529,8 @@ const AlimentadorPublicaciones = () => {
       category: editSelectedCategory,
       description: editFormData.description || null,
       keywords: editFormData.keywords,
-      urls: editFormData.urls
+      urls: editFormData.urls,
+      files: editFormData.files
     };
   
     console.log('Datos a enviar:', submissionData);
@@ -611,7 +612,8 @@ const AlimentadorPublicaciones = () => {
       category: editSelectedCategory,
       description: editFormData.description || null,
       keywords: editFormData.keywords,
-      urls: editFormData.urls
+      urls: editFormData.urls,
+      files: editFormData.files
     };
   
     console.log('Datos a enviar:', submissionData);
