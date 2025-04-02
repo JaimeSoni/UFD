@@ -224,10 +224,6 @@ const AlimentadorCategorias = () => {
               <FaHome className="action-icon" color="#353866" />
               <span className="action-content" data-content="Inicio" />
             </Link>
-            <Link to={'/alimentador_recopilacion'} className="action" type="button">
-              <BiSolidCollection className="action-icon" color="#353866" />
-              <span className="action-content" data-content="Recopilacion" />
-            </Link>
             <Link to={'/alimentador_publicaciones'} className="action" type="button">
               <IoMdCloudUpload className="action-icon" color="#353866" />
               <span className="action-content" data-content="Publicaciones" />
@@ -292,8 +288,7 @@ const AlimentadorCategorias = () => {
                 <thead>
                   <tr>
                     <th className='border-2 border-basenaranja w-[20%]'>Categoría</th>
-                    <th className='border-2 border-basenaranja w-[45%]'>Descripción</th>
-                    <th className='border-2 border-basenaranja w-[15%]'>Publicaciones</th>
+                    <th className='border-2 border-basenaranja w-[60%]'>Descripción</th>
                     <th className='border-2 border-basenaranja w-[20%]'>Acción</th>
                   </tr>
                 </thead>
@@ -303,7 +298,6 @@ const AlimentadorCategorias = () => {
                     <tr key={index}>
                       <td className='border-2 border-basenaranja'>{cat.categoria}</td>
                       <td className='border-2 border-basenaranja'>{cat.descripcion}</td>
-                      <td className='border-2 border-basenaranja'>{cat.publicaciones} publicaciones</td>
                       <td className='border-2 border-basenaranja w-[100%]'>
 
                         {/* Botón Editar */}

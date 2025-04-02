@@ -16,29 +16,6 @@ import { MdBlock } from "react-icons/md";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { IoDocumentOutline } from "react-icons/io5";
 
-// Datos de ejemplo para las áreas y sus categorías
-const areasData = {
-    Gimnasio: ["Mensualidad", "Horarios", "Rutinas", "Coachs"],
-
-    Biblioteca: ["Trámites", "Libros", "Prestamos", "Costos", "Secciones", "Clasificaciones", "Horarios", "Entregas"],
-
-    Laboratorio: ["Horarios", "Encargados", "Reglamento"],
-
-    SaladeComputo: ["Horarios", "Maestros", "Equipos", "Encargados", "Espacios"],
-
-    Cafeteria: ["Reglamento", "Normas", "Políticas", "Horarios", "Comidas", "Bebidas"],
-
-    ControlEscolar: ["Horarios", "Personal"],
-
-    DireccionGeneral: ["Reglamento", "Normas", "Políticas"],
-
-    Primaria: ["Reglamento", "Normas", "Horarios", "Maestros", "Salones", "Mensualidad", "Planeaciones", "Materias"],
-
-    Tienda: ["Reglamento", "Normas", "Políticas"],
-
-    SalaDeJuntas: ["Reglamento", "Normas", "Políticas"]
-};
-
 function AlimentadorInterno() {
     const [publicaciones, setPublicaciones] = useState([]);
     const [expandedId, setExpandedId] = useState(null);
@@ -46,6 +23,9 @@ function AlimentadorInterno() {
     const [activeArea, setActiveArea] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // Nuevo estado para almacenar las categorías obtenidas de la API
+    const [categorias, setCategorias] = useState([]);
 
     // Ref para el contenedor de scroll horizontal
     const scrollContainerRef = useRef(null);
@@ -56,6 +36,25 @@ function AlimentadorInterno() {
     // Estados para los modales
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAsistenciaModalOpen, setIsAsistenciaModalOpen] = useState(false);
+
+    // Fetch categorías desde la base de datos
+    useEffect(() => {
+        const fetchCategorias = async () => {
+            try {
+                const response = await axios.get('http://localhost/UFD/src/BackEnd/obtener_categorias.php');
+
+                if (response.data.success) {
+                    setCategorias(response.data.categorias);
+                } else {
+                    console.error("Error al obtener categorías:", response.data.message);
+                }
+            } catch (err) {
+                console.error("Error al obtener categorías:", err);
+            }
+        };
+
+        fetchCategorias();
+    }, []);
 
     // Fetch publicaciones desde la base de datos
     useEffect(() => {
@@ -70,7 +69,7 @@ function AlimentadorInterno() {
                 // Ahora mapea sobre el array de publicaciones
                 const data = publicacionesArray.map(articulo => ({
                     id: articulo.id_privado.toString(),
-                    fecha: formatDate(articulo.fecha_publicacion),
+                    fecha: articulo.fecha_publicacion, // Usar directamente la fecha sin formatear
                     categoria: articulo.categoria_privada,
                     tema: articulo.tema_privado,
                     descripcion: articulo.descripcion_privada,
@@ -96,17 +95,6 @@ function AlimentadorInterno() {
 
         fetchPublicaciones();
     }, []);
-
-    // Helper function to format date from YYYY-MM-DD to DD/MM/YYYY
-    const formatDate = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        }).replace(/-/g, '/');
-    };
 
     // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
     const resultadosFiltrados = filtroPublicacion.trim()
@@ -160,9 +148,10 @@ function AlimentadorInterno() {
         if (!isDragging) {
             setActiveArea(area === activeArea ? null : area);
 
-            // Si se selecciona un área, filtrar por la primera categoría de esa área
+            // Si se selecciona un área, establecer el filtro al nombre de la categoría
             if (area && area !== activeArea) {
-                setFiltroPublicacion(areasData[area][0]);
+                setFiltroPublicacion(area.categoria);
+                closeModal(); // Cerrar el modal después de seleccionar
             }
         }
     };
@@ -189,7 +178,7 @@ function AlimentadorInterno() {
     const handleMouseMove = (e) => {
         if (!isDragging || !scrollContainerRef.current) return;
 
-        const x = e.pageX - scrollContainerRef.current.offsetLeft;
+        const x = (e.pageX - scrollContainerRef.current.offsetLeft);
         const walk = (x - startX) * 2; // Multiplicador para ajustar la velocidad
         scrollContainerRef.current.scrollLeft = scrollLeft - walk;
 
@@ -209,7 +198,7 @@ function AlimentadorInterno() {
     const handleTouchMove = (e) => {
         if (!isDragging || !scrollContainerRef.current) return;
 
-        const x = e.touches[0].pageX - scrollContainerRef.current.offsetLeft;
+        const x = (e.touches[0].pageX - scrollContainerRef.current.offsetLeft);
         const walk = (x - startX) * 2;
         scrollContainerRef.current.scrollLeft = scrollLeft - walk;
     };
@@ -247,11 +236,6 @@ function AlimentadorInterno() {
                     <Link to={'/alimentador_inicio'} className="action" type="button">
                         <FaHome className="action-icon" color="#353866" />
                         <span className="action-content" data-content="Inicio" />
-                    </Link>
-
-                    <Link to={'/alimentador_recopilacion'} className="action" type="button">
-                        <BiSolidCollection className="action-icon" color="#353866" />
-                        <span className="action-content" data-content="Recopilacion" />
                     </Link>
 
                     <Link to={'/alimentador_publicaciones'} className="action" type="button">
@@ -392,10 +376,16 @@ function AlimentadorInterno() {
                                             <div className="documentos p-2 w-1/2 h-[80px]">
                                                 <p className='titulos-resultados text-xl'>Documentos:</p>
                                                 <div className='flex flex-col'>
-                                                    <span className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
-                                                        <IoDocumentOutline className='text-baseazul mr-2' />
-                                                        {publicacion.documentos || <span className='text-basenaranja'>Sin documentos</span>}
-                                                    </span>
+                                                    {publicacion.documentos ? (
+                                                        publicacion.documentos.split(',').map((doc, index) => (
+                                                            <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                                                <IoDocumentOutline className='text-baseazul mr-2' />
+                                                                {doc.trim()}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className='text-basenaranja'>Sin documentos</span>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -427,42 +417,26 @@ function AlimentadorInterno() {
                     <div className='modal-overlay-uf'>
                         <div className='modal-content-uf'>
                             {/* Boton de x */}
-                            <div className='w-[100%] h-[8%] flex items-center justify-end'>
+                            <div className='w-[100%] h-[20%] flex items-center justify-end'>
                                 <button className="BotonCerrar" onClick={closeModal}>
                                     <IoIosCloseCircleOutline className='text-2xl' />
                                 </button>
                             </div>
 
                             {/* Titulo */}
-                            <div className='titulo-filtro-uf w-[100%] h-[10%] flex items-center justify-center text-3xl'>
+                            <div className='titulo-filtro-uf w-[100%] h-[15%] flex items-center justify-center text-3xl mt-2'>
                                 <h1>Filtrar Búsqueda</h1>
                             </div>
 
-                            {/* Resumir */}
-                            <div className='resumir-filtro-uf w-[100%] h-[15%] flex items-center justify-center'>
-                                <h1 className='pr-5 text-xl'>Filtrar:</h1>
-
-                                {/* Options */}
-                                <div id="firstFilter" className="filter-switch-uf">
-                                    <input defaultChecked id="option1-uf" name="options" type="radio" />
-                                    <label className="option-uf" htmlFor="option1-uf">Todos</label>
-                                    <input id="option2-uf" name="options" type="radio" />
-                                    <label className="option-uf" htmlFor="option2-uf">Puntuados</label>
-                                    <input id="option3-uf" name="options" type="radio" />
-                                    <label className="option-uf" htmlFor="option3-uf">Recientes</label>
-                                    <span className="background-uf" />
-                                </div>
-                            </div>
-
                             {/* Areas */}
-                            <div className='w-[100%] h-[65%] flex flex-col p-2'>
+                            <div className='w-[100%] h-[50%] flex flex-col p-2 mt-4'>
                                 {/* Título de las áreas */}
-                                <div className='w-[100%] h-[15%] flex items-center justify-center'>
-                                    <h1 className='uf-titulo-areas text-xl'>Áreas:</h1>
+                                <div className='w-[100%] h-[20%] flex items-center justify-center'>
+                                    <h1 className='uf-titulo-areas text-xl'>Categorias:</h1>
                                 </div>
 
                                 {/* Navegación de áreas con scroll horizontal */}
-                                <div className='w-[100%] h-[17%] bg-coloralternotres rounded-3xl mb-5'>
+                                <div className='w-[100%] h-[70%] bg-coloralternotres rounded-3xl mb-5 mt-3'>
                                     <div
                                         ref={scrollContainerRef}
                                         className='flex overflow-x-auto py-2 no-scrollbar'
@@ -485,43 +459,21 @@ function AlimentadorInterno() {
                                                 <span className="text-2xl flex items-center justify-center"><MdBlock /></span>
                                             </button>
 
-                                            {/* Botones para cada área */}
-                                            {Object.keys(areasData).map((area) => (
+                                            {/* Botones para cada área (ahora usando datos de la API) */}
+                                            {categorias.map((area) => (
                                                 <button
-                                                    key={area}
+                                                    key={area.id}
                                                     onClick={() => handleAreaClick(area)}
-                                                    className={`px-2 py-1 ${activeArea === area ? 'bg-basenaranja rounded-xl text-baseblanco' : 'bg-white text-black border border-basenaranja'}`}
+                                                    className={`px-2 py-1 ${activeArea && activeArea.id === area.id ? 'bg-basenaranja rounded-xl text-baseblanco' : 'bg-white text-black border border-basenaranja'}`}
                                                     style={{ touchAction: 'none' }}
                                                 >
-                                                    {area}
+                                                    {area.categoria}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Mostrar categorías del área seleccionada */}
-                                {activeArea && (
-                                    <div className='w-full h-[65%] p-2 bg-white border-2 border-baseazul rounded-lg'>
-                                        <h3 className='text-lg font-bold mb-2 text-baseazul'>Categorías:</h3>
-                                        <div className='flex flex-wrap gap-2'>
-                                            {areasData[activeArea].map((category, index) => (
-                                                <div
-                                                    key={index}
-                                                    className='p-1 bg-basenaranja text-baseblanco rounded-lg cursor-pointer'
-                                                    onClick={() => {
-                                                        setFiltroPublicacion(category);
-                                                        closeModal();
-                                                    }}
-                                                >
-                                                    {category}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
-
                         </div>
                     </div>
                 )}

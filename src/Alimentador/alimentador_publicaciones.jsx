@@ -532,8 +532,6 @@ const AlimentadorPublicaciones = () => {
       urls: editFormData.urls
     };
 
-    console.log('Datos a enviar:', submissionData);
-
     const formDataUpload = new FormData();
     Object.keys(submissionData).forEach(key => {
       if (submissionData[key] !== null) {
@@ -568,7 +566,6 @@ const AlimentadorPublicaciones = () => {
       });
 
       const responseText = await response.text(); // Obtener la respuesta como texto
-      console.log('Respuesta del servidor:', responseText); // Verificar el contenido
 
       if (!response.ok) {
         throw new Error(`Error en la respuesta del servidor: ${responseText}`);
@@ -691,11 +688,6 @@ const AlimentadorPublicaciones = () => {
             <Link to={'/alimentador_inicio'} className="action" type="button">
               <FaHome className="action-icon" color="#353866" />
               <span className="action-content" data-content="Inicio" />
-            </Link>
-
-            <Link to={'/alimentador_recopilacion'} className="action" type="button">
-              <BiSolidCollection className="action-icon" color="#353866" />
-              <span className="action-content" data-content="Recopilacion" />
             </Link>
 
             <Link to={'/alimentador_publicaciones'} className="action" type="button">

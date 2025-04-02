@@ -35,11 +35,6 @@ const AlimentadorInicio = () => {
             <span className="action-content" data-content="Inicio" />
           </Link>
 
-          <Link to={'/alimentador_recopilacion'} className="action" type="button">
-            <BiSolidCollection className="action-icon" color="#353866" />
-            <span className="action-content" data-content="Recopilacion" />
-          </Link>
-
           <Link to={'/alimentador_publicaciones'} className="action" type="button">
             <IoMdCloudUpload className="action-icon" color="#353866" />
             <span className="action-content" data-content="Publicaciones" />
