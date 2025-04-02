@@ -20,20 +20,6 @@ const preguntasFrecuentes = [
   { id: 6, pregunta: "Convocatoria para becas académicas", categoria: "Becas" }
 ];
 
-// Datos de ejemplo para las áreas y sus categorías (se mantendrá como respaldo en caso de error)
-const areasData = {
-  Gimnasio: ["Mensualidad", "Horarios", "Rutinas", "Coachs"],
-  Biblioteca: ["Trámites", "Libros", "Prestamos", "Costos", "Secciones", "Clasificaciones", "Horarios", "Entregas"],
-  Laboratorio: ["Horarios", "Encargados", "Reglamento"],
-  SaladeComputo: ["Horarios", "Maestros", "Equipos", "Encargados", "Espacios"],
-  Cafeteria: ["Reglamento", "Normas", "Políticas", "Horarios", "Comidas", "Bebidas"],
-  ControlEscolar: ["Horarios", "Personal"],
-  DireccionGeneral: ["Reglamento", "Normas", "Políticas"],
-  Primaria: ["Reglamento", "Normas", "Horarios", "Maestros", "Salones", "Mensualidad", "Planeaciones", "Materias"],
-  Tienda: ["Reglamento", "Normas", "Políticas"],
-  SalaDeJuntas: ["Reglamento", "Normas", "Políticas"]
-};
-
 const UFInicio = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [filtroPublicacion, setFiltroPublicacion] = useState('');
