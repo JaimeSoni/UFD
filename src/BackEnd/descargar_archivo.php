@@ -27,20 +27,13 @@ if (!file_exists($filepath) || !is_readable($filepath)) {
 
 // Alternativa a finfo_open() - usar la extensión del archivo para determinar el tipo MIME
 $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-$mimeTypes = [
+$mimeTypes = [  
     'txt' => 'text/plain',
     'pdf' => 'application/pdf',
     'doc' => 'application/msword',
     'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'xls' => 'application/vnd.ms-excel',
     'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'jpeg' => 'image/jpeg',
-    'jpg' => 'image/jpeg',
-    'png' => 'image/png',
-    'gif' => 'image/gif',
-    'zip' => 'application/zip',
-    'rar' => 'application/x-rar-compressed',
-    // Añadir más tipos según sea necesario
 ];
 
 // Asignar tipo MIME basado en la extensión o usar un tipo genérico si no está en la lista
