@@ -10,6 +10,8 @@ import { IoDocumentOutline } from "react-icons/io5";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { MdBlock } from "react-icons/md";
 
+import { IoDownloadOutline } from "react-icons/io5";
+
 // Datos de ejemplo para preguntas frecuentes
 const preguntasFrecuentes = [
   { id: 1, pregunta: "¿Cómo solicito una constancia de estudios?", categoria: "Trámites" },
@@ -393,48 +395,93 @@ const UFInicio = () => {
                   
                   {/* Nuevo componente de documentos y URLs */}
                   <div className='flex'>
-                    <div className="documentos p-2 w-1/2 h-[80px]">
-                      <p className='titulos-resultados text-xl'>Documentos:</p>
-                      <div className='flex flex-col'>
-                        {publicacion.archivos && publicacion.archivos.length > 0 ? (
-                          // Manejar tanto arrays como strings JSON
-                          (Array.isArray(publicacion.archivos) ?
-                            publicacion.archivos.map((archivo, index) => (
-                              <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
-                                <IoDocumentOutline className='text-baseazul mr-2' />
-                                {typeof archivo === 'object' ? archivo.name || archivo.filename : archivo}
-                              </span>
-                            ))
-                            : (
-                              // Si es un string, intentar parsear como JSON
-                              (() => {
-                                try {
-                                  const parsedFiles = JSON.parse(publicacion.archivos);
-                                  return Array.isArray(parsedFiles) ?
-                                    parsedFiles.map((archivo, index) => (
-                                      <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
-                                        <IoDocumentOutline className='text-baseazul mr-2' />
-                                        {typeof archivo === 'object' ? archivo.name || archivo.filename : archivo}
-                                      </span>
-                                    ))
-                                    : <span className='text-basenaranja'>Formato de archivos inválido</span>;
-                                } catch (e) {
-                                  // Si no es JSON válido, mostrar como string simple
-                                  return (
-                                    <span className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
-                                      <IoDocumentOutline className='text-baseazul mr-2' />
-                                      {publicacion.archivos}
-                                    </span>
-                                  );
-                                }
-                              })()
-                            )
-                          )
-                          ) : (
-                          <span className='text-basenaranja'>Sin documentos</span>
-                        )}
+                  <div className="documentos p-2 w-1/2 h-[80px]">
+  <p className='titulos-resultados text-xl'>Documentos:</p>
+  <div className='flex flex-col'>
+    {publicacion.archivos && publicacion.archivos.length > 0 ? (
+      (Array.isArray(publicacion.archivos) ?
+        publicacion.archivos.map((archivo, index) => {
+          const nombreArchivo = typeof archivo === 'object' ? archivo.name || archivo.filename : archivo;
+          const urlDescarga = typeof archivo === 'object' ? 
+            archivo.url || `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}` : 
+            `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
+          
+          return (
+            <div key={index} className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+              <div className='flex items-center'>
+                <IoDocumentOutline className='text-baseazul mr-2' />
+                <span className="truncate max-w-xs">{nombreArchivo}</span>
+              </div>
+              <a 
+                href={urlDescarga} 
+                download={nombreArchivo}
+                className="text-basenaranja hover:text-baseazul ml-2 p-1"
+                title="Descargar archivo"
+                onClick={(e) => {
+                  // Opcional: puedes agregar tracking de descargas aquí
+                  console.log(`Descargando: ${nombreArchivo}`);
+                }}
+              >
+                <IoDownloadOutline className='text-xl' />
+              </a>
+            </div>
+          );
+        })
+        : (() => {
+            try {
+              const parsedFiles = JSON.parse(publicacion.archivos);
+              return Array.isArray(parsedFiles) ?
+                parsedFiles.map((archivo, index) => {
+                  const nombreArchivo = typeof archivo === 'object' ? archivo.name || archivo.filename : archivo;
+                  const urlDescarga = typeof archivo === 'object' ? 
+                    archivo.url || `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}` : 
+                    `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
+                  
+                  return (
+                    <div key={index} className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                      <div className='flex items-center'>
+                        <IoDocumentOutline className='text-baseazul mr-2' />
+                        <span className="truncate max-w-xs">{nombreArchivo}</span>
                       </div>
+                      <a 
+                        href={urlDescarga} 
+                        download={nombreArchivo}
+                        className="text-basenaranja hover:text-baseazul ml-2 p-1"
+                        title="Descargar archivo"
+                      >
+                        <IoDownloadOutline className='text-xl' />
+                      </a>
                     </div>
+                  );
+                })
+                : <span className='text-basenaranja'>Formato de archivos inválido</span>;
+            } catch (e) {
+              const nombreArchivo = publicacion.archivos;
+              const urlDescarga = `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
+              
+              return (
+                <div className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                  <div className='flex items-center'>
+                    <IoDocumentOutline className='text-baseazul mr-2' />
+                    <span className="truncate max-w-xs">{nombreArchivo}</span>
+                  </div>
+                  <a 
+                    href={urlDescarga} 
+                    download={nombreArchivo}
+                    className="text-basenaranja hover:text-baseazul ml-2 p-1"
+                    title="Descargar archivo"
+                  >
+                    <IoDownloadOutline className='text-xl' />
+                  </a>
+                </div>
+              );
+            }
+          })()
+    )) : (
+      <span className='text-basenaranja'>Sin documentos</span>
+    )}
+  </div>
+</div>
                     <div className="urls p-2 w-1/2 h-[80px]">
                       <p className='titulos-resultados text-xl'>Links:</p>
                       <div className='flex flex-col'>
