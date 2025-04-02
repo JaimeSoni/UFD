@@ -22,15 +22,6 @@ const preguntasFrecuentes = [
   { id: 6, pregunta: "Convocatoria para becas académicas", categoria: "Becas" }
 ];
 
-// Datos de ejemplo para categorías (como respaldo)
-const areasData = {
-  "Trámites": { descripcion: "Procedimientos administrativos" },
-  "Colegiaturas": { descripcion: "Pagos y financiamiento" },
-  "Becas": { descripcion: "Oportunidades de apoyo económico" },
-  "Biblioteca": { descripcion: "Recursos y horarios" },
-  "Calificaciones": { descripcion: "Resultados académicos" }
-};
-
 const UFInicio = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -42,6 +33,7 @@ const UFInicio = () => {
   const [categorias, setCategorias] = useState([]);
   const [isLoadingCategorias, setIsLoadingCategorias] = useState(true);
   const [copiedLink, setCopiedLink] = useState(null);
+  const [filtroTipo, setFiltroTipo] = useState('todos'); // 'todos' o 'recientes'
 
   // Ref para el contenedor de scroll horizontal
   const scrollContainerRef = useRef(null);
@@ -62,7 +54,7 @@ const UFInicio = () => {
         throw new Error('Error al obtener las categorías');
       }
       const data = await response.json();
-      
+
       if (data.success && Array.isArray(data.categorias)) {
         setCategorias(data.categorias);
       } else {
@@ -83,7 +75,7 @@ const UFInicio = () => {
         throw new Error('Error al obtener las publicaciones');
       }
       const data = await response.json();
-      
+
       return data.publicaciones.map(pub => ({
         id: pub.id_publico,
         fecha: pub.fecha_publicacion,
@@ -116,7 +108,7 @@ const UFInicio = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const categoriaParam = searchParams.get('categoria');
-    
+
     if (categoriaParam) {
       setActiveArea(categoriaParam);
       setFiltroPublicacion(categoriaParam);
@@ -124,30 +116,38 @@ const UFInicio = () => {
     }
   }, [location.search]);
 
-  // Filtrar publicaciones en tiempo real
-  const resultadosFiltrados = filtroPublicacion.trim()
-    ? publicaciones.filter(publicacion => {
-      const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
-      
-      let palabrasClave = '';
-      if (Array.isArray(publicacion.palabras_clave)) {
-        palabrasClave = publicacion.palabras_clave.join(' ').toLowerCase();
-      } else if (typeof publicacion.palabras_clave === 'string') {
-        palabrasClave = publicacion.palabras_clave.toLowerCase();
-      }
-      
-      return (
-        publicacion.categoria.toLowerCase().includes(terminoBusqueda) ||
-        publicacion.tema.toLowerCase().includes(terminoBusqueda) ||
-        palabrasClave.includes(terminoBusqueda)
-      );
-    })
-    : [];
+  // Filtrar y ordenar publicaciones
+  const resultadosFiltrados = React.useMemo(() => {
+    if (filtroPublicacion.trim()) {
+      return publicaciones.filter(publicacion => {
+        const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
+
+        let palabrasClave = '';
+        if (Array.isArray(publicacion.palabras_clave)) {
+          palabrasClave = publicacion.palabras_clave.join(' ').toLowerCase();
+        } else if (typeof publicacion.palabras_clave === 'string') {
+          palabrasClave = publicacion.palabras_clave.toLowerCase();
+        }
+
+        return (
+          publicacion.categoria.toLowerCase().includes(terminoBusqueda) ||
+          publicacion.tema.toLowerCase().includes(terminoBusqueda) ||
+          palabrasClave.includes(terminoBusqueda)
+        );
+      });
+    } else if (filtroTipo === 'recientes') {
+      // Ordenar por fecha y limitar a 5 resultados
+      return [...publicaciones]
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .slice(0, 5); // <- Esto limita a 5 publicaciones
+    }
+    return [];
+  }, [publicaciones, filtroPublicacion, filtroTipo]);
 
   // Función para copiar el enlace de la categoría
   const copiarEnlaceCategoria = (categoria) => {
     const url = `${window.location.origin}${window.location.pathname}?categoria=${encodeURIComponent(categoria)}`;
-    
+
     navigator.clipboard.writeText(url)
       .then(() => {
         setCopiedLink(categoria);
@@ -177,6 +177,7 @@ const UFInicio = () => {
 
   const clearInput = () => {
     setFiltroPublicacion('');
+    setFiltroTipo('todos');
   };
 
   const toggleExpand = (id) => {
@@ -209,7 +210,8 @@ const UFInicio = () => {
     if (!isDragging) {
       setActiveArea(categoria === activeArea ? null : categoria);
       setFiltroPublicacion(categoria && categoria !== activeArea ? categoria : '');
-      
+      setFiltroTipo('todos'); // Resetear filtro tipo al seleccionar categoría
+
       // Actualizar URL sin recargar la página
       if (categoria && categoria !== activeArea) {
         navigate(`?categoria=${encodeURIComponent(categoria)}`, { replace: true });
@@ -342,6 +344,13 @@ const UFInicio = () => {
         </div>
       )}
 
+      {/* Indicador de filtro recientes */}
+      {filtroTipo === 'recientes' && !filtroPublicacion.trim() && (
+        <div className="flex justify-center items-center h-12 text-baseazul font-medium">
+          Mostrando las publicaciones más recientes
+        </div>
+      )}
+
       {/* Resultados */}
       <div className='flex items-center justify-center'>
         <div className='resultados-final w-[95%] h-[50%] mt-3 overflow-y-auto'>
@@ -349,13 +358,11 @@ const UFInicio = () => {
             <div className="flex justify-center items-center h-32 text-gray-500">
               Cargando publicaciones...
             </div>
-          ) : filtroPublicacion.trim() === '' ? (
-            <div className="flex justify-center items-center h-32 text-gray-500">
-              {/* Mensaje cuando no hay búsqueda */}
-            </div>
           ) : resultadosFiltrados.length === 0 ? (
             <div className="flex justify-center items-center h-32 text-coloralternodos">
-              No se encontraron resultados para "{filtroPublicacion}"
+              {filtroPublicacion.trim() || filtroTipo === 'recientes'
+                ? "No se encontraron resultados"
+                : "No hay publicaciones disponibles"}
             </div>
           ) : (
             resultadosFiltrados.map((publicacion) => (
@@ -391,7 +398,7 @@ const UFInicio = () => {
                   <div className="descripcion p-2 h-[120px]">
                     <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
                   </div>
-                  
+
                   <div className="palabras-clave p-2 h-[100px]">
                     <p className='titulos-resultados text-xl'>Palabras Clave:</p>
                     <div className='flex flex-wrap gap-2'>
@@ -427,7 +434,7 @@ const UFInicio = () => {
                       })()}
                     </div>
                   </div>
-                  
+
                   <div className='flex'>
                     <div className="documentos p-2 w-1/2 h-[80px]">
                       <p className='titulos-resultados text-xl'>Documentos:</p>
@@ -436,18 +443,18 @@ const UFInicio = () => {
                           (Array.isArray(publicacion.archivos) ?
                             publicacion.archivos.map((archivo, index) => {
                               const nombreArchivo = typeof archivo === 'object' ? archivo.name || archivo.filename : archivo;
-                              const urlDescarga = typeof archivo === 'object' ? 
-                                archivo.url || `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}` : 
+                              const urlDescarga = typeof archivo === 'object' ?
+                                archivo.url || `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}` :
                                 `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
-                              
+
                               return (
                                 <div key={index} className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
                                   <div className='flex items-center'>
                                     <IoDocumentOutline className='text-baseazul mr-2' />
                                     <span className="truncate max-w-xs">{nombreArchivo}</span>
                                   </div>
-                                  <a 
-                                    href={urlDescarga} 
+                                  <a
+                                    href={urlDescarga}
                                     download={nombreArchivo}
                                     className="text-basenaranja hover:text-baseazul ml-2 p-1"
                                     title="Descargar archivo"
@@ -458,56 +465,56 @@ const UFInicio = () => {
                               );
                             })
                             : (() => {
-                                try {
-                                  const parsedFiles = JSON.parse(publicacion.archivos);
-                                  return Array.isArray(parsedFiles) ?
-                                    parsedFiles.map((archivo, index) => {
-                                      const nombreArchivo = typeof archivo === 'object' ? archivo.name || archivo.filename : archivo;
-                                      const urlDescarga = typeof archivo === 'object' ? 
-                                        archivo.url || `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}` : 
-                                        `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
-                                      
-                                      return (
-                                        <div key={index} className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
-                                          <div className='flex items-center'>
-                                            <IoDocumentOutline className='text-baseazul mr-2' />
-                                            <span className="truncate max-w-xs">{nombreArchivo}</span>
-                                          </div>
-                                          <a 
-                                            href={urlDescarga} 
-                                            download={nombreArchivo}
-                                            className="text-basenaranja hover:text-baseazul ml-2 p-1"
-                                            title="Descargar archivo"
-                                          >
-                                            <IoDownloadOutline className='text-xl' />
-                                          </a>
+                              try {
+                                const parsedFiles = JSON.parse(publicacion.archivos);
+                                return Array.isArray(parsedFiles) ?
+                                  parsedFiles.map((archivo, index) => {
+                                    const nombreArchivo = typeof archivo === 'object' ? archivo.name || archivo.filename : archivo;
+                                    const urlDescarga = typeof archivo === 'object' ?
+                                      archivo.url || `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}` :
+                                      `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
+
+                                    return (
+                                      <div key={index} className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                        <div className='flex items-center'>
+                                          <IoDocumentOutline className='text-baseazul mr-2' />
+                                          <span className="truncate max-w-xs">{nombreArchivo}</span>
                                         </div>
-                                      );
-                                    })
-                                    : <span className='text-basenaranja'>Formato de archivos inválido</span>;
-                                } catch (e) {
-                                  const nombreArchivo = publicacion.archivos;
-                                  const urlDescarga = `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
-                                  
-                                  return (
-                                    <div className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
-                                      <div className='flex items-center'>
-                                        <IoDocumentOutline className='text-baseazul mr-2' />
-                                        <span className="truncate max-w-xs">{nombreArchivo}</span>
+                                        <a
+                                          href={urlDescarga}
+                                          download={nombreArchivo}
+                                          className="text-basenaranja hover:text-baseazul ml-2 p-1"
+                                          title="Descargar archivo"
+                                        >
+                                          <IoDownloadOutline className='text-xl' />
+                                        </a>
                                       </div>
-                                      <a 
-                                        href={urlDescarga} 
-                                        download={nombreArchivo}
-                                        className="text-basenaranja hover:text-baseazul ml-2 p-1"
-                                        title="Descargar archivo"
-                                      >
-                                        <IoDownloadOutline className='text-xl' />
-                                      </a>
+                                    );
+                                  })
+                                  : <span className='text-basenaranja'>Formato de archivos inválido</span>;
+                              } catch (e) {
+                                const nombreArchivo = publicacion.archivos;
+                                const urlDescarga = `http://localhost/UFD/src/BackEnd/descargar_archivo.php?archivo=${nombreArchivo}`;
+
+                                return (
+                                  <div className='flex items-center justify-between border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                    <div className='flex items-center'>
+                                      <IoDocumentOutline className='text-baseazul mr-2' />
+                                      <span className="truncate max-w-xs">{nombreArchivo}</span>
                                     </div>
-                                  );
-                                }
-                              })()
-                        )) : (
+                                    <a
+                                      href={urlDescarga}
+                                      download={nombreArchivo}
+                                      className="text-basenaranja hover:text-baseazul ml-2 p-1"
+                                      title="Descargar archivo"
+                                    >
+                                      <IoDownloadOutline className='text-xl' />
+                                    </a>
+                                  </div>
+                                );
+                              }
+                            })()
+                          )) : (
                           <span className='text-basenaranja'>Sin documentos</span>
                         )}
                       </div>
@@ -533,7 +540,6 @@ const UFInicio = () => {
           )}
         </div>
       </div>
-
       {/* Modal del Filtro */}
       {isModalOpen && (
         <div className='modal-overlay-final'>
@@ -556,10 +562,25 @@ const UFInicio = () => {
 
               {/* Options */}
               <div id="firstFilter-final" className="filter-switch-final">
-                <input defaultChecked id="option1-final" name="options" type="radio" />
+                <input
+                  checked={filtroTipo === 'todos'}
+                  id="option1-final"
+                  name="options"
+                  type="radio"
+                  onChange={() => setFiltroTipo('todos')}
+                />
                 <label className="option-final" htmlFor="option1-final">Todos</label>
 
-                <input id="option2-final" name="options" type="radio" />
+                <input
+                  checked={filtroTipo === 'recientes'}
+                  id="option2-final"
+                  name="options"
+                  type="radio"
+                  onChange={() => {
+                    setFiltroTipo('recientes');
+                    closeModal();
+                  }}
+                />
                 <label className="option-final" htmlFor="option2-final">Recientes</label>
 
                 <span className="background-final" />
@@ -662,8 +683,8 @@ const UFInicio = () => {
             {/* Lista de preguntas frecuentes */}
             <div className='w-[90%] mx-auto h-[65%] overflow-y-auto'>
               {preguntasFrecuentes.map((pregunta) => (
-                <div 
-                  key={pregunta.id} 
+                <div
+                  key={pregunta.id}
                   className='p-4 my-3 bg-white border-l-4 border-basenaranja rounded-lg shadow-md cursor-pointer hover:bg-gray-50 transition-all'
                   onClick={() => handlePreguntaClick(pregunta.pregunta)}
                 >
