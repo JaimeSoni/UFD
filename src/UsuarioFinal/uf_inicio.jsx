@@ -525,7 +525,7 @@ const UFInicio = () => {
       {/* Modal de Asistencia Rápida */}
       {isAsistenciaModalOpen && (
         <div className='modal-overlay-final'>
-          <div className='modal-content-final'>
+          <div className='modal-content-finall'>
             {/* Botón de cerrar */}
             <div className='w-[100%] h-[8%] flex items-center justify-end'>
               <button className="BotonCerrar" onClick={closeAsistenciaModal}>

@@ -388,6 +388,15 @@ button.pf-uf:active {
   height: 300px;
 }
 
+.modal-content-finall {
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  position: relative;
+  width: 500px;
+  height: 500px;
+}
+
 .titulo-filtro-final {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   color: #353866;
