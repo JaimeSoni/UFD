@@ -11,7 +11,8 @@ import { IoDocumentOutline } from "react-icons/io5";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { MdBlock } from "react-icons/md";
 import { IoDownloadOutline } from "react-icons/io5";
-
+import { IoSearchCircleOutline } from "react-icons/io5";
+import { PiSmileySad } from "react-icons/pi";
 // Datos de ejemplo para preguntas frecuentes
 const preguntasFrecuentes = [
   { id: 1, pregunta: "¿Cómo solicito una constancia de estudios?", categoria: "Trámites" },
@@ -353,17 +354,29 @@ const UFInicio = () => {
 
       {/* Resultados */}
       <div className='flex items-center justify-center'>
-        <div className='resultados-final w-[95%] h-[50%] mt-3 overflow-y-auto'>
+        <div className='resultados-final w-[95%] h-[50%] mt-3'>
           {isLoading ? (
             <div className="flex justify-center items-center h-32 text-gray-500">
               Cargando publicaciones...
             </div>
           ) : resultadosFiltrados.length === 0 ? (
-            <div className="flex justify-center items-center h-32 text-coloralternodos">
-              {filtroPublicacion.trim() || filtroTipo === 'recientes'
-                ? "No se encontraron resultados"
-                : "No hay publicaciones disponibles"}
-            </div>
+            filtroPublicacion.trim() || filtroTipo === 'recientes' ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="text-8xl mb-4">
+                  <PiSmileySad className='text-baseblanco' />
+                </div>
+                <p className="text-xl font-bold text-baseblanco">
+                  No se encontraron los resultados "{filtroPublicacion}".
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col justify-center items-center h-32 text-center">
+                <div className="text-8xl mb-4 pt-20">
+                  <IoSearchCircleOutline  className='text-baseblanco' />
+                </div>
+                <p className="text-xl font-bold text-baseblanco">Utilice el filtro para obtener su búsqueda.</p>
+              </div>
+            )
           ) : (
             resultadosFiltrados.map((publicacion) => (
               <div key={publicacion.id} className={`articulos-finales p-1 flex flex-col transition-all duration-300 ${expandedId === publicacion.id ? "expanded" : ""}`}>
