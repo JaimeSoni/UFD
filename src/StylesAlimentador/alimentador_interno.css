@@ -657,7 +657,7 @@ input[id^="heart-"] {
   border-radius: 5px;
   position: relative;
   width: 500px;
-  max-height: 200px;
+  max-height: 250px;
 }
 
 .titulo-filtro-uf {

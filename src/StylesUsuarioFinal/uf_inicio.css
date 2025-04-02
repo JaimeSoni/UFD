@@ -366,7 +366,7 @@ button.pf-uf:active {
 
 /* Diseño del modal del filtro */
 
-.modal-overlay-uf {
+.modal-overlay-final {
   position: fixed;
   top: 0;
   left: 0;
@@ -379,7 +379,7 @@ button.pf-uf:active {
   z-index: 1000;
 }
 
-.modal-content-uf {
+.modal-content-final {
   background-color: white;
   padding: 10px;
   border-radius: 5px;
@@ -388,19 +388,19 @@ button.pf-uf:active {
   height: 500px;
 }
 
-.titulo-filtro-uf {
+.titulo-filtro-final {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   color: #353866;
 }
 
-.resumir-filtro-uf {
+.resumir-filtro-final {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   color: #353866;
 }
 
 /* Diseño de options del fitro */
 
-.filter-switch-uf {
+.filter-switch-final {
   border: 2px solid #ED6B06;
   border-radius: 30px;
   position: relative;
@@ -411,12 +411,12 @@ button.pf-uf:active {
   overflow: hidden;
 }
 
-.filter-switch-uf input {
+.filter-switch-final input {
   display: none;
   text-align: center;
 }
 
-.filter-switch-uf label {
+.filter-switch-final label {
   flex: 1;
   text-align: center;
   cursor: pointer;
@@ -431,7 +431,7 @@ button.pf-uf:active {
   margin-top: 35px;
 }
 
-.filter-switch-uf .background-uf {
+.filter-switch-final .background-final {
   position: absolute;
   width: 30%;
   height: 28px;
@@ -442,38 +442,38 @@ button.pf-uf:active {
   transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-#option2-uf:checked ~ .background-uf {
+#option2-final:checked ~ .background-final {
   left: 35%;
 }
 
-#option3-uf:checked ~ .background-uf {
+#option3-final:checked ~ .background-final {
   left: 69%;
 }
 
-#option1-uf:checked + label[for="option1-uf"] {
+#option1-final:checked + label[for="option1-final"] {
   color: white;
   font-weight: bold;
 }
 
-#option2-uf:checked + label[for="option2-uf"] {
+#option2-final:checked + label[for="option2-final"] {
   color: white;
   font-weight: bold;
 }
 
-#option3-uf:checked + label[for="option3-uf"] {
+#option3-final:checked + label[for="option3-final"] {
   color: white;
   font-weight: bold;
 }
 
-#option1-uf:not(:checked) + label[for="option1-uf"],
-#option2-uf:not(:checked) + label[for="option2-uf"],
-#option3-uf:not(:checked) + label[for="option3-uf"] {
+#option1-final:not(:checked) + label[for="option1-final"],
+#option2-final:not(:checked) + label[for="option2-final"],
+#option3-final:not(:checked) + label[for="option3-final"] {
   color: black;
 }
 
 /* Titulo areas uf */
 
-.uf-titulo-areas {
+.final-titulo-areas {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   color: #353866;
 }

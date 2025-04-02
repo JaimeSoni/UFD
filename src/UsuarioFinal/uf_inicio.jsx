@@ -441,8 +441,8 @@ const UFInicio = () => {
 
       {/* Modal del Filtro */}
       {isModalOpen && (
-        <div className='modal-overlay-uf'>
-          <div className='modal-content-uf'>
+        <div className='modal-overlay-final'>
+          <div className='modal-content-final'>
             {/* Boton de x */}
             <div className='w-[100%] h-[8%] flex items-center justify-end'>
               <button className="BotonCerrar" onClick={closeModal}>
@@ -451,23 +451,23 @@ const UFInicio = () => {
             </div>
 
             {/* Titulo */}
-            <div className='titulo-filtro-uf w-[100%] h-[10%] flex items-center justify-center text-3xl'>
+            <div className='titulo-filtro-final w-[100%] h-[10%] flex items-center justify-center text-3xl'>
               <h1>Filtrar Búsqueda</h1>
             </div>
 
             {/* Resumir */}
-            <div className='resumir-filtro-uf w-[100%] h-[15%] flex items-center justify-center'>
+            <div className='resumir-filtro-final w-[100%] h-[15%] flex items-center justify-center'>
               <h1 className='pr-5 text-xl'>Filtrar:</h1>
 
               {/* Options */}
-              <div id="firstFilter" className="filter-switch-uf">
-                <input defaultChecked id="option1-uf" name="options" type="radio" />
-                <label className="option-uf" htmlFor="option1-uf">Todos</label>
-                <input id="option2-uf" name="options" type="radio" />
-                <label className="option-uf" htmlFor="option2-uf">Puntuados</label>
-                <input id="option3-uf" name="options" type="radio" />
-                <label className="option-uf" htmlFor="option3-uf">Recientes</label>
-                <span className="background-uf" />
+              <div id="firstFilter-final" className="filter-switch-final">
+                <input defaultChecked id="option1-final" name="options" type="radio" />
+                <label className="option-final" htmlFor="option1-final">Todos</label>
+                <input id="option2-final" name="options" type="radio" />
+                <label className="option-final" htmlFor="option2-final">Puntuados</label>
+                <input id="option3-final" name="options" type="radio" />
+                <label className="option-final" htmlFor="option3-final">Recientes</label>
+                <span className="background-final" />
               </div>
             </div>
 
@@ -545,8 +545,8 @@ const UFInicio = () => {
 
       {/* Modal de Asistencia Rápida */}
       {isAsistenciaModalOpen && (
-        <div className='modal-overlay-uf'>
-          <div className='modal-content-uf'>
+        <div className='modal-overlay-final'>
+          <div className='modal-content-final'>
             {/* Botón de cerrar */}
             <div className='w-[100%] h-[8%] flex items-center justify-end'>
               <button className="BotonCerrar" onClick={closeAsistenciaModal}>
@@ -555,7 +555,7 @@ const UFInicio = () => {
             </div>
 
             {/* Título */}
-            <div className='titulo-filtro-uf w-[100%] h-[15%] flex items-center justify-center text-3xl'>
+            <div className='titulo-filtro-final w-[100%] h-[15%] flex items-center justify-center text-3xl'>
               <h1>Asistencia Rápida</h1>
             </div>
 
