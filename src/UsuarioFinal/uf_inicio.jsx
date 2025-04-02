@@ -4,6 +4,7 @@ import '../StylesUsuarioFinal/uf_inicio.css'
 // Iconos
 import { BiChevronDownCircle } from "react-icons/bi";
 import { FaCreativeCommonsShare } from "react-icons/fa";
+import { IoDocumentOutline } from "react-icons/io5";
 
 // Iconos modal
 import { IoIosCloseCircleOutline } from "react-icons/io";
@@ -66,9 +67,9 @@ const UFInicio = () => {
         categoria: pub.categoria_publica,
         tema: pub.tema_publico,
         descripcion: pub.descripcion_publico,
-        palabrasClave: Array.isArray(pub.palabras_clave) ? pub.palabras_clave.join(', ') : pub.palabras_clave,
-        documentos: Array.isArray(pub.archivos) ? pub.archivos.join(', ') : pub.archivos,
-        urls: Array.isArray(pub.urls) ? pub.urls.join(', ') : pub.urls
+        palabras_clave: pub.palabras_clave,
+        archivos: pub.archivos,
+        urls: pub.urls
       }));
     } catch (error) {
       console.error('Error fetching publicaciones:', error);
@@ -90,10 +91,19 @@ const UFInicio = () => {
   const resultadosFiltrados = filtroPublicacion.trim()
     ? publicaciones.filter(publicacion => {
       const terminoBusqueda = filtroPublicacion.toLowerCase().trim();
+      
+      // Manejar palabras_clave como string o array
+      let palabrasClave = '';
+      if (Array.isArray(publicacion.palabras_clave)) {
+        palabrasClave = publicacion.palabras_clave.join(' ').toLowerCase();
+      } else if (typeof publicacion.palabras_clave === 'string') {
+        palabrasClave = publicacion.palabras_clave.toLowerCase();
+      }
+      
       return (
         publicacion.categoria.toLowerCase().includes(terminoBusqueda) ||
         publicacion.tema.toLowerCase().includes(terminoBusqueda) ||
-        publicacion.palabrasClave.toLowerCase().includes(terminoBusqueda)
+        palabrasClave.includes(terminoBusqueda)
       );
     })
     : [];
@@ -318,36 +328,109 @@ const UFInicio = () => {
                 </div>
 
                 <div
-                  className={`transition-all duration-300 overflow-hidden ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
+                  className={`transition-all duration-300 overflow-y-auto ${expandedId === publicacion.id ? "max-h-[300px]" : "max-h-0"
                     }`}
                 >
                   <div className="descripcion p-2 h-[120px]">
                     <p className='titulos-resultados text-xl'>Descripcion: <br /> <span className='textos-resultados'>{publicacion.descripcion}</span></p>
                   </div>
+                  
+                  {/* Nuevo componente de palabras clave */}
                   <div className="palabras-clave p-2 h-[100px]">
-                    <p className='titulos-resultados text-xl'>Palabras Clave: <br /> <span className='text-baseblanco text-[15px] bg-baseazul p-2 rounded-[20px]'>{publicacion.palabrasClave}</span></p>
-                  </div>
-                  <div className='flex'>
-                    <div className="documentos p-2 w-[40%] h-[80px]">
-                      <p className='titulos-resultados text-xl'>Documentos: <br /> <span className='textos-resultados'> {publicacion.documentos}</span></p>
-                    </div>
-                    <div className="urls p-2 w-[40%] h-[80px]">
-                      <p className='titulos-resultados text-xl'>Links: <br /> <span className='textos-resultados'>{publicacion.urls}</span></p>
-                    </div>
+                    <p className='titulos-resultados text-xl'>Palabras Clave:</p>
+                    <div className='flex flex-wrap gap-2'>
+                      {(() => {
+                        // Verifica si existe palabras_clave
+                        if (!publicacion.palabras_clave) {
+                          return <span className='text-basenaranja'>Sin palabras clave</span>;
+                        }
 
-                    <div className='calificar p-2 w-[20%]'>
-                      <p className='calificar-resultados text-xl text-baseazul'>Calificar:</p>
-                      <div className="like-button">
-                        <input className="on" id={`heart-${publicacion.id}`} type="checkbox" />
-                        <label className="like" htmlFor={`heart-${publicacion.id}`}>
-                          <svg className="like-icon" fillRule="nonzero" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
-                          </svg>
-                          <span className="like-text">Likes</span>
-                        </label>
+                        let keywords = [];
+
+                        if (Array.isArray(publicacion.palabras_clave)) {
+                          keywords = publicacion.palabras_clave.map(kw =>
+                            typeof kw === 'string' ? kw.trim() : kw
+                          );
+                        } else if (typeof publicacion.palabras_clave === 'string' &&
+                          publicacion.palabras_clave.trim().length > 0) {
+                          keywords = publicacion.palabras_clave.split(',').map(kw => kw.trim());
+                        }
+
+                        if (keywords.length === 0) {
+                          return <span className='text-basenaranja'>Sin palabras clave</span>;
+                        }
+
+                        return (
+                          <div className='flex flex-wrap gap-2'>
+                            {keywords.map((kw, index) => (
+                              <span key={index} className='text-baseblanco text-sm bg-baseazul px-2 py-1 rounded-lg'>
+                                {kw}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  
+                  {/* Nuevo componente de documentos y URLs */}
+                  <div className='flex'>
+                    <div className="documentos p-2 w-1/2 h-[80px]">
+                      <p className='titulos-resultados text-xl'>Documentos:</p>
+                      <div className='flex flex-col'>
+                        {publicacion.archivos && publicacion.archivos.length > 0 ? (
+                          // Manejar tanto arrays como strings JSON
+                          (Array.isArray(publicacion.archivos) ?
+                            publicacion.archivos.map((archivo, index) => (
+                              <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                <IoDocumentOutline className='text-baseazul mr-2' />
+                                {typeof archivo === 'object' ? archivo.name || archivo.filename : archivo}
+                              </span>
+                            ))
+                            : (
+                              // Si es un string, intentar parsear como JSON
+                              (() => {
+                                try {
+                                  const parsedFiles = JSON.parse(publicacion.archivos);
+                                  return Array.isArray(parsedFiles) ?
+                                    parsedFiles.map((archivo, index) => (
+                                      <span key={index} className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                        <IoDocumentOutline className='text-baseazul mr-2' />
+                                        {typeof archivo === 'object' ? archivo.name || archivo.filename : archivo}
+                                      </span>
+                                    ))
+                                    : <span className='text-basenaranja'>Formato de archivos inválido</span>;
+                                } catch (e) {
+                                  // Si no es JSON válido, mostrar como string simple
+                                  return (
+                                    <span className='flex items-center border-b-4 mb-3 pl-2 border-basenaranja rounded-[20px]'>
+                                      <IoDocumentOutline className='text-baseazul mr-2' />
+                                      {publicacion.archivos}
+                                    </span>
+                                  );
+                                }
+                              })()
+                            )
+                          )
+                          ) : (
+                          <span className='text-basenaranja'>Sin documentos</span>
+                        )}
                       </div>
                     </div>
-
+                    <div className="urls p-2 w-1/2 h-[80px]">
+                      <p className='titulos-resultados text-xl'>Links:</p>
+                      <div className='flex flex-col'>
+                        {Array.isArray(publicacion.urls) && publicacion.urls.length > 0 ? (
+                          publicacion.urls.map((linkUrl, index) => (
+                            <a key={index} href={linkUrl.trim()} target="_blank" rel="noopener noreferrer" className="text-blue-600 truncate hover:underline hover:text-baseazul">
+                              {linkUrl.trim()}
+                            </a>
+                          ))
+                        ) : (
+                          <span className='text-basenaranja'>Sin URLs</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
