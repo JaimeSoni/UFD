@@ -13,14 +13,19 @@ import { MdBlock } from "react-icons/md";
 import { IoDownloadOutline } from "react-icons/io5";
 import { IoSearchCircleOutline } from "react-icons/io5";
 import { PiSmileySad } from "react-icons/pi";
+
 // Datos de ejemplo para preguntas frecuentes
 const preguntasFrecuentes = [
-  { id: 1, pregunta: "¿Cómo solicito una constancia de estudios?", categoria: "Trámites" },
-  { id: 2, pregunta: "¿Cuándo es el último día para pagar la colegiatura?", categoria: "Colegiaturas" },
-  { id: 3, pregunta: "¿Qué documentos necesito para inscribirme a la preparatoria?", categoria: "Trámites" },
-  { id: 4, pregunta: "¿Cuáles son los requisitos para obtener una beca?", categoria: "Becas" },
-  { id: 5, pregunta: "¿Cuál es el horario de la biblioteca?", categoria: "Biblioteca" },
-  { id: 6, pregunta: "Convocatoria para becas académicas", categoria: "Becas" }
+  { id: 1, pregunta: "Mensualidad de Licenciaturas", categoria: "Mensualidad" },
+  { id: 2, pregunta: "PruebaPublico", categoria: "CategoriaPrueba" },
+  { id: 3, pregunta: "Horarios del Gym", categoria: "Gimnasio" },
+  { id: 4, pregunta: "Licenciaturas Disponibles", categoria: "Licenciaturas" },
+  { id: 5, pregunta: "Horarios de Computo", categoria: "SaladeComputo" },
+  { id: 6, pregunta: "Comida de la semana", categoria: "Comedor" },
+  { id: 7, pregunta: "Examenen de Admision", categoria: "Admision" },
+  { id: 8, pregunta: "Licenciatura en Terapia Fisica", categoria: "Licenciatura" },
+  { id: 9, pregunta: "Entrega de Calificaciones", categoria: "Reuniones" },
+  { id: 10, pregunta: "Como darme de baja", categoria: "ControlEscolar" },
 ];
 
 const UFInicio = () => {
