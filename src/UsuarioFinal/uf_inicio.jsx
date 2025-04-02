@@ -9,13 +9,6 @@ import { FaCreativeCommonsShare } from "react-icons/fa";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { MdBlock } from "react-icons/md";
 
-// Simulación de datos de publicaciones con `id` único
-const publicaciones = [
-  { id: "pub1", fecha: "21/02/2025", categoria: "Colegiaturas", tema: "Mensualidad sobre los semestres para la preparatoria.", descripcion: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Dignissimos quos, atque asperiores consequatur, sint architecto odio beatae dolores possimus enim, sapiente quaerat? Quae beatae veritatis exercitationem iste eligendi fuga velit!", palabrasClave: "pago, mensualidad, costo", documentos: "", urls: "" },
-  { id: "pub2", fecha: "15/02/2025", categoria: "Trámites", tema: "Proceso para solicitar constancia de estudios", descripcion: "Información sobre el proceso para solicitar constancias oficiales y los documentos necesarios.", palabrasClave: "constancia, documentos, trámite", documentos: "", urls: "" },
-  { id: "pub3", fecha: "10/02/2025", categoria: "Becas", tema: "Convocatoria para becas académicas", descripcion: "Detalles sobre las becas disponibles para estudiantes de alto rendimiento.", palabrasClave: "beca, apoyo, financiamiento", documentos: "", urls: "" }
-];
-
 // Datos de ejemplo para preguntas frecuentes
 const preguntasFrecuentes = [
   { id: 1, pregunta: "¿Cómo solicito una constancia de estudios?", categoria: "Trámites" },
@@ -29,23 +22,14 @@ const preguntasFrecuentes = [
 // Datos de ejemplo para las áreas y sus categorías
 const areasData = {
   Gimnasio: ["Mensualidad", "Horarios", "Rutinas", "Coachs"],
-
   Biblioteca: ["Trámites", "Libros", "Prestamos", "Costos", "Secciones", "Clasificaciones", "Horarios", "Entregas"],
-
   Laboratorio: ["Horarios", "Encargados", "Reglamento"],
-
   SaladeComputo: ["Horarios", "Maestros", "Equipos", "Encargados", "Espacios"],
-
   Cafeteria: ["Reglamento", "Normas", "Políticas", "Horarios", "Comidas", "Bebidas"],
-
   ControlEscolar: ["Horarios", "Personal"],
-
   DireccionGeneral: ["Reglamento", "Normas", "Políticas"],
-
   Primaria: ["Reglamento", "Normas", "Horarios", "Maestros", "Salones", "Mensualidad", "Planeaciones", "Materias"],
-
   Tienda: ["Reglamento", "Normas", "Políticas"],
-
   SalaDeJuntas: ["Reglamento", "Normas", "Políticas"]
 };
 
@@ -53,6 +37,8 @@ const UFInicio = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [filtroPublicacion, setFiltroPublicacion] = useState('');
   const [activeArea, setActiveArea] = useState(null);
+  const [publicaciones, setPublicaciones] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Ref para el contenedor de scroll horizontal
   const scrollContainerRef = useRef(null);
@@ -63,6 +49,42 @@ const UFInicio = () => {
   // Estados para los modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAsistenciaModalOpen, setIsAsistenciaModalOpen] = useState(false);
+
+  // Función para obtener publicaciones desde la API
+  const fetchPublicaciones = async () => {
+    try {
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php',);
+      if (!response.ok) {
+        throw new Error('Error al obtener las publicaciones');
+      }
+      const data = await response.json();
+      
+      // Formatear los datos para que coincidan con la estructura esperada
+      return data.publicaciones.map(pub => ({
+        id: pub.id_publico,
+        fecha: pub.fecha_publicacion,
+        categoria: pub.categoria_publica,
+        tema: pub.tema_publico,
+        descripcion: pub.descripcion_publico,
+        palabrasClave: Array.isArray(pub.palabras_clave) ? pub.palabras_clave.join(', ') : pub.palabras_clave,
+        documentos: Array.isArray(pub.archivos) ? pub.archivos.join(', ') : pub.archivos,
+        urls: Array.isArray(pub.urls) ? pub.urls.join(', ') : pub.urls
+      }));
+    } catch (error) {
+      console.error('Error fetching publicaciones:', error);
+    }
+  };
+
+  // Cargar publicaciones al montar el componente
+  useEffect(() => {
+    const loadPublicaciones = async () => {
+      const data = await fetchPublicaciones();
+      setPublicaciones(data);
+      setIsLoading(false);
+    };
+
+    loadPublicaciones();
+  }, []);
 
   // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
   const resultadosFiltrados = filtroPublicacion.trim()
@@ -252,8 +274,13 @@ const UFInicio = () => {
       {/* Resultados */}
       <div className='flex items-center justify-center'>
         <div className='resultados-final w-[95%] h-[50%] mt-3 overflow-y-auto'>
-          {filtroPublicacion.trim() === '' ? (
+          {isLoading ? (
             <div className="flex justify-center items-center h-32 text-gray-500">
+              Cargando publicaciones...
+            </div>
+          ) : filtroPublicacion.trim() === '' ? (
+            <div className="flex justify-center items-center h-32 text-gray-500">
+              {/* Mensaje cuando no hay búsqueda */}
             </div>
           ) : resultadosFiltrados.length === 0 ? (
             <div className="flex justify-center items-center h-32 text-coloralternodos">
