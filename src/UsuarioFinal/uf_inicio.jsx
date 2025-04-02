@@ -444,42 +444,42 @@ const UFInicio = () => {
         <div className='modal-overlay-final'>
           <div className='modal-content-final'>
             {/* Boton de x */}
-            <div className='w-[100%] h-[8%] flex items-center justify-end'>
+            <div className='w-[100%] h-[15%] flex items-center justify-end'>
               <button className="BotonCerrar" onClick={closeModal}>
                 <IoIosCloseCircleOutline className='text-2xl' />
               </button>
             </div>
 
             {/* Titulo */}
-            <div className='titulo-filtro-final w-[100%] h-[10%] flex items-center justify-center text-3xl'>
+            <div className='titulo-filtro-final w-[100%] h-[15%] flex items-center justify-center text-3xl mt-2'>
               <h1>Filtrar Búsqueda</h1>
             </div>
 
             {/* Resumir */}
-            <div className='resumir-filtro-final w-[100%] h-[15%] flex items-center justify-center'>
+            <div className='resumir-filtro-final w-[100%] h-[20%] flex items-center justify-center mt-2'>
               <h1 className='pr-5 text-xl'>Filtrar:</h1>
 
               {/* Options */}
               <div id="firstFilter-final" className="filter-switch-final">
                 <input defaultChecked id="option1-final" name="options" type="radio" />
                 <label className="option-final" htmlFor="option1-final">Todos</label>
+
                 <input id="option2-final" name="options" type="radio" />
-                <label className="option-final" htmlFor="option2-final">Puntuados</label>
-                <input id="option3-final" name="options" type="radio" />
-                <label className="option-final" htmlFor="option3-final">Recientes</label>
+                <label className="option-final" htmlFor="option2-final">Recientes</label>
+
                 <span className="background-final" />
               </div>
             </div>
 
             {/* Areas */}
-            <div className='w-[100%] h-[65%] flex flex-col p-2'>
+            <div className='w-[100%] h-[40%] mt-2 flex flex-col p-2'>
               {/* Título de las áreas */}
-              <div className='w-[100%] h-[15%] flex items-center justify-center'>
-                <h1 className='uf-titulo-areas text-xl'>Áreas:</h1>
+              <div className='w-[100%] h-[20%] flex items-center justify-center'>
+                <h1 className='uf-titulo-areas text-xl'>Categorias:</h1>
               </div>
 
               {/* Navegación de áreas con scroll horizontal */}
-              <div className='w-[100%] h-[17%] bg-coloralternotres rounded-3xl mb-5'>
+              <div className='w-[100%] h-[50%] mt-2 bg-coloralternotres rounded-3xl mb-5'>
                 <div
                   ref={scrollContainerRef}
                   className='flex overflow-x-auto py-2 no-scrollbar'
@@ -516,27 +516,6 @@ const UFInicio = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Mostrar categorías del área seleccionada */}
-              {activeArea && (
-                <div className='w-full h-[65%] p-2 bg-white border-2 border-baseazul rounded-lg'>
-                  <h3 className='text-lg font-bold mb-2 text-baseazul'>Categorías:</h3>
-                  <div className='flex flex-wrap gap-2'>
-                    {areasData[activeArea].map((category, index) => (
-                      <div
-                        key={index}
-                        className='p-1 bg-basenaranja text-baseblanco rounded-lg cursor-pointer'
-                        onClick={() => {
-                          setFiltroPublicacion(category);
-                          closeModal();
-                        }}
-                      >
-                        {category}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
           </div>

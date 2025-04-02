@@ -385,7 +385,7 @@ button.pf-uf:active {
   border-radius: 5px;
   position: relative;
   width: 500px;
-  height: 500px;
+  height: 300px;
 }
 
 .titulo-filtro-final {
@@ -407,7 +407,7 @@ button.pf-uf:active {
   display: flex;
   align-items: center;
   height: 40px;
-  width: 400px;
+  width: 300px;
   overflow: hidden;
 }
 
@@ -433,7 +433,7 @@ button.pf-uf:active {
 
 .filter-switch-final .background-final {
   position: absolute;
-  width: 30%;
+  width: 48%;
   height: 28px;
   background-color: #ED6B06;
   top: 4px;
@@ -443,11 +443,7 @@ button.pf-uf:active {
 }
 
 #option2-final:checked ~ .background-final {
-  left: 35%;
-}
-
-#option3-final:checked ~ .background-final {
-  left: 69%;
+  left: 50%;
 }
 
 #option1-final:checked + label[for="option1-final"] {
@@ -460,14 +456,8 @@ button.pf-uf:active {
   font-weight: bold;
 }
 
-#option3-final:checked + label[for="option3-final"] {
-  color: white;
-  font-weight: bold;
-}
-
 #option1-final:not(:checked) + label[for="option1-final"],
-#option2-final:not(:checked) + label[for="option2-final"],
-#option3-final:not(:checked) + label[for="option3-final"] {
+#option2-final:not(:checked) + label[for="option2-final"] {
   color: black;
 }
 
