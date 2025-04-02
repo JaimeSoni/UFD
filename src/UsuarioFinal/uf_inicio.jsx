@@ -20,7 +20,7 @@ const preguntasFrecuentes = [
   { id: 6, pregunta: "Convocatoria para becas académicas", categoria: "Becas" }
 ];
 
-// Datos de ejemplo para las áreas y sus categorías
+// Datos de ejemplo para las áreas y sus categorías (se mantendrá como respaldo en caso de error)
 const areasData = {
   Gimnasio: ["Mensualidad", "Horarios", "Rutinas", "Coachs"],
   Biblioteca: ["Trámites", "Libros", "Prestamos", "Costos", "Secciones", "Clasificaciones", "Horarios", "Entregas"],
@@ -40,6 +40,8 @@ const UFInicio = () => {
   const [activeArea, setActiveArea] = useState(null);
   const [publicaciones, setPublicaciones] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [categorias, setCategorias] = useState([]); // Nuevo estado para las categorías
+  const [isLoadingCategorias, setIsLoadingCategorias] = useState(true); // Estado para controlar la carga de categorías
 
   // Ref para el contenedor de scroll horizontal
   const scrollContainerRef = useRef(null);
@@ -51,10 +53,32 @@ const UFInicio = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAsistenciaModalOpen, setIsAsistenciaModalOpen] = useState(false);
 
+  // Función para obtener categorías desde la API
+  const fetchCategorias = async () => {
+    try {
+      setIsLoadingCategorias(true);
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_categorias.php');
+      if (!response.ok) {
+        throw new Error('Error al obtener las categorías');
+      }
+      const data = await response.json();
+      
+      if (data.success && Array.isArray(data.categorias)) {
+        setCategorias(data.categorias);
+      } else {
+        console.error('Formato de respuesta incorrecto:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching categorías:', error);
+    } finally {
+      setIsLoadingCategorias(false);
+    }
+  };
+
   // Función para obtener publicaciones desde la API
   const fetchPublicaciones = async () => {
     try {
-      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php',);
+      const response = await fetch('http://localhost/UFD/src/BackEnd/obtener_publicaciones.php');
       if (!response.ok) {
         throw new Error('Error al obtener las publicaciones');
       }
@@ -73,18 +97,23 @@ const UFInicio = () => {
       }));
     } catch (error) {
       console.error('Error fetching publicaciones:', error);
+      return [];
     }
   };
 
-  // Cargar publicaciones al montar el componente
+  // Cargar publicaciones y categorías al montar el componente
   useEffect(() => {
-    const loadPublicaciones = async () => {
-      const data = await fetchPublicaciones();
-      setPublicaciones(data);
+    const loadData = async () => {
+      // Cargar publicaciones
+      const publicacionesData = await fetchPublicaciones();
+      setPublicaciones(publicacionesData || []);
       setIsLoading(false);
+      
+      // Cargar categorías
+      await fetchCategorias();
     };
 
-    loadPublicaciones();
+    loadData();
   }, []);
 
   // Filtrar publicaciones en tiempo real basado en el texto de búsqueda
@@ -147,14 +176,17 @@ const UFInicio = () => {
     closeAsistenciaModal();
   };
 
-  // Función para manejar clicks en los botones de área
-  const handleAreaClick = (area) => {
+  // Función para manejar clicks en los botones de categoría
+  const handleCategoriaClick = (categoria) => {
     if (!isDragging) {
-      setActiveArea(area === activeArea ? null : area);
+      setActiveArea(categoria === activeArea ? null : categoria);
 
-      // Si se selecciona un área, filtrar por la primera categoría de esa área
-      if (area && area !== activeArea) {
-        setFiltroPublicacion(areasData[area][0]);
+      // Si se selecciona una categoría, filtrar por el nombre de esa categoría
+      if (categoria && categoria !== activeArea) {
+        setFiltroPublicacion(categoria);
+      } else {
+        // Si se deselecciona, limpiar el filtro
+        setFiltroPublicacion('');
       }
     }
   };
@@ -471,14 +503,14 @@ const UFInicio = () => {
               </div>
             </div>
 
-            {/* Areas */}
+            {/* Categorías */}
             <div className='w-[100%] h-[40%] mt-2 flex flex-col p-2'>
-              {/* Título de las áreas */}
+              {/* Título de las categorías */}
               <div className='w-[100%] h-[20%] flex items-center justify-center'>
                 <h1 className='uf-titulo-areas text-xl'>Categorias:</h1>
               </div>
 
-              {/* Navegación de áreas con scroll horizontal */}
+              {/* Navegación de categorías con scroll horizontal */}
               <div className='w-[100%] h-[50%] mt-2 bg-coloralternotres rounded-3xl mb-5'>
                 <div
                   ref={scrollContainerRef}
@@ -495,24 +527,46 @@ const UFInicio = () => {
                   <div className='flex space-x-3 min-w-max px-2'>
                     {/* Botón por defecto/ninguno */}
                     <button
-                      onClick={() => handleAreaClick(null)}
+                      onClick={() => handleCategoriaClick(null)}
                       className={`px-2 py-1 ${!activeArea ? 'bg-basenaranja rounded-xl text-baseblanco' : 'bg-white text-black border border-basenaranja'}`}
                       style={{ touchAction: 'none' }}
                     >
                       <span className="text-2xl flex items-center justify-center"><MdBlock /></span>
                     </button>
 
-                    {/* Botones para cada área */}
-                    {Object.keys(areasData).map((area) => (
-                      <button
-                        key={area}
-                        onClick={() => handleAreaClick(area)}
-                        className={`px-2 py-1 ${activeArea === area ? 'bg-basenaranja rounded-xl text-baseblanco' : 'bg-white text-black border border-basenaranja'}`}
-                        style={{ touchAction: 'none' }}
-                      >
-                        {area}
-                      </button>
-                    ))}
+                    {/* Mostrar categorías dinámicas */}
+                    {isLoadingCategorias ? (
+                      <div className="px-2 py-1 text-gray-500">Cargando categorías...</div>
+                    ) : categorias.length > 0 ? (
+                      categorias.map((categoria) => (
+                        <button
+                          key={categoria.id}
+                          onClick={() => handleCategoriaClick(categoria.categoria)}
+                          className={`px-2 py-1 ${activeArea === categoria.categoria ? 'bg-basenaranja rounded-xl text-baseblanco' : 'bg-white text-black border border-basenaranja'}`}
+                          style={{ touchAction: 'none' }}
+                          title={categoria.descripcion || ''}
+                        >
+                          {categoria.categoria}
+                          {categoria.publicaciones > 0 && (
+                            <span className="ml-1 text-xs bg-baseazul text-white rounded-full px-1">
+                              {categoria.publicaciones}
+                            </span>
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      // Usar areasData como respaldo si no se pudieron cargar categorías
+                      Object.keys(areasData).map((area) => (
+                        <button
+                          key={area}
+                          onClick={() => handleCategoriaClick(area)}
+                          className={`px-2 py-1 ${activeArea === area ? 'bg-basenaranja rounded-xl text-baseblanco' : 'bg-white text-black border border-basenaranja'}`}
+                          style={{ touchAction: 'none' }}
+                        >
+                          {area}
+                        </button>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
