@@ -37,11 +37,6 @@ const AdminRegistros = () => {
               <TfiWorld className="action-icon" color="#353866" />
               <span className="action-content" data-content="Áreas" />
             </Link>
-            
-            <Link to={'/admin_docs'} className="action" type="button">
-              <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
-              <span className="action-content" data-content="Doc. Internos" />
-            </Link>
 
             <Link to={'/admin_registros'} className="action" type="button">
               <FaUsers className="action-icon" color="#353866" />

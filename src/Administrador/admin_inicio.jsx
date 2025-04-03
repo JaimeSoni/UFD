@@ -10,6 +10,13 @@ import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 import { FaUsers } from "react-icons/fa";
 
 const AdminInicio = () => {
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userData');
+    navigate('/'); // Ahora redirige a la ruta raíz que contiene login_ufd
+  };
+
   return (
     <div>
         <div className="w-screen h-screen bg-baseazul flex items-center justify-center relative">
@@ -29,17 +36,12 @@ const AdminInicio = () => {
           <span className="action-content" data-content="Áreas" />
         </Link>
 
-        <Link to={'/admin_docs'} className="action" type="button">
-          <HiDocumentMagnifyingGlass className="action-icon" color="#353866" />
-          <span className="action-content" data-content="Doc. Internos" />
-        </Link>
-
         <Link to={'/admin_registros'} className="action" type="button">
           <FaUsers className="action-icon" color="#353866" />
           <span className="action-content" data-content="Registro de Accesos" />
         </Link>
 
-        <Link to={'/'} className="action" type="button">
+        <Link to={'/'} onClick={handleLogout} className="action" type="button">
           <RiLogoutCircleLine className="action-icon" color="#353866" />
           <span className="action-content" data-content="Salir" />
         </Link>

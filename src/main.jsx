@@ -7,14 +7,12 @@ import LoginUFD from "./login_ufd.jsx";
 import ProtectedRoute from "./BackEnd/protectedRoute.jsx";
 
 // Administrador
-import Login from "./Administrador/login.jsx";
 import AdminInicio from "./Administrador/admin_inicio.jsx";
 import AdminAreas from "./Administrador/admin_areas.jsx";
 import AdminDocs from "./Administrador/admin_docs.jsx";
 import AdminRegistros from "./Administrador/admin_registros.jsx";
 
 // Alimentador
-import AlimentadorLogin from "./Alimentador/alimentador_login.jsx";
 import AlimentadorInicio from "./Alimentador/alimentador_inicio.jsx";
 import AlimentadorRecopilacion from "./Alimentador/alimentador_recopilacion.jsx";
 import AlimentadorPublicaciones from "./Alimentador/alimentador_publicaciones.jsx";
@@ -32,20 +30,23 @@ createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <Routes>
       {/* General */}
-      <Route path="/login_ufd" element={<LoginUFD />} />
+      <Route path="/" element={<LoginUFD />} />
 
-      {/* Administrador */}
-      <Route path="/" element={<Login />} />
-      <Route path="/admin_inicio" element={<AdminInicio />} />
-      <Route path="/admin_areas" element={<AdminAreas />} />
-      <Route path="/admin_docs" element={<AdminDocs />} />
-      <Route path="/admin_registros" element={<AdminRegistros />} />
+      {/* Rutas Protegidas - Administrador */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin_inicio" element={<AdminInicio />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin_areas" element={<AdminAreas />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin_docs" element={<AdminDocs />} />
+      </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/admin_registros" element={<AdminRegistros />} />
+      </Route>
 
-
-      {/* Alimentador */}
-      <Route path="/alimentador_login" element={<AlimentadorLogin />} />
-      
-      {/* Rutas Protegidas */}
+      {/* Rutas Protegidas - Alimentador */}
       <Route element={<ProtectedRoute />}>
         <Route path="/alimentador_inicio" element={<AlimentadorInicio />} />
       </Route>

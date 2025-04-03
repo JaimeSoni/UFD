@@ -705,7 +705,7 @@ const AlimentadorPublicaciones = () => {
               <span className="action-content" data-content="Doc. Internos" />
             </Link>
 
-            <Link to={'/alimentador_login'} onClick={handleLogout} className="action" type="button">
+            <Link to={'/'} onClick={handleLogout} className="action" type="button">
               <RiLogoutCircleLine className="action-icon" color="#353866" />
               <span className="action-content" data-content="Salir" />
             </Link>
